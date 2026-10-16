@@ -1,8 +1,8 @@
-# Commander4Mac proposed design
+# Commander4Mac design
 
 Date: October 16, 2026.
 
-Status: Proposed for review. This document does not represent implemented functionality.
+Status: Design approved on October 16, 2026, with the user's requirement that Full Disk Access be part of the first local release. This document does not represent implemented functionality.
 
 ## 1. Intent and success
 
@@ -18,10 +18,11 @@ User requirements:
 - Control over the default current or left view and over text and icon sizes.
 - Learn from Total Commander, Double Commander, Commander One, Path Finder, and ForkLift without copying their designs.
 - Use the Build macOS Apps plugin.
+- Full Disk Access is required for the intended complete local browsing workflow. Address it early in setup rather than adding repeated folder-selection workarounds.
 
 Success means the user can browse two real locations, keep important places available, gather files from several folders, transfer them with a clear destination, and restore the workspace next launch without a setup tutorial.
 
-Proposed assumptions for review: personal use is the first priority; direct installation precedes an App Store distribution decision; macOS 15 or later is the initial deployment target. Commander4Mac is a working name.
+Personal use is the first priority. Use direct installation and a non-App-Sandbox build for the initial release, with macOS 15 or later as the deployment target. Commander4Mac is a working name. Implement the local workspace and file operations before adding remote connections.
 
 ## 2. Approach
 
@@ -45,8 +46,8 @@ Use one primary window type with multiple windows supported. Each window owns it
 
 The main window has four stable regions:
 
-1. A restrained toolbar with navigation, view options, Connect, and activity access.
-2. A collapsible sidebar with Favorites, Locations, and Connections.
+1. A restrained toolbar with navigation, view options, and activity access. Add Connect when a remote provider is implemented.
+2. A collapsible sidebar with Favorites and Locations. Add Connections when supported.
 3. Two resizable file panes, each with its own tabs, breadcrumbs, table, and status line.
 4. A shared bottom shelf for staged items, normally reduced to a slim strip when empty.
 
@@ -54,13 +55,13 @@ Conceptual layout, not a pixel specification:
 
 ```text
 +-----------------------------------------------------------------------+
-| Navigation       View options             Connect       Activities     |
+| Navigation       View options                           Activities     |
 +--------------+---------------------------+----------------------------+
 | Favorites    | Left tabs             [+] | Right tabs             [+] |
 |              | Location breadcrumbs      | Location breadcrumbs       |
 | Locations    +---------------------------+----------------------------+
 |              | Name       Size  Modified | Name        Size  Modified |
-| Connections  |                           |                            |
+|              |                           |                            |
 |              |       file table          |        file table          |
 |              |                           |                            |
 |              +---------------------------+----------------------------+
@@ -124,7 +125,7 @@ Persist shelf references between launches. Resolve them lazily. Restoring a remo
 
 ## 7. Appearance and configuration
 
-The first run should be useful immediately. Keep the primary settings to General, Appearance, Connections, and Shortcuts.
+The first run should be useful immediately. Keep the local release settings to General, Appearance, and Shortcuts. Add Connections when a remote provider is implemented.
 
 - Appearance: System, Light, Dark. Apply the chosen mode to all app-controlled browsing surfaces.
 - Text size: independent list text control, proposed default 13 points and range 11 through 20.
@@ -196,7 +197,9 @@ Remote-to-remote transfer may require a streamed relay through the Mac with boun
 
 ## 11. Platform access and distribution
 
-Propose direct distribution initially, with a normal app bundle, hardened runtime for distribution, and stable application/signing identity. An App Store sandboxed build is a separate distribution decision. macOS privacy and filesystem restrictions still need correct handling; do not request Full Disk Access as a default onboarding step. If sandboxing is introduced, manage persistent security-scoped access and stale bookmarks explicitly. [Apple: File access](https://developer.apple.com/documentation/security/accessing-files-from-the-macos-app-sandbox?language=objc).
+Use direct distribution initially, with a normal non-App-Sandbox app bundle, hardened runtime, and stable application/signing identity. Full Disk Access setup is a first-release requirement, as explicitly requested by the user. Provide clear instructions to enable the installed app in System Settings > Privacy & Security > Full Disk Access, show the exact app name and installed path, and offer restart and retry when needed. Avoid repeated folder-picking as the main access model.
+
+The user must grant Full Disk Access through macOS. The app cannot grant this privilege through an entitlement or its own code. The setup acknowledgement records that the user completed the step; it must not pretend to be an authoritative OS-wide permission query. Verify real access in the installed application and explain failures at the attempted location. POSIX permissions, ACLs, and system protections may still deny individual operations. Do not modify TCC databases or disable platform protections. [Apple: File access](https://developer.apple.com/documentation/security/accessing-files-from-the-macos-app-sandbox?language=objc), [Apple DTS: Reliable test for Full Disk Access](https://developer.apple.com/forums/thread/114452).
 
 Use distinct development and production bundle identities. Give executables valid, unique build UUIDs and avoid scattering duplicate registered app bundles. Log the actual running executable and bundle identity for diagnostics without recording secrets or file contents.
 
@@ -208,7 +211,7 @@ The Build macOS Apps workflow will provide one project-local build-and-run scrip
 
 ### A. Local workspace
 
-Working two-pane list browsing, per-pane tabs and histories, both pin modes, favorites and destination routing, editable paths, directory filtering, selection restoration, shelf reference collection, session persistence, themes, and text/icon size controls. Include file opening and Quick Look.
+Working two-pane list browsing, per-pane tabs and histories, both pin modes, favorites and destination routing, editable paths, directory filtering, selection restoration, shelf reference collection, session persistence, themes, and text/icon size controls. Include file opening, Quick Look, and Full Disk Access setup in a signed app installed at a stable path.
 
 Acceptance: browse two temporary fixture directories, open multiple tabs, exercise both pin modes, route a favorite to the left while the right pane is active, stage items from multiple folders, change appearance, and relaunch with state restored. Missing locations and permission failures are visible. This milestone becomes useful for browsing, but is not described as a complete file manager until milestone B.
 
@@ -253,6 +256,6 @@ Current environment limitation: the local toolchain reported unaccepted Xcode li
 - [x] Confirm that both pin modes are wanted.
 - [x] Compare implementation approaches and recommend one.
 - [x] Write and self-review the proposed design.
-- [ ] User review of this written design, including navigable-pin return timing and milestone order.
-- [ ] Write the implementation plan after design approval.
+- [x] User review of this written design, including navigable-pin return timing and milestone order. Approved with local-first execution and required Full Disk Access setup.
+- [x] Write the implementation plan after design approval. See the [local file manager plan](../plans/2026-10-16-local-file-manager.md).
 - [ ] Implement, build, and validate the approved first milestone.

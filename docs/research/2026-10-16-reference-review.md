@@ -45,6 +45,14 @@ Apple documents Local Network privacy on macOS, attribution to the responsible a
 
 Specific SFTP libraries, WebDAV implementations, and the SMB mounting mechanism have not been selected or validated. Those decisions require focused compatibility and packaging checks before the remote-connection milestone.
 
+## Full Disk Access requirement, October 16 update
+
+The user explicitly requires Full Disk Access in the first local release. The approved direction is direct installation without App Sandbox, with early setup guidance for the installed app. Apple states that the user must grant this privilege in System Settings; an app cannot grant it to itself. Apple's DTS recommends testing the operation the app actually needs and handling errors rather than inspecting the TCC database. [Apple file-access guidance](https://developer.apple.com/documentation/security/accessing-files-from-the-macos-app-sandbox?language=objc), [Apple DTS](https://developer.apple.com/forums/thread/114452).
+
+Apple announced additional explicit user controls around Full Disk Access on October 2, 2026. Recheck behavior on the installed OS during implementation; do not build around private permission databases or a hard-coded global preflight result. [Apple announcement](https://developer.apple.com/news/?id=p6zjojqw).
+
+Read-only tooling discovery found XcodeGen 2.45.4 and a valid Developer ID Application signing identity. No signing certificate, key, or system permission was modified. The Xcode license prerequisite remains unresolved.
+
 ## Workspace observations
 
 The project directory was empty and was not inside a Git repository when inspected. There was no existing application or build configuration to preserve.

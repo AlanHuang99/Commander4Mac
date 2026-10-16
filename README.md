@@ -4,9 +4,10 @@ A native macOS file explorer built around two independent panes, fast keyboard n
 
 ## Project status
 
-As of October 16, 2026, this repository contains the proposed design and reference research. Application implementation has not started.
+As of October 16, 2026, the product design is approved. The repository contains the design, local-release implementation plan, and reference research. Application implementation has not started.
 
-- [Proposed design](docs/superpowers/specs/2026-10-16-commander4mac-design.md)
+- [Approved design](docs/superpowers/specs/2026-10-16-commander4mac-design.md)
+- [Local file manager implementation plan](docs/superpowers/plans/2026-10-16-local-file-manager.md)
 - [Reference observations and sources](docs/research/2026-10-16-reference-review.md)
 
 ## Product direction
@@ -17,6 +18,7 @@ As of October 16, 2026, this repository contains the proposed design and referen
 - System, Light, and Dark appearance; separate text and icon sizes.
 - Explicit destination routing to the current, left, or right pane.
 - Reliable local file operations, followed by integrated SFTP, SMB, and WebDAV.
+- Full Disk Access setup for a signed, directly installed, non-App-Sandbox app.
 - An original interface informed by established file-management workflows.
 
 ## Development direction

@@ -40,6 +40,8 @@ struct WorkspaceView: View {
                 Button { controller.sidebarVisible.toggle() } label: { Image(systemName: "sidebar.left") }.help("Toggle Sidebar")
             }
             ToolbarItemGroup {
+                Button { controller.manageConnection() } label: { Label("Connect", systemImage: "network") }
+                    .help("Connect to SFTP Server").accessibilityIdentifier("connections.open")
                 Button { controller.shelfVisible.toggle() } label: { Image(systemName: "tray.full") }.help("Toggle Shelf")
                 Button { controller.activityVisible.toggle() } label: {
                     Label("Activity \(controller.services.activeJobCount)", systemImage: "arrow.left.arrow.right")
@@ -49,6 +51,7 @@ struct WorkspaceView: View {
                 Button { showAccessSetup = true } label: { Image(systemName: "externaldrive.badge.checkmark") }.help("Full Disk Access Setup")
             }
         }
+        .sheet(isPresented: $controller.showConnections) { ConnectionEditor(controller: controller, profile: controller.editingConnection) }
         .sheet(isPresented: $showAccessSetup) {
             AccessSetupView { acknowledged = true; showAccessSetup = false }
         }

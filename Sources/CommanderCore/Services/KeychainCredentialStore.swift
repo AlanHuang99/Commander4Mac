@@ -41,7 +41,7 @@ public struct CredentialVault: Sendable {
     public func read(for profile: ConnectionProfile) throws -> String? {
         guard let data = try store.read(account: profile.id.uuidString) else { return nil }
         let record = try JSONDecoder().decode(Record.self, from: data)
-        return record.scope == profile.credentialScope ? record.secret : nil
+        return record.scope.utf8.elementsEqual(profile.credentialScope.utf8) ? record.secret : nil
     }
     public func write(_ secret: String, for profile: ConnectionProfile) throws {
         try store.write(JSONEncoder().encode(Record(scope: profile.credentialScope, secret: secret)), account: profile.id.uuidString)

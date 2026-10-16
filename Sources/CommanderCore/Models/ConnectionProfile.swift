@@ -14,6 +14,8 @@ public struct RemotePath: Hashable, Codable, Sendable, RawRepresentable {
         }
         rawValue = "/" + parts.joined(separator: "/")
     }
+    public static func == (lhs: Self, rhs: Self) -> Bool { lhs.rawValue.utf8.elementsEqual(rhs.rawValue.utf8) }
+    public func hash(into hasher: inout Hasher) { hasher.combine(Data(rawValue.utf8)) }
     public init?(rawValue: String) { guard let valid = try? Self(rawValue) else { return nil }; self = valid }
     public init(from decoder: Decoder) throws { try self.init(decoder.singleValueContainer().decode(String.self)) }
     public func encode(to encoder: Encoder) throws { var c = encoder.singleValueContainer(); try c.encode(rawValue) }
@@ -42,7 +44,8 @@ public struct ConnectionProfile: Identifiable, Codable, Sendable, Equatable {
         self.id = id; self.name = name; self.host = host; self.port = port; self.username = username
         self.initialPath = initialPath; self.authentication = authentication
     }
-    public var credentialScope: String { "\(host.lowercased())\u{0}\(port)\u{0}\(username)\u{0}\(authentication.rawValue)" }
+    public var credentialScope: String { "\(host.lowercased())\u{0}\(port)\u{0}\(username)\u{0}\(authentication.rawValue)\u{0}\(keyReference.map { String($0.expectedIdentity.device) + ":" + String($0.expectedIdentity.inode) } ?? "")" }
+    public func hasSameCredentialScope(as other: ConnectionProfile) -> Bool { credentialScope.utf8.elementsEqual(other.credentialScope.utf8) }
     public func validated() throws -> Self {
         var copy = self; copy.host = host.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !copy.host.isEmpty, !copy.host.contains(where: { $0.isWhitespace || $0.isNewline || $0 == "/" || $0 == "@" || $0 == "\0" }),

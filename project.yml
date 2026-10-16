@@ -54,6 +54,7 @@ targets:
         NSDocumentsFolderUsageDescription: Browse and organize your documents.
         NSDownloadsFolderUsageDescription: Browse and organize your downloads.
         NSRemovableVolumesUsageDescription: Browse and organize files on removable drives.
+        NSLocalNetworkUsageDescription: Connect to file servers on your local network.
         NSNetworkVolumesUsageDescription: Browse and organize files on mounted network drives.
     entitlements:
       path: Configuration/Commander4Mac.entitlements

@@ -17,6 +17,7 @@ final class AppServices {
         }
     }
     let remote = SFTPConnectionManager()
+    let connections: ConnectionController
     let favorites: FavoriteStore
     let shelf: ShelfStore
     let transferQueue: TransferQueue
@@ -81,6 +82,7 @@ final class AppServices {
         preferences = initialPreferences
         stateStore = ApplicationStateStore(directory: directory)
         persistence = SessionPersistence(store: stateStore)
+        connections = ConnectionController(remote: remote, directory: directory)
         let loaded = stateStore.loadRecovering()
         favorites = FavoriteStore(items: loaded.state.favorites)
         shelf = ShelfStore(items: loaded.state.shelf)

@@ -2,6 +2,15 @@ import XCTest
 import CommanderCore
 
 @MainActor final class RemoteLocationTests: XCTestCase {
+    func testRemoteUnicodeDirectoryEntriesKeepDistinctByteIdentity() throws {
+        let id = UUID()
+        let a = FileLocation.sftp(profileID: id, path: try RemotePath("/caf\u{00e9}"))
+        let b = FileLocation.sftp(profileID: id, path: try RemotePath("/cafe\u{0301}"))
+        XCTAssertNotEqual(a, b)
+        XCTAssertNotEqual(a.remotePath, b.remotePath)
+        XCTAssertNotEqual(EntryID(a.url), EntryID(b.url))
+        XCTAssertEqual(Set([a,b]).count, 2)
+    }
     func testRemoteIdentityAndLiteralNamesRemainProviderQualified() throws {
         let one = UUID(); let two = UUID(); let path = try RemotePath("/folder/./inner/../file #? 中文.txt")
         XCTAssertEqual(path.rawValue, "/folder/file #? 中文.txt")
@@ -23,6 +32,13 @@ import CommanderCore
         let restored = try WorkspaceSnapshot(workspace).restore()
         XCTAssertEqual(restored.left.activeTab.location, remote)
         XCTAssertNil(restored.left.activeTab.unresolvedReference)
+    }
+    func testBookmarkResolutionRejectsNonFileURLsEvenWhenLocalIdentityMatches() throws {
+        let f = try FixtureDirectory()
+        let remote = FileLocation.sftp(profileID: UUID(), path: try RemotePath(f.url.path))
+        let reference = LocationReference(bookmark: Data(), displayURL: remote.url, expectedIdentity: try LocationResolver.identity(at: f.url))
+        if case .available = LocationResolver().resolve(reference) { XCTFail("A remote URL must never resolve through a matching local path") }
+        XCTAssertFalse(FileLocation.local(remote.url).isLocal)
     }
     func testLocalServicesNeverUseRemotePathsAsLocalPaths() async throws {
         let f = try FixtureDirectory()

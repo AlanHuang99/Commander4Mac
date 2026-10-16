@@ -3,7 +3,10 @@ import Foundation
 public enum FileLocation: Hashable, Codable, Sendable {
     case local(URL)
     case sftp(profileID: UUID, path: RemotePath)
-    public var isLocal: Bool { if case .local = self { true } else { false } }
+    public var isLocal: Bool {
+        guard case .local(let url) = self, url.isFileURL else { return false }
+        return url.host == nil || url.host == "" || url.host == "localhost"
+    }
     public var profileID: UUID? { if case .sftp(let id, _) = self { id } else { nil } }
     public var remotePath: RemotePath? { if case .sftp(_, let path) = self { path } else { nil } }
     public func requireLocal() throws { guard isLocal else { throw FileOperationError.message("This action requires a local location.") } }
@@ -16,8 +19,15 @@ public enum FileLocation: Hashable, Codable, Sendable {
         }
     }
     public var providerID: String { profileID.map { "sftp:" + $0.uuidString } ?? "local" }
-    public static func == (lhs: FileLocation, rhs: FileLocation) -> Bool { lhs.providerID == rhs.providerID && lhs.url.path == rhs.url.path }
-    public func hash(into hasher: inout Hasher) { hasher.combine(providerID); hasher.combine(url.path) }
+    public static func == (lhs: FileLocation, rhs: FileLocation) -> Bool {
+        guard lhs.providerID == rhs.providerID, lhs.isLocal == rhs.isLocal else { return false }
+        if let left = lhs.remotePath, let right = rhs.remotePath { return left == right }
+        return lhs.isLocal ? lhs.url.path == rhs.url.path : lhs.url.absoluteString == rhs.url.absoluteString
+    }
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(providerID); hasher.combine(isLocal)
+        if let remotePath { hasher.combine(remotePath) } else { hasher.combine(isLocal ? url.path : url.absoluteString) }
+    }
     public var title: String { url.lastPathComponent.isEmpty ? url.path : url.lastPathComponent }
     public var parent: FileLocation {
         switch self { case .local: .local(url.deletingLastPathComponent()); case .sftp(let id, let path): .sftp(profileID: id, path: path.parent) }

@@ -1,0 +1,103 @@
+import SwiftUI
+import AppKit
+import CommanderCore
+
+struct ConnectionEditor: View {
+    var controller: WorkspaceController
+    @Environment(\.dismiss) private var dismiss
+    @State private var profile: ConnectionProfile
+    @State private var keyPath: String
+    @State private var secret = ""
+    @State private var remember = true
+    @State private var busy = false
+    @State private var error: String?
+    init(controller: WorkspaceController, profile: ConnectionProfile?) {
+        self.controller = controller
+        let initial = profile ?? ConnectionProfile(username: NSUserName())
+        _profile = State(initialValue: initial)
+        _keyPath = State(initialValue: initial.keyReference?.displayURL.path ?? "")
+    }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Label("SFTP Connection", systemImage: "network").font(.title2).fontWeight(.semibold)
+            Text("Open a secure file server in either pane.").foregroundStyle(.secondary)
+            Form {
+                TextField("Name", text: $profile.name).accessibilityIdentifier("connection.name")
+                TextField("Server", text: $profile.host).accessibilityIdentifier("connection.host")
+                TextField("Port", value: $profile.port, format: .number.grouping(.never)).accessibilityIdentifier("connection.port")
+                TextField("Username", text: $profile.username).accessibilityIdentifier("connection.username")
+                TextField("Start folder", text: $profile.initialPath).accessibilityIdentifier("connection.path")
+                Picker("Authentication", selection: $profile.authentication) {
+                    Text("Password").tag(SFTPAuthentication.password)
+                    Text("OpenSSH Ed25519 key").tag(SFTPAuthentication.ed25519Key)
+                }.accessibilityIdentifier("connection.authentication")
+                if profile.authentication == .ed25519Key {
+                    HStack {
+                        TextField("Private key", text: $keyPath).accessibilityIdentifier("connection.keyPath")
+                        Button("Choose…") {
+                            let panel = NSOpenPanel(); panel.canChooseDirectories = false; panel.canChooseFiles = true; panel.allowsMultipleSelection = false
+                            panel.message = "Choose an OpenSSH Ed25519 private key."
+                            if panel.runModal() == .OK, let url = panel.url { keyPath = url.path }
+                        }
+                    }
+                }
+                SecureField(profile.authentication == .password ? "Password" : "Key passphrase", text: $secret)
+                    .accessibilityIdentifier("connection.secret")
+                Toggle("Remember credential in Keychain", isOn: $remember)
+                Picker("Open in", selection: Binding(get: { profile.destination?.rawValue ?? "default" }, set: { profile.destination = OpenDestination(rawValue: $0) })) {
+                    Text("App default").tag("default")
+                    Text("Current pane").tag(OpenDestination.current.rawValue)
+                    Text("Left pane").tag(OpenDestination.left.rawValue)
+                    Text("Right pane").tag(OpenDestination.right.rawValue)
+                }
+            }.disabled(busy)
+            Text("Leave the credential blank to use Keychain. Nothing connects automatically on launch.").font(.caption).foregroundStyle(.secondary)
+            Text("SFTP copies individual files without preserving permissions, timestamps, or extended metadata. Folder transfers, remote moves, and remote Trash are not available yet.").font(.caption).foregroundStyle(.secondary)
+            if let error { Text(error).font(.callout).foregroundStyle(.red).textSelection(.enabled).fixedSize(horizontal: false, vertical: true) }
+            HStack {
+                Button("Cancel") {
+                    if busy { let id = profile.id; Task { await controller.services.remote.disconnect(id) } }
+                    dismiss()
+                }.keyboardShortcut(.cancelAction).accessibilityIdentifier("connection.cancel")
+                Spacer()
+                if busy { ProgressView().controlSize(.small) }
+                Button("Save") { submit(connect: false) }.disabled(busy)
+                Button("Connect") { submit(connect: true) }.keyboardShortcut(.defaultAction).disabled(busy)
+                    .accessibilityIdentifier("connection.connect")
+            }
+        }.padding(24).frame(width: 510).interactiveDismissDisabled(busy)
+    }
+    private func submit(connect: Bool) {
+        let pane = controller.workspace.activePane
+        let defaultDestination = controller.services.preferences.defaultDestination
+        let candidate = profile; let selectedKeyPath = keyPath; let capturedSecret = secret; let remember = remember
+        busy = true; error = nil
+        Task {
+            do {
+                var candidate = candidate
+                if candidate.authentication == .ed25519Key {
+                    guard !selectedKeyPath.isEmpty else { throw FileOperationError.message("Choose an OpenSSH Ed25519 private key.") }
+                    if candidate.keyReference?.displayURL.path != selectedKeyPath {
+                        candidate.keyReference = try await BlockingFileWorker.run {
+                            try LocationResolver().reference(for: .local(URL(fileURLWithPath: (selectedKeyPath as NSString).expandingTildeInPath)))
+                        }
+                    }
+                }
+                let saved = try await controller.services.connections.save(candidate, secret: capturedSecret.isEmpty ? nil : capturedSecret, remember: remember)
+                profile = saved
+                if connect {
+                    let request = try ConnectionOpenRequest(profile: saved, activePane: pane, defaultDestination: defaultDestination)
+                    let credential: String
+                    if !capturedSecret.isEmpty { credential = capturedSecret }
+                    else if let stored = try await controller.services.connections.secret(for: saved) { credential = stored }
+                    else if saved.authentication == .ed25519Key { credential = "" }
+                    else { throw FileOperationError.message("Enter a password. There is no saved credential for this server and username.") }
+                    try await controller.establishConnection(request, secret: credential, onProfileChange: { profile = $0 })
+                }
+                secret = ""; dismiss()
+            } catch is CancellationError { }
+            catch { self.error = error.localizedDescription }
+            busy = false
+        }
+    }
+}

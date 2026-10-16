@@ -6,6 +6,8 @@ BUNDLE="CommanderCoreTests"
 SCHEME="CommanderCore"
 ACTION="build-for-testing"
 if [[ "${1:-}" == "--ui" ]]; then BUNDLE="Commander4MacUITests"; SCHEME="Commander4Mac"; ACTION="test"; shift; fi
+CONFIGURATION="${COMMANDER_TEST_CONFIGURATION:-Debug}"
+if [[ "$BUNDLE" == "Commander4MacUITests" ]]; then CONFIGURATION="UITest"; fi
 FILTER="$BUNDLE"
 CLASS="${1:-}"
 if [[ -n "$CLASS" ]]; then FILTER="$BUNDLE/$CLASS"; fi
@@ -24,13 +26,13 @@ ERRORS
 }
 BUILD_COMMAND=(/usr/bin/xcodebuild)
 if [[ "$BUNDLE" == "Commander4MacUITests" ]]; then BUILD_COMMAND=(python3 "$ROOT_DIR/script/run_ui_tests.py"); fi
-if ! "${BUILD_COMMAND[@]}" -project Commander4Mac.xcodeproj -scheme "$SCHEME" -configuration UITest -destination 'platform=macOS' -derivedDataPath .build/xcode -only-testing:"$FILTER" "$ACTION" >"$LOG" 2>&1; then
+if ! "${BUILD_COMMAND[@]}" -project Commander4Mac.xcodeproj -scheme "$SCHEME" -configuration "$CONFIGURATION" -destination 'platform=macOS' -derivedDataPath .build/xcode -only-testing:"$FILTER" "$ACTION" >"$LOG" 2>&1; then
   report_failure; exit 1
 fi
 if [[ "$BUNDLE" == "CommanderCoreTests" ]]; then
-  export DYLD_FRAMEWORK_PATH="$ROOT_DIR/.build/xcode/Build/Products/UITest"
+  export DYLD_FRAMEWORK_PATH="$ROOT_DIR/.build/xcode/Build/Products/$CONFIGURATION"
   ARGS=()
   if [[ -n "$CLASS" ]]; then ARGS=(-XCTest "CommanderCoreTests.$CLASS"); fi
-  if ! xcrun xctest "${ARGS[@]}" "$ROOT_DIR/.build/xcode/Build/Products/UITest/CommanderCoreTests.xctest" >>"$LOG" 2>&1; then report_failure; exit 1; fi
+  if ! xcrun xctest "${ARGS[@]}" "$ROOT_DIR/.build/xcode/Build/Products/$CONFIGURATION/CommanderCoreTests.xctest" >>"$LOG" 2>&1; then report_failure; exit 1; fi
 fi
 tail -n 20 "$LOG"

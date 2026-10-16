@@ -13,6 +13,8 @@ final class WorkspaceController {
     var sidebarVisible = true
     var shelfVisible = true
     var activityVisible = false
+    var showConnections = false
+    var editingConnection: ConnectionProfile?
     var renameRequest: UUID?
     var renamePane: PaneID?
     let quickLook = QuickLookController()
@@ -84,6 +86,42 @@ final class WorkspaceController {
         let ticket = tab.requestNavigation(to: tab.location)
         await loader.load(target: .init(paneID: paneID, tabID: tab.id, ticket: ticket), options: .init(includeHidden: tab.options.includeHidden))
     }
+    func manageConnection(_ profile: ConnectionProfile? = nil) { editingConnection = profile; showConnections = true }
+    func connectSaved(_ profile: ConnectionProfile, destination: OpenDestination? = nil) {
+        do {
+            let request = try ConnectionOpenRequest(profile: profile, activePane: workspace.activePane, destination: destination, defaultDestination: services.preferences.defaultDestination)
+            Task {
+                do {
+                    if await services.remote.isConnected(profile.id) { try await establishConnection(request, secret: ""); return }
+                    let stored = try await services.connections.secret(for: profile)
+                    guard let credential = stored ?? (profile.authentication == .ed25519Key ? "" : nil) else { manageConnection(profile); return }
+                    try await establishConnection(request, secret: credential)
+                } catch is CancellationError { }
+                catch { errorMessage = error.localizedDescription }
+            }
+        } catch { errorMessage = error.localizedDescription }
+    }
+    func establishConnection(_ request: ConnectionOpenRequest, secret: String, onProfileChange: ((ConnectionProfile) -> Void)? = nil) async throws {
+        var profile = request.profile
+        do { try await services.remote.connect(profile, secret: secret) }
+        catch let challenge as HostKeyChallenge {
+            let alert = NSAlert(); alert.alertStyle = challenge.previousFingerprint == nil ? .informational : .warning
+            alert.messageText = challenge.previousFingerprint == nil ? "Verify SFTP Server" : "SSH Host Key Changed"
+            var message = "Server: \(challenge.host):\(challenge.port)\nKey type: \(challenge.observedKey.split(separator: " ").first.map(String.init) ?? "SSH")\nFingerprint: \(challenge.fingerprint)"
+            if let previous = challenge.previousFingerprint { message += "\nPreviously trusted: " + previous }
+            message += "\n\nVerify this fingerprint through a trusted channel before trusting it."
+            alert.informativeText = message
+            alert.addButton(withTitle: challenge.previousFingerprint == nil ? "Trust and Connect" : "Trust Changed Key")
+            alert.addButton(withTitle: "Cancel"); alert.buttons[0].keyEquivalent = ""; alert.buttons[1].keyEquivalent = "\r"
+            guard alert.runModal() == .alertFirstButtonReturn else { await services.remote.disconnect(profile.id); throw CancellationError() }
+            profile = try await services.connections.trust(challenge.observedKey, for: profile)
+            onProfileChange?(profile)
+            try await services.remote.connect(profile, secret: secret)
+        }
+        guard window?.isVisible == true else { return }
+        let verifiedLocation = FileLocation.sftp(profileID: profile.id, path: request.location.remotePath!)
+        open(verifiedLocation, in: request.paneID)
+    }
     func openPath(_ text: String, in pane: PaneID) {
         do { open(try PathNavigation.resolve(text, from: workspace.pane(pane).activeTab.location), in: pane) }
         catch { errorMessage = error.localizedDescription }
@@ -147,7 +185,7 @@ final class WorkspaceController {
     func activate(_ entry: FileEntry, pane: PaneID) {
         if !entry.location.isLocal {
             if entry.kind == .directory { open(entry.location, in: pane) }
-            else { errorMessage = "Copy this remote file to a local pane to open or preview it." }
+            else { errorMessage = entry.kind == .symbolicLink ? "Remote symlinks are not opened in this SFTP milestone. Browse the target path directly." : "Copy this remote file to a local pane to open or preview it." }
             return
         }
         workspace.activePane = pane

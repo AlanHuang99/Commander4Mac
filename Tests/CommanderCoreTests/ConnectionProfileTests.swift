@@ -26,6 +26,15 @@ final class ConnectionProfileTests: XCTestCase {
         try vault.remove(for: profile)
         profile.username = "alice"; XCTAssertNil(try vault.read(for: profile))
     }
+    func testCredentialScopePreservesUsernameByteIdentity() throws {
+        let store = MemorySecretStore(); let vault = CredentialVault(store: store)
+        var profile = ConnectionProfile(host: "fixture.test", username: "caf\u{00e9}")
+        try vault.write("test-only credential", for: profile)
+        let original = profile
+        profile.username = "cafe\u{0301}"
+        XCTAssertNil(try vault.read(for: profile))
+        XCTAssertNotEqual(try ConnectionProfileChange.prepare(profile, previous: original).id, original.id)
+    }
     func testCorruptProfilesArePreserved() throws {
         let f = try FixtureDirectory(); let store = ConnectionStore(directory: f.url)
         try Data("bad".utf8).write(to: store.fileURL)

@@ -54,7 +54,7 @@ struct PaneView: View {
             }.font(.system(size: 12)).padding(.horizontal, 11).padding(.bottom, 8)
             Divider()
             ZStack {
-                let browser = FileTableView(tab: tab, revision: tab.entriesRevision, paneID: paneID, isActive: workspace.activePane == paneID,
+                let browser = FileTableView(tab: tab, revision: tab.entriesRevision, paneID: paneID, destination: workspace.pane(paneID.opposite).activeTab.location, isActive: workspace.activePane == paneID,
                     onFocus: { workspace.activePane = paneID },
                     onActivate: { controller.activate($0, pane: paneID) },
                     onCommand: { controller.tableCommand($0, pane: paneID) },
@@ -78,17 +78,24 @@ struct PaneView: View {
             Divider()
             HStack(spacing: 10) {
                 Button("Copy to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.copy, from: paneID) }
+                    .disabled((!tab.location.isLocal || !workspace.pane(paneID.opposite).activeTab.location.isLocal) &&
+                        (tab.location.isLocal == workspace.pane(paneID.opposite).activeTab.location.isLocal || tab.selectedEntries.contains { $0.kind != .file }))
+                    .help("Copy to the other pane. SFTP copies support individual regular files.")
                 Button("Move to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.move, from: paneID) }.disabled(!tab.location.isLocal || !workspace.pane(paneID.opposite).activeTab.location.isLocal)
                 Button("Stage") { workspace.activePane = paneID; controller.stageSelection() }.disabled(!tab.location.isLocal)
                 Spacer()
             }.font(.system(size: 11)).buttonStyle(.borderless).padding(.horizontal, 11).padding(.vertical, 6)
-                .disabled(tab.selection.isEmpty)
+                .disabled(tab.selection.isEmpty || tab.failure != nil)
                 .help("Destination: " + workspace.pane(paneID.opposite).activeTab.location.url.path)
             Divider()
             HStack {
-                Text(tab.selection.isEmpty ? "\(tab.visibleEntries.count) items" : "\(tab.selection.count) selected")
+                Text(tab.failure != nil ? "Unavailable" : (tab.selection.isEmpty ? "\(tab.visibleEntries.count) items" : "\(tab.selection.count) selected"))
                 Spacer()
                 if tab.isLoading { ProgressView().controlSize(.mini) }
+                if let id = tab.location.profileID {
+                    Text(controller.services.connections.profiles.first(where: { $0.id == id })?.name ?? "SFTP")
+                        .lineLimit(1).help(controller.services.connections.states[id]?.rawValue ?? "Disconnected")
+                }
                 Text(paneID == .left ? "Left" : "Right").foregroundStyle(.tertiary)
             }.font(.system(size: 11)).foregroundStyle(.secondary).padding(.horizontal, 11).padding(.vertical, 7)
         }
@@ -97,7 +104,7 @@ struct PaneView: View {
         }
         .onChange(of: tab.pin) { controller.services.saveSoon() }
         .onChange(of: tab.options) { controller.services.saveSoon() }
-        .task(id: tab.id.uuidString + tab.location.url.path) {
+        .task(id: tab.id.uuidString + tab.location.providerID + tab.location.url.path) {
             for await _ in DirectoryWatcher().events(for: tab.location) {
                 do { try await Task.sleep(for: .milliseconds(150)) } catch { return }
                 if Task.isCancelled { return }

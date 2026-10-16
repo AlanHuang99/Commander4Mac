@@ -25,7 +25,7 @@ struct FileGridView: NSViewRepresentable {
             guard let coordinator, coordinator.entries.indices.contains(index) else { return }
             coordinator.owner.onActivate(coordinator.entries[index])
         }
-        let menu = NSMenu()
+        let menu = NSMenu(); menu.autoenablesItems = false; menu.delegate = context.coordinator
         for (title, command) in [("Open", TableCommand.open), ("Quick Look", .preview), ("Rename", .rename), ("Copy Path", .copyPath), ("Add to Shelf", .stage), ("Copy to Other Pane", .copy), ("Move to Other Pane", .move), ("Move to Trash", .trash), ("Show Package Contents", .showPackage)] {
             let item = NSMenuItem(title: title, action: #selector(GridCoordinator.contextAction(_:)), keyEquivalent: "")
             item.target = context.coordinator; item.representedObject = CommandBox(command); menu.addItem(item)
@@ -78,7 +78,7 @@ struct FileGridView: NSViewRepresentable {
     }
 }
 
-@MainActor final class GridCoordinator: NSObject, NSCollectionViewDataSource, NSCollectionViewDelegate, NSTextFieldDelegate {
+@MainActor final class GridCoordinator: NSObject, NSCollectionViewDataSource, NSCollectionViewDelegate, NSTextFieldDelegate, NSMenuDelegate {
     var owner: FileTableView
     weak var grid: CommanderCollectionView?
     var entries: [FileEntry] = []
@@ -118,6 +118,11 @@ struct FileGridView: NSViewRepresentable {
     @objc func doubleClick(_ sender: NSClickGestureRecognizer) {
         guard let grid, let path = grid.indexPathForItem(at: sender.location(in: grid)), entries.indices.contains(path.item) else { return }
         owner.onActivate(entries[path.item])
+    }
+    func menuWillOpen(_ menu: NSMenu) {
+        for item in menu.items {
+            if let command = (item.representedObject as? CommandBox)?.command { item.isEnabled = command.isSupported(in: owner) }
+        }
     }
     @objc func contextAction(_ sender: NSMenuItem) { if let box = sender.representedObject as? CommandBox { owner.onCommand(box.command) } }
     func beginRename() {

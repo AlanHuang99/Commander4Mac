@@ -36,9 +36,10 @@ public struct RemoteTransferExecutor: TransferExecuting {
             emit(.state(.running))
             var all: ConflictResolution?
             var progress = CopyProgress()
+            var lastProgressTime: TimeInterval = 0
             for (source, version) in zip(sources, versions) {
                 let item = await copy(source, version: version, request: request, parentIdentity: parentIdentity, cancellation: cancellation,
-                    applyAll: &all, progress: &progress, resolve: resolveConflict, emit: emit)
+                    applyAll: &all, progress: &progress, lastProgressTime: &lastProgressTime, resolve: resolveConflict, emit: emit)
                 results.append(item); emit(.item(item))
             }
         } catch {
@@ -104,7 +105,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
         }
     }
     private func copy(_ source: FileLocation, version: SourceVersion, request: TransferRequest, parentIdentity: FileIdentity?,
-                      cancellation: OperationCancellation, applyAll: inout ConflictResolution?, progress: inout CopyProgress,
+                      cancellation: OperationCancellation, applyAll: inout ConflictResolution?, progress: inout CopyProgress, lastProgressTime: inout TimeInterval,
                       resolve: @escaping @Sendable (TransferConflict) async -> ConflictResolution,
                       emit: @escaping @Sendable (OperationEvent) -> Void) async -> ItemOperationOutcome {
         let itemID = UUID()
@@ -152,7 +153,9 @@ public struct RemoteTransferExecutor: TransferExecuting {
                         if bytes.isEmpty { break }
                         guard offset + UInt64(bytes.count) <= expectedSize else { throw FileOperationError.message("The source grew during copying.") }
                         try await writer.write(bytes, offset: offset)
-                        offset += UInt64(bytes.count); progress.bytesCopied += Int64(bytes.count); emit(.progress(progress))
+                        offset += UInt64(bytes.count); progress.bytesCopied += Int64(bytes.count)
+                        let now = ProcessInfo.processInfo.systemUptime
+                        if now - lastProgressTime >= 0.08 { emit(.progress(progress)); lastProgressTime = now }
                     }
                     try await writer.close()
                 } catch { try? await writer.close(); throw error }
@@ -171,7 +174,9 @@ public struct RemoteTransferExecutor: TransferExecuting {
                         if bytes.isEmpty { break }
                         guard offset + UInt64(bytes.count) <= expectedSize else { throw FileOperationError.message("The remote source grew during copying.") }
                         try await BlockingFileWorker.run { try handle.write(contentsOf: bytes) }
-                        offset += UInt64(bytes.count); progress.bytesCopied += Int64(bytes.count); emit(.progress(progress))
+                        offset += UInt64(bytes.count); progress.bytesCopied += Int64(bytes.count)
+                        let now = ProcessInfo.processInfo.systemUptime
+                        if now - lastProgressTime >= 0.08 { emit(.progress(progress)); lastProgressTime = now }
                     }
                     try await reader.close()
                     try await BlockingFileWorker.run { try handle.synchronize(); try handle.close() }
@@ -210,9 +215,9 @@ public struct RemoteTransferExecutor: TransferExecuting {
             }
             if let container, let containerIdentity { try await cleanup(container, identity: containerIdentity) }
             record.phase = .complete; record.staging = nil; try await write(record)
-            progress.completedItems += 1; emit(.progress(progress))
+            progress.completedItems += 1; emit(.progress(progress)); lastProgressTime = ProcessInfo.processInfo.systemUptime
             return .init(id: itemID, source: source, destination: destination, state: .completed,
-                         detail: "File contents copied. SFTP copies do not preserve extended local metadata.")
+                         detail: "Contents copied. SFTP copies do not preserve permissions, timestamps, or extended metadata yet.")
         } catch {
             var retainedLocalStage = false
             if let container, let containerIdentity { do { try await cleanup(container, identity: containerIdentity) } catch { retainedLocalStage = true } }

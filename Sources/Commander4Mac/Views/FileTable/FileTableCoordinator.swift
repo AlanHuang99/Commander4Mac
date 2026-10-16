@@ -124,8 +124,12 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
     }
     func menuWillOpen(_ menu: NSMenu) {
         menu.items.filter { $0.tag == 884 }.forEach { menu.removeItem($0) }
+        for item in menu.items {
+            if let command = (item.representedObject as? CommandBox)?.command { item.isEnabled = command.isSupported(in: owner) }
+        }
         let entries = owner.tab.selectedEntries
-        guard let first = entries.first else { return }
+        for item in menu.items where (item.representedObject as? CommandBox)?.command == .showPackage { item.isHidden = entries.first?.kind != .package || !owner.tab.location.isLocal }
+        guard let first = entries.first, first.location.isLocal else { return }
         let item = NSMenuItem(title: "Open With", action: nil, keyEquivalent: ""); item.tag = 884
         let submenu = NSMenu()
         for app in SystemFileActions.applications(for: first.location) {

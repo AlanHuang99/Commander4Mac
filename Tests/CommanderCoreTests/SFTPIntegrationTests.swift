@@ -14,10 +14,14 @@ final class SFTPIntegrationTests: XCTestCase, @unchecked Sendable {
                                         initialPath: dataRoot.path, authentication: .ed25519Key)
         profile.keyReference = try LocationResolver().reference(for: .local(root.appendingPathComponent("user_key")))
         let manager = SFTPConnectionManager()
+        let socketsBefore = try fixtureSocketCount(port: profile.port)
         do { try await manager.connect(profile, secret: ""); XCTFail("Untrusted host must fail") }
         catch { XCTAssertTrue(error is HostKeyChallenge, "Expected host verification, got \(error)") }
+        XCTAssertEqual(try fixtureSocketCount(port: profile.port), socketsBefore, "Rejected host verification must close its TCP transport")
+        let verificationState = await manager.state(profile.id); XCTAssertEqual(verificationState, .verificationRequired)
         profile.serverKey = try String(contentsOf: root.appendingPathComponent("host_key.pub"), encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)
         try await manager.connect(profile, secret: "")
+        let connectedState = await manager.state(profile.id); XCTAssertEqual(connectedState, .connected)
         let location = FileLocation.sftp(profileID: profile.id, path: try RemotePath(profile.initialPath))
         let listing = try await manager.list(location, options: .init())
         XCTAssertTrue(listing.entries.contains { $0.name == "hello.txt" })
@@ -35,6 +39,12 @@ final class SFTPIntegrationTests: XCTestCase, @unchecked Sendable {
         try await manager.createDirectory(try location.appending("new-folder"))
         XCTAssertTrue(FileManager.default.fileExists(atPath: dataRoot.appendingPathComponent("new-folder").path))
         do { _ = try await manager.list(try location.appending("missing"), options: .init()); XCTFail("Missing directory is not empty success") } catch { }
+        let denied = dataRoot.appendingPathComponent("denied")
+        try FileManager.default.createDirectory(at: denied, withIntermediateDirectories: false)
+        try FileManager.default.setAttributes([.posixPermissions: 0], ofItemAtPath: denied.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: denied.path) }
+        do { _ = try await manager.list(try location.appending("denied"), options: .init()); XCTFail("Denied directory is not empty success") }
+        catch { XCTAssertTrue(error.localizedDescription.lowercased().contains("denied"), error.localizedDescription) }
         do { try await manager.rename(renamed, to: original); XCTFail("Rename must not overwrite an existing item") } catch { }
         XCTAssertEqual(try String(contentsOf: dataRoot.appendingPathComponent("hello.txt"), encoding: .utf8), "SFTP fixture")
         let local = try FixtureDirectory(); let source = try local.file("round trip #中文.bin", content: String(repeating: "SFTP bytes", count: 20_000))
@@ -46,9 +56,19 @@ final class SFTPIntegrationTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(down.state, .completed, down.outcomes.first?.detail ?? "")
         XCTAssertEqual(try Data(contentsOf: source), try Data(contentsOf: localDestination.appendingPathComponent(source.lastPathComponent)))
         await manager.disconnect(profile.id)
+        let disconnectedState = await manager.state(profile.id); XCTAssertEqual(disconnectedState, .disconnected)
         do { _ = try await manager.list(location, options: .init()); XCTFail("Disconnected listing must fail") } catch { }
         profile.serverKey = "ssh-ed25519 Y2hhbmdlZA=="
-        do { try await manager.connect(profile, secret: ""); XCTFail("Changed key must fail") }
+        let restoredManager = SFTPConnectionManager()
+        do { try await restoredManager.connect(profile, secret: ""); XCTFail("Changed key must fail") }
         catch { XCTAssertNotNil((error as? HostKeyChallenge)?.previousFingerprint) }
     }
+    private func fixtureSocketCount(port: Int) throws -> Int {
+        let process = Process(); process.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        process.arguments = ["-nP", "-a", "-p", String(ProcessInfo.processInfo.processIdentifier), "-iTCP:\(port)"]
+        let output = Pipe(); process.standardOutput = output; process.standardError = Pipe()
+        try process.run(); let data = output.fileHandleForReading.readDataToEndOfFile(); process.waitUntilExit()
+        return max(0, String(decoding: data, as: UTF8.self).split(separator: "\n").count - 1)
+    }
+
 }

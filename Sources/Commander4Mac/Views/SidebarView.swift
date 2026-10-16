@@ -51,6 +51,26 @@ struct SidebarView: View {
                 Button { controller.addFavorite() } label: { Label("Add Current Folder", systemImage: "plus").frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }
                     .buttonStyle(.plain).foregroundStyle(.secondary)
             }
+            Section("Connections") {
+                ForEach(controller.services.connections.profiles) { profile in
+                    Button { controller.connectSaved(profile) } label: {
+                        Label(profile.name, systemImage: "network")
+                            .frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
+                    }.buttonStyle(.plain)
+                        .accessibilityLabel(profile.name + ", " + (controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected"))
+                        .help("\(profile.username)@\(profile.host):\(profile.port) · \(controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected")")
+                        .contextMenu {
+                            Button("Open in Current Pane") { controller.connectSaved(profile, destination: .current) }
+                            Button("Open in Left Pane") { controller.connectSaved(profile, destination: .left) }
+                            Button("Open in Right Pane") { controller.connectSaved(profile, destination: .right) }
+                            Button("Edit Connection…") { controller.manageConnection(profile) }
+                            Button("Disconnect") { Task { await controller.services.remote.disconnect(profile.id); await controller.refresh(.left); await controller.refresh(.right) } }
+                            Button("Remove Connection") { Task { do { try await controller.services.connections.remove(profile) } catch { controller.errorMessage = error.localizedDescription } } }
+                        }
+                }
+                Button { controller.manageConnection() } label: { Label("New SFTP Connection…", systemImage: "plus").frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }.buttonStyle(.plain)
+                if let diagnostic = controller.services.connections.diagnostic { Text(diagnostic).font(.caption).foregroundStyle(.secondary) }
+            }
             Section("Locations") {
                 ForEach(locations, id: \.0) { title, icon, url in
                     Button { controller.open(.local(url)) } label: { Label(title, systemImage: icon).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }

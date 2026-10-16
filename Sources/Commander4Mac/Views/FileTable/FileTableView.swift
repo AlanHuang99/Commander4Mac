@@ -9,6 +9,7 @@ struct FileTableView: NSViewRepresentable {
     var tab: TabSession
     var revision: UInt64
     var paneID: PaneID
+    var destination: FileLocation
     var isActive: Bool
     var onFocus: () -> Void
     var onActivate: (FileEntry) -> Void
@@ -42,7 +43,7 @@ struct FileTableView: NSViewRepresentable {
         table.target = context.coordinator; table.doubleAction = #selector(FileTableCoordinator.activate)
         table.previewController = previewController
         table.onFocus = onFocus; table.onCommand = onCommand
-        let menu = NSMenu()
+        let menu = NSMenu(); menu.autoenablesItems = false
         for (title, command) in [("Open", TableCommand.open), ("Quick Look", .preview), ("Copy Path", .copyPath), ("Add to Shelf", .stage), ("Copy to Other Pane", .copy), ("Move to Other Pane", .move), ("Rename", .rename), ("New Folder", .newFolder), ("Move to Trash", .trash), ("Show Package Contents", .showPackage)] {
             let item = NSMenuItem(title: title, action: #selector(FileTableCoordinator.contextAction(_:)), keyEquivalent: "")
             item.target = context.coordinator; item.representedObject = CommandBox(command); menu.addItem(item)
@@ -135,5 +136,21 @@ final class CommanderTableView: NSTableView {
         for (column, target) in zip(table.tableColumns, widths) where abs(column.width - target) > 0.5 { column.width = target }
         if abs(table.frame.width - width) > 0.5 { table.setFrameSize(NSSize(width: width, height: table.frame.height)) }
         if contentView.bounds.origin.x != 0 { contentView.scroll(to: NSPoint(x: 0, y: contentView.bounds.origin.y)) }
+    }
+}
+
+extension TableCommand {
+    @MainActor func isSupported(in browser: FileTableView) -> Bool {
+        let local = browser.tab.location.isLocal
+        switch self {
+        case .preview, .trash, .stage, .copyClipboard: return local
+        case .move: return local && browser.destination.isLocal
+        case .moveClipboard: return local
+        case .copy:
+            if local && browser.destination.isLocal { return true }
+            return local != browser.destination.isLocal && browser.tab.selectedEntries.allSatisfy { $0.kind == .file }
+        case .showPackage: return local && browser.tab.selectedEntries.first?.kind == .package
+        default: return true
+        }
     }
 }

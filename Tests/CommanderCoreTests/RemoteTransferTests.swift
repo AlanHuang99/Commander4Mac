@@ -48,6 +48,20 @@ final class RemoteTransferTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(result.outcomes.first?.state, .partial)
         XCTAssertTrue(FileManager.default.fileExists(atPath: source.path))
     }
+    func testStreamingProgressIsCoalescedAndFinalTotalsRemainExact() async throws {
+        let f = try FixtureDirectory(); let source = try f.file("large-progress", content: String(repeating: "x", count: 2_000_000))
+        let remote = MemoryRemote(); let events = ProgressEvents()
+        let result = await RemoteTransferExecutor(remote: remote, journal: .init(directory: f.url.appendingPathComponent("journal"))).executeRequest(
+            .init(kind: .copy, sources: [.local(source)], destinationDirectory: remote.root), cancellation: .init(), resolveConflict: { _ in .init(.skip) }, emit: { event in
+                if case .progress(let progress) = event { events.append(progress) }
+            })
+        XCTAssertEqual(result.state, .completed)
+        let samples = events.values
+        XCTAssertEqual(samples.last?.1.bytesCopied, 2_000_000)
+        XCTAssertEqual(samples.last?.1.completedItems, 1)
+        let nonFinal = samples.dropLast()
+        XCTAssertTrue(zip(nonFinal, nonFinal.dropFirst()).allSatisfy { $1.0 - $0.0 >= 0.075 }, "Streaming updates must be coalesced, with a separate final flush")
+    }
     func testUnsupportedBatchAndMoveRejectBeforeCreatingAnything() async throws {
         let f = try FixtureDirectory(); let file = try f.file("file"); let directory = try f.directory("folder")
         let remote = MemoryRemote()
@@ -153,3 +167,9 @@ private actor MemoryChannel: RemoteFileChannel {
 }
 
 private actor ConflictCounter { var count = 0; func increment() { count += 1 } }
+
+private final class ProgressEvents: @unchecked Sendable {
+    private let lock = NSLock(); private var samples: [(TimeInterval, CopyProgress)] = []
+    var values: [(TimeInterval, CopyProgress)] { lock.withLock { samples } }
+    func append(_ value: CopyProgress) { lock.withLock { samples.append((ProcessInfo.processInfo.systemUptime, value)) } }
+}

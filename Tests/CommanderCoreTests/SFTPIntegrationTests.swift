@@ -56,6 +56,7 @@ final class SFTPIntegrationTests: XCTestCase, @unchecked Sendable {
         let down = await executor.executeRequest(.init(kind: .copy, sources: [try location.appending(source.lastPathComponent)], destinationDirectory: .local(localDestination)), cancellation: .init(), resolveConflict: { _ in .init(.skip) }, emit: { _ in })
         XCTAssertEqual(down.state, .completed, down.outcomes.first?.detail ?? "")
         XCTAssertEqual(try Data(contentsOf: source), try Data(contentsOf: localDestination.appendingPathComponent(source.lastPathComponent)))
+        try await assertNetworkTreeRoundTrip(remote: manager, root: location)
         await manager.disconnect(profile.id)
         let disconnectedState = await manager.state(profile.id); XCTAssertEqual(disconnectedState, .disconnected)
         do { _ = try await manager.list(location, options: .init()); XCTFail("Disconnected listing must fail") } catch { }

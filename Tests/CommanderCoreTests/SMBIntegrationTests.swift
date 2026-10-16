@@ -38,6 +38,7 @@ final class SMBIntegrationTests: XCTestCase, @unchecked Sendable {
             let down = await executor.executeRequest(.init(kind: .copy, sources: [try location.appending(source.lastPathComponent)], destinationDirectory: .local(downloads)), cancellation: .init(), resolveConflict: { _ in .init(.skip) }, emit: { _ in })
             XCTAssertEqual(down.state, .completed, down.outcomes.first?.detail ?? "")
             XCTAssertEqual(try Data(contentsOf: source), try Data(contentsOf: downloads.appendingPathComponent(source.lastPathComponent)))
+            try await assertNetworkTreeRoundTrip(remote: manager, root: location)
         } catch { await manager.disconnect(profile.id); throw error }
         await manager.disconnect(profile.id)
         let connected = await manager.isConnected(profile.id); XCTAssertFalse(connected)

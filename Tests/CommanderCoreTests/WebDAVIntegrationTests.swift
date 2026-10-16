@@ -47,6 +47,7 @@ final class WebDAVIntegrationTests: XCTestCase, @unchecked Sendable {
             let down = await engine.executeRequest(.init(kind: .copy, sources: [try root.appending(source.lastPathComponent)], destinationDirectory: .local(downloads)), cancellation: .init(), resolveConflict: { _ in .init(.skip) }, emit: { _ in })
             XCTAssertEqual(down.state, .completed, down.outcomes.first?.detail ?? "")
             XCTAssertEqual(try Data(contentsOf: source), try Data(contentsOf: downloads.appendingPathComponent(source.lastPathComponent)))
+            try await assertNetworkTreeRoundTrip(remote: manager, root: root)
         } catch { await manager.disconnect(p.id); throw error }
         await manager.disconnect(p.id)
     }

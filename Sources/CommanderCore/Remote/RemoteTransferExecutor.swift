@@ -7,7 +7,12 @@ public struct RemoteTransferExecutor: TransferExecuting {
     private let remote: any RemoteFileAccess
     private let journal: OperationJournal
     private let local: LocalOperationExecutor
+    private let onVerifiedContent: (@Sendable (FileLocation, Data, TransferTreeManifest.Revision) -> Void)?
     public init(remote: any RemoteFileAccess, journal: OperationJournal) {
+        self.init(remote: remote, journal: journal, onVerifiedContent: nil)
+    }
+    init(remote: any RemoteFileAccess, journal: OperationJournal, onVerifiedContent: (@Sendable (FileLocation, Data, TransferTreeManifest.Revision) -> Void)?) {
+        self.onVerifiedContent = onVerifiedContent
         self.remote = remote; self.journal = journal; local = LocalOperationExecutor(journal: journal)
     }
     public func execute(_ plan: TransferPlan, cancellation: OperationCancellation,
@@ -37,6 +42,16 @@ public struct RemoteTransferExecutor: TransferExecuting {
                 throw FileOperationError.message("Remote Copy currently supports Copy between a local pane and a remote pane. Remote moves and server-to-server copies are not available.")
             }
             let sources = Array(Set(request.sources)).sorted { $0.url.absoluteString < $1.url.absoluteString }
+            let treePlanner = TransferTreePlanner(remote: remote)
+            var manifests: [TransferTreeManifest] = []; var total: UInt64 = 0; var entryCount = 0
+            for source in sources {
+                let manifest = try await treePlanner.plan(source)
+                guard manifest.entries.count <= 100_000 - entryCount else { throw FileOperationError.message("This batch exceeds the 100,000 entry transfer limit.") }; entryCount += manifest.entries.count
+                try await treePlanner.validateLocalNames(manifest, destinationDirectory: request.destinationDirectory)
+                for entry in manifest.entries { let sum = total.addingReportingOverflow(entry.size ?? 0); guard !sum.overflow, sum.partialValue <= UInt64(Int64.max) else { throw FileOperationError.message("This batch exceeds the supported byte count.") }; total = sum.partialValue }
+                manifests.append(manifest)
+            }
+            if manifests.contains(where: \.isDirectory) { return await RemoteTreeTransferExecutor(remote: remote, journal: journal).execute(request, manifests: manifests, cancellation: cancellation, resolve: resolveConflict, emit: emit) }
             var versions: [SourceVersion] = []
             // Complete preflight for the entire batch before creating any destination.
             for source in sources { versions.append(try await sourceVersion(source)) }
@@ -58,7 +73,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
         let state: JobState = cancellation.isRequested ? .canceled : (failed ? .failed : .completed)
         emit(.state(state)); return .init(jobID: request.id, outcomes: results, state: state)
     }
-    private enum SourceVersion: Equatable { case local(ItemVersion), remote(RemoteFileMetadata) }
+    private typealias SourceVersion = TransferTreeManifest.Revision
     private func sourceVersion(_ location: FileLocation) async throws -> SourceVersion {
         if location.isLocal {
             let value = try await BlockingFileWorker.run { try ItemVersion.read(at: location.url) }
@@ -222,11 +237,13 @@ public struct RemoteTransferExecutor: TransferExecuting {
             }
             guard committed else { throw FileOperationError.message("The destination kept changing. The source was retained.") }
             try await verifyParent(request.destinationDirectory, identity: parentIdentity)
-            guard try await verifyFinal(destination!, stage: completedStage, digest: Data(digest.finalize()), cancellation: cancellation) else {
+            let contentDigest = Data(digest.finalize())
+            guard let verifiedVersion = try await verifyFinal(destination!, stage: completedStage, digest: contentDigest, cancellation: cancellation) else {
                 throw FileOperationError.message("The finalized destination changed or could not be verified. The source was retained.")
             }
             if let container, let containerIdentity { try await cleanup(container, identity: containerIdentity) }
             record.phase = .complete; record.staging = nil; try await write(record)
+            onVerifiedContent?(destination!, contentDigest, verifiedVersion)
             progress.completedItems += 1; emit(.progress(progress)); lastProgressTime = ProcessInfo.processInfo.systemUptime
             return .init(id: itemID, source: source, destination: destination, state: .completed,
                          detail: "Contents copied. Remote copies do not preserve permissions, timestamps, or extended metadata yet.")
@@ -240,11 +257,11 @@ public struct RemoteTransferExecutor: TransferExecuting {
                          state: partial ? .partial : (cancellation.isRequested ? .canceled : .failed), detail: detail)
         }
     }
-    private func verifyFinal(_ destination: FileLocation, stage: SourceVersion, digest: Data, cancellation: OperationCancellation) async throws -> Bool {
+    private func verifyFinal(_ destination: FileLocation, stage: SourceVersion, digest: Data, cancellation: OperationCancellation) async throws -> SourceVersion? {
         let final = try await sourceVersion(destination)
-        guard destination.connectionProtocol == .webdav else { return final == stage }
-        guard case .remote(let before) = stage, case .remote(let after) = final, before.size == after.size else { return false }
-        if let tag = before.revision, tag == after.revision { return true }
+        guard destination.connectionProtocol == .webdav else { return final == stage ? final : nil }
+        guard case .remote(let before) = stage, case .remote(let after) = final, before.size == after.size else { return nil }
+        if let tag = before.revision, tag == after.revision { return final }
         // RFC 4918 permits validators to change during MOVE. Verify the bytes
         // when a server cannot carry its strong validator across publication.
         let reader = try await remote.openFile(destination, writeExclusive: false)
@@ -252,12 +269,12 @@ public struct RemoteTransferExecutor: TransferExecuting {
             var hash = SHA256(); var offset: UInt64 = 0
             while true {
                 try cancellation.check(); let data = try await reader.read(offset: offset, length: 65536)
-                if data.isEmpty { break }; guard offset + UInt64(data.count) <= after.size! else { await reader.abort(); return false }
+                if data.isEmpty { break }; guard offset + UInt64(data.count) <= after.size! else { await reader.abort(); return nil }
                 hash.update(data: data); offset += UInt64(data.count)
             }
             try await reader.close()
             let unchanged = try await sourceVersion(destination) == final
-            return offset == after.size && Data(hash.finalize()) == digest && unchanged
+            return offset == after.size && Data(hash.finalize()) == digest && unchanged ? final : nil
         } catch { await reader.abort(); throw error }
     }
     private static func openReader(_ url: URL, version: SourceVersion) throws -> FileHandle {

@@ -39,6 +39,8 @@
 		284B893876C799425ADE48DF /* CommanderCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		29616E564A2D72ECFF174116 /* ConnectionProfileCommit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A16316BE7E596BECD0C16F /* ConnectionProfileCommit.swift */; };
 		29EDCFF91C6A03A33E994ABE /* SMBIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 637909C376F6ACBE205A241E /* SMBIntegrationTests.swift */; };
+		2B95B82EC298EDC778635E85 /* TransferTreeManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEFBEF79A9C05E68935B39E /* TransferTreeManifest.swift */; };
+		30DBB1CEB9BA0A1A2EC27011 /* NetworkTreeRoundTrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDF0783F8894433BFE3AC86 /* NetworkTreeRoundTrip.swift */; };
 		31BCAD05D6AC2595B5158A68 /* webdav_fixture.py in Resources */ = {isa = PBXBuildFile; fileRef = A9C48A3A1610AC97C59D6245 /* webdav_fixture.py */; };
 		3206142EA7CECE9F36D87564 /* WebDAVXML.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BE09F9F09FA2048EFFB8B6 /* WebDAVXML.swift */; };
 		3305A436BB586ED17F8FBB2A /* CommandRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0821AF46A0D62BDD5C76B479 /* CommandRoutingTests.swift */; };
@@ -71,6 +73,7 @@
 		6EC18E2866F82328E0460D6A /* ConnectionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE7E088C591AD37759FB52E /* ConnectionStore.swift */; };
 		6F5A69561EACB554A79479D8 /* SessionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A6CC266B9C15CA13197AF8 /* SessionPersistenceTests.swift */; };
 		7401DC036054E57B95B94DE3 /* ProviderRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65881F4DB7D25A189205336C /* ProviderRouterTests.swift */; };
+		7424C382BFB12D584C4F1956 /* RemoteTreeTransferExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176AAC8A2C1693E92A6229B0 /* RemoteTreeTransferExecutor.swift */; };
 		753581A21C12218322F6BFAB /* ConnectionEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D92C4AC0810FA70FE5894F /* ConnectionEditor.swift */; };
 		764FB8BEA5387D253E102C70 /* DirectoryWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819A2BBCF203753509D5D124 /* DirectoryWatcher.swift */; };
 		7906B1BFE20270CF985B89B6 /* AccessSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8F4E656A0010825C109395 /* AccessSetupView.swift */; };
@@ -114,6 +117,8 @@
 		B406D4CE13054A68C7ED243C /* BrowserInteractionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A942D3A00509227C85DD22A5 /* BrowserInteractionTests.swift */; };
 		B8E7563AC88AC00CA88ECC40 /* CommandRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDBB08D94AEE4169D9CEA41 /* CommandRouter.swift */; };
 		BB0B6D200F51AF2D666A7BFA /* FilePasteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBAE09C3122833AF7AE7ABAA /* FilePasteboard.swift */; };
+		BB408EB956EE6FAB4F57737A /* RemoteTreeTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC92D35DA9B7BD29DDFF824E /* RemoteTreeTransferTests.swift */; };
+		BB46C850A3AD0201CC956269 /* TreeMemoryRemote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94942DC724D739D1A980A2B0 /* TreeMemoryRemote.swift */; };
 		BE4624D0E918E44E83B404FE /* FileIconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0744CF4239F12173748ED6BD /* FileIconCache.swift */; };
 		BF62DF041338924784B6D303 /* CommanderCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BFB3449FD88815835D32CBAC /* AMSMB2 in Frameworks */ = {isa = PBXBuildFile; productRef = A599BDC2D476B8C3F861B893 /* AMSMB2 */; };
@@ -202,6 +207,7 @@
 		0821AF46A0D62BDD5C76B479 /* CommandRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRoutingTests.swift; sourceTree = "<group>"; };
 		09729B608D972D8A6258F3B3 /* ConflictPresentationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictPresentationRouter.swift; sourceTree = "<group>"; };
 		0CB9CF0445FF554FFA2F9B0A /* Commander4MacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Commander4MacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CDF0783F8894433BFE3AC86 /* NetworkTreeRoundTrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTreeRoundTrip.swift; sourceTree = "<group>"; };
 		0E44A7A7437A069F6220F435 /* OperationCancellation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationCancellation.swift; sourceTree = "<group>"; };
 		10D4F8EEDA34E2B33F2506C8 /* Commander4MacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commander4MacApp.swift; sourceTree = "<group>"; };
 		1114B030AA3D1C2873A4E696 /* ActiveOperationMarkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveOperationMarkerTests.swift; sourceTree = "<group>"; };
@@ -209,6 +215,7 @@
 		124C0022482DB323C15F4697 /* ConnectionWorkflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionWorkflow.swift; sourceTree = "<group>"; };
 		12A7F869D37BB4EEA009EF4B /* LocalCopyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalCopyEngine.swift; sourceTree = "<group>"; };
 		16DA5CEFEB9AEA3C38FCECCA /* OperationGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationGate.swift; sourceTree = "<group>"; };
+		176AAC8A2C1693E92A6229B0 /* RemoteTreeTransferExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTreeTransferExecutor.swift; sourceTree = "<group>"; };
 		1858ADADCF22EA7CD6859835 /* KeychainCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCredentialStore.swift; sourceTree = "<group>"; };
 		186F61A54D9DFDDF4852E56A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		20EF1F852FC06879A903CCF2 /* ShelfTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfTransferTests.swift; sourceTree = "<group>"; };
@@ -223,6 +230,7 @@
 		357D208077AA7716E636C38F /* FileOperationBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileOperationBackend.swift; sourceTree = "<group>"; };
 		36844EF27E5DD25BC36F9367 /* HostKeyVerification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostKeyVerification.swift; sourceTree = "<group>"; };
 		3BB07A99CCEB26605793A527 /* FileNameRulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameRulesTests.swift; sourceTree = "<group>"; };
+		3EEFBEF79A9C05E68935B39E /* TransferTreeManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferTreeManifest.swift; sourceTree = "<group>"; };
 		40FA1790AA7A04AA0FEE5375 /* Commander4Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Commander4Mac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		455376E03CE555A9E9195F01 /* LocalFileActionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileActionsTests.swift; sourceTree = "<group>"; };
 		45B1FCFB9E853975226DC8B5 /* KeyboardAndAccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardAndAccessibilityTests.swift; sourceTree = "<group>"; };
@@ -275,6 +283,7 @@
 		8BB2080DAA2004B04E71CA2C /* WorkspaceSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceSessionTests.swift; sourceTree = "<group>"; };
 		920607C712067FD37F06CBE2 /* DirectoryLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryLoader.swift; sourceTree = "<group>"; };
 		93B3B3A30AFD74C96629C12B /* WebDAVHTTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVHTTPTransport.swift; sourceTree = "<group>"; };
+		94942DC724D739D1A980A2B0 /* TreeMemoryRemote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeMemoryRemote.swift; sourceTree = "<group>"; };
 		9D76476D645CD4627BB18849 /* PaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneView.swift; sourceTree = "<group>"; };
 		9E864C93BDF18401490D033C /* TransferQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferQueue.swift; sourceTree = "<group>"; };
 		A4066ABB17A10AA18079E81C /* KeychainIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainIntegrationTests.swift; sourceTree = "<group>"; };
@@ -305,6 +314,7 @@
 		D89B82894663940920DADBED /* HostKeyVerificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostKeyVerificationTests.swift; sourceTree = "<group>"; };
 		DBAE09C3122833AF7AE7ABAA /* FilePasteboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePasteboard.swift; sourceTree = "<group>"; };
 		DC65A623852E31652E902D9F /* ApplicationStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationStateStore.swift; sourceTree = "<group>"; };
+		DC92D35DA9B7BD29DDFF824E /* RemoteTreeTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTreeTransferTests.swift; sourceTree = "<group>"; };
 		DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTableView.swift; sourceTree = "<group>"; };
 		DE08FE987C1D09084D5E9AD5 /* NetworkProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkProfileTests.swift; sourceTree = "<group>"; };
 		DE4EE2ADC87D82A96BBBA25A /* SFTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFTPTransport.swift; sourceTree = "<group>"; };
@@ -406,6 +416,8 @@
 				186F61A54D9DFDDF4852E56A /* .gitkeep */,
 				7FA67393A511ABAB1DCC9E49 /* FaultInjectingFileOperations.swift */,
 				5F8C524CE10BC6C906B9DD97 /* FixtureDirectory.swift */,
+				0CDF0783F8894433BFE3AC86 /* NetworkTreeRoundTrip.swift */,
+				94942DC724D739D1A980A2B0 /* TreeMemoryRemote.swift */,
 				C3477FE7A937F59D471F091D /* Network */,
 			);
 			name = Support;
@@ -537,6 +549,7 @@
 				65881F4DB7D25A189205336C /* ProviderRouterTests.swift */,
 				E035804223C3F357F6CD1817 /* RemoteLocationTests.swift */,
 				2C4F68758672A5715B949B52 /* RemoteTransferTests.swift */,
+				DC92D35DA9B7BD29DDFF824E /* RemoteTreeTransferTests.swift */,
 				11A6CC266B9C15CA13197AF8 /* SessionPersistenceTests.swift */,
 				EA8A61A7F7BBD4B7A45C904F /* SFTPIntegrationTests.swift */,
 				B53A0AC989F55938371025FD /* ShelfStoreTests.swift */,
@@ -614,8 +627,10 @@
 				601E8BF83FD10F0131818E8E /* LocalKeyMaterial.swift */,
 				48150E3D1860A90482B0270D /* RemoteConnectionManager.swift */,
 				B209BFF4D5897F2C5DFC308A /* RemoteTransferExecutor.swift */,
+				176AAC8A2C1693E92A6229B0 /* RemoteTreeTransferExecutor.swift */,
 				DE4EE2ADC87D82A96BBBA25A /* SFTPTransport.swift */,
 				5C1160A69DD895ACD7E8DCAD /* SMBConnectionManager.swift */,
+				3EEFBEF79A9C05E68935B39E /* TransferTreeManifest.swift */,
 				594DB6C0A701C921C7A7EDBC /* WebDAVConnectionManager.swift */,
 				F7D97C19E247054458546A8D /* WebDAVFileChannel.swift */,
 				93B3B3A30AFD74C96629C12B /* WebDAVHTTPTransport.swift */,
@@ -859,12 +874,14 @@
 				A963D2C065F2411E62539F7E /* ProviderRouter.swift in Sources */,
 				19A37553BF36B4119C2849FF /* RemoteConnectionManager.swift in Sources */,
 				A37E32425DE62FE1F1924A17 /* RemoteTransferExecutor.swift in Sources */,
+				7424C382BFB12D584C4F1956 /* RemoteTreeTransferExecutor.swift in Sources */,
 				3EA1EE23E0913B7C10D89711 /* SFTPTransport.swift in Sources */,
 				8BE20E51982083E328E1EA8C /* SMBConnectionManager.swift in Sources */,
 				D6C13C93BE428FB5D6CC5393 /* ShelfStore.swift in Sources */,
 				42C5F443EB7EADEFB9F05269 /* TabSession.swift in Sources */,
 				4DE4142CE27DC180008346AE /* TransferModels.swift in Sources */,
 				7F602809067702F7D42EDF72 /* TransferQueue.swift in Sources */,
+				2B95B82EC298EDC778635E85 /* TransferTreeManifest.swift in Sources */,
 				C9993E64CD96185F47F13DA1 /* ViewOptions.swift in Sources */,
 				AD03696D5702E2A6431D15E6 /* WebDAVConnectionManager.swift in Sources */,
 				B2AFC2887D1F783111E9F446 /* WebDAVFileChannel.swift in Sources */,
@@ -902,15 +919,18 @@
 				99F2028F933983C6CDD810DE /* MetadataPreservationTests.swift in Sources */,
 				A7304FD0F152C388782968B6 /* NetworkConnectionTests.swift in Sources */,
 				33879676C8714B41CA0CB646 /* NetworkProfileTests.swift in Sources */,
+				30DBB1CEB9BA0A1A2EC27011 /* NetworkTreeRoundTrip.swift in Sources */,
 				0923CF1A40F44184527AF318 /* PreferencesStoreTests.swift in Sources */,
 				7401DC036054E57B95B94DE3 /* ProviderRouterTests.swift in Sources */,
 				C17C5929028F89CFD315FC4D /* RemoteLocationTests.swift in Sources */,
 				C4045CE4E3FEEFD53976D0FD /* RemoteTransferTests.swift in Sources */,
+				BB408EB956EE6FAB4F57737A /* RemoteTreeTransferTests.swift in Sources */,
 				4B70E99D54E794D63C5FEAB4 /* SFTPIntegrationTests.swift in Sources */,
 				29EDCFF91C6A03A33E994ABE /* SMBIntegrationTests.swift in Sources */,
 				6F5A69561EACB554A79479D8 /* SessionPersistenceTests.swift in Sources */,
 				9741CEB51C3268B497576410 /* ShelfStoreTests.swift in Sources */,
 				0D19B25F83B552E255592C03 /* TransferQueueTests.swift in Sources */,
+				BB46C850A3AD0201CC956269 /* TreeMemoryRemote.swift in Sources */,
 				92B5A07F4C25A95CC9883D18 /* ViewModeStateTests.swift in Sources */,
 				B3C5B57F6F2EFB82911ABBBD /* WebDAVIntegrationTests.swift in Sources */,
 				81392B7FECC2C0C52581093E /* WebDAVTests.swift in Sources */,

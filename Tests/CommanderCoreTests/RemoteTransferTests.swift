@@ -78,7 +78,7 @@ final class RemoteTransferTests: XCTestCase, @unchecked Sendable {
         XCTAssertTrue(zip(nonFinal, nonFinal.dropFirst()).allSatisfy { $1.0 - $0.0 >= 0.075 }, "Streaming updates must be coalesced, with a separate final flush")
     }
     func testUnsupportedBatchAndMoveRejectBeforeCreatingAnything() async throws {
-        let f = try FixtureDirectory(); let file = try f.file("file"); let directory = try f.directory("folder")
+        let f = try FixtureDirectory(); let file = try f.file("file"); let directory = try f.directory("folder"); try FileManager.default.createSymbolicLink(at: directory.appendingPathComponent("unsupported-link"), withDestinationURL: file)
         let remote = MemoryRemote()
         for request in [TransferRequest(kind: .copy, sources: [.local(file), .local(directory)], destinationDirectory: remote.root),
                         .init(kind: .move, sources: [.local(file)], destinationDirectory: remote.root)] {

@@ -26,6 +26,12 @@ final class SFTPIntegrationTests: XCTestCase, @unchecked Sendable {
         let location = FileLocation.sftp(profileID: profile.id, path: try RemotePath(profile.initialPath))
         let listing = try await manager.list(location, options: .init())
         XCTAssertTrue(listing.entries.contains { $0.name == "hello.txt" })
+        let linkURL = dataRoot.appendingPathComponent("source-link")
+        try FileManager.default.createSymbolicLink(at: linkURL, withDestinationURL: dataRoot.appendingPathComponent("hello.txt"))
+        let link = try location.appending("source-link"); let linkMetadata = try await manager.metadata(link)
+        XCTAssertEqual(linkMetadata?.kind, .symbolicLink); XCTAssertFalse(linkMetadata?.isRegularFile == true)
+        do { _ = try await TransferTreePlanner(remote: manager).plan(link); XCTFail("LSTAT must reject copying the link target") } catch { }
+        try FileManager.default.removeItem(at: linkURL)
         let original = try location.appending("hello.txt")
         let reader = try await manager.openFile(original, writeExclusive: false)
         let bytes = try await reader.read(offset: 0, length: 65536); try await reader.close()
@@ -73,6 +79,39 @@ final class SFTPIntegrationTests: XCTestCase, @unchecked Sendable {
         let restoredManager = SFTPConnectionManager()
         do { try await restoredManager.connect(profile, secret: ""); XCTFail("Changed key must fail") }
         catch { XCTAssertNotNil((error as? HostKeyChallenge)?.previousFingerprint) }
+    }
+    func testOversizedSFTPFrameIsRejectedBeforeWaitingForItsBody() async throws {
+        guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SFTP_FIXTURE"] else { throw XCTSkip("Owned SFTP fixture required") }
+        let root = URL(fileURLWithPath: fixture); let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
+        var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String, authentication: .ed25519Key)
+        p.keyReference = try LocationResolver().reference(for: .local(root.appendingPathComponent("user_key"))); p.serverKey = try String(contentsOf: root.appendingPathComponent("host_key.pub"), encoding: .utf8)
+        let manager = SFTPConnectionManager(operationTimeout: .seconds(10)); try await manager.connect(p, secret: "")
+        let trigger = root.appendingPathComponent("oversize-packets"); try Data().write(to: trigger); defer { try? FileManager.default.removeItem(at: trigger) }
+        let start = ContinuousClock.now
+        do { _ = try await manager.metadata(.sftp(profileID: p.id, path: RemotePath("/owned"))); XCTFail("Oversized frame cannot be accepted") } catch { }
+        XCTAssertLessThan(start.duration(to: .now), .seconds(3), "Reject the declared length without waiting for the missing payload or the 10s timeout")
+        await manager.disconnect(p.id)
+    }
+    func testWideDirectoryUsesLinearMetadataWithoutParentRelisting() async throws {
+        guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SFTP_FIXTURE"] else { throw XCTSkip("Owned SFTP fixture required") }
+        let root = URL(fileURLWithPath: fixture); let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
+        let folder = root.appendingPathComponent("data/wide-" + UUID().uuidString); try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        for n in 0..<80 { try Data("owned".utf8).write(to: folder.appendingPathComponent("file-\(n)")) }
+        var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String, authentication: .ed25519Key)
+        p.keyReference = try LocationResolver().reference(for: .local(root.appendingPathComponent("user_key"))); p.serverKey = try String(contentsOf: root.appendingPathComponent("host_key.pub"), encoding: .utf8)
+        let manager = SFTPConnectionManager(); try await manager.connect(p, secret: "")
+        let log = root.appendingPathComponent("sftp-events.log")
+        let before = (try? String(contentsOf: log, encoding: .utf8)) ?? ""
+        let manifest = try await TransferTreePlanner(remote: manager).plan(.sftp(profileID: p.id, path: try RemotePath(folder.path)))
+        let after = try String(contentsOf: log, encoding: .utf8)
+        let lines = String(after.dropFirst(before.count)).components(separatedBy: .newlines).filter { $0.contains(": readdir") }
+        do { _ = try await manager.list(.sftp(profileID: p.id, path: RemotePath(folder.path)), options: .init(includeHidden: true), limit: 3); XCTFail("SFTP must stop bounded enumeration") } catch { XCTAssertTrue(error.localizedDescription.contains("limit")) }
+        let boundedLog = try String(contentsOf: log, encoding: .utf8)
+        let budgetReads = String(boundedLog.dropFirst(after.count)).components(separatedBy: .newlines).filter { $0.contains(": readdir") }.count
+        XCTAssertLessThanOrEqual(budgetReads, 1)
+        XCTAssertEqual(manifest.entries.count, 81); XCTAssertGreaterThan(lines.count, 0, "Owned server log must observe protocol enumeration"); XCTAssertLessThanOrEqual(lines.count, 4, "Wide manifests must not reread a parent directory for every child")
+        await manager.disconnect(p.id)
     }
     func testStalledPeerTimeoutReleasesQueueGate() async throws {
         try await exerciseStalledPeer(cancel: false)

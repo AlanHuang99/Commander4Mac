@@ -88,11 +88,13 @@ public struct ConnectionProfile: Identifiable, Codable, Sendable, Equatable {
         copy.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         if copy.name.isEmpty { copy.name = copy.host }
         guard !domain.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }), !domain.contains("\\"), !domain.contains("/") else { throw FileOperationError.message("Enter a domain without path separators or control characters.") }
-        if protocolKind == .smb { copy.share = try FileNameRules.validateComponent(share) }
+        if protocolKind == .smb { copy.share = try FileNameRules.validateComponent(share); try RemotePathRules.validate(RemotePath("/" + copy.share), for: .smb) }
         if protocolKind == .webdav {
             copy.basePath = try RemotePath(basePath).rawValue
+            try RemotePathRules.validate(RemotePath(copy.basePath), for: .webdav)
             guard secure || copy.isLoopback else { throw FileOperationError.message("WebDAV requires HTTPS. HTTP is allowed only for numeric loopback servers.") }
         }
+        try RemotePathRules.validate(RemotePath(copy.initialPath), for: protocolKind)
         guard (authentication != .ed25519Key || protocolKind == .sftp), (authentication != .guest || protocolKind != .sftp) else { throw FileOperationError.message("Choose an authentication method supported by this protocol.") }
         if authentication == .ed25519Key && keyReference == nil { throw FileOperationError.message("Choose an OpenSSH Ed25519 private key.") }
         return copy

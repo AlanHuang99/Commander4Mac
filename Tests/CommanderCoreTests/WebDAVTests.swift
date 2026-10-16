@@ -22,11 +22,15 @@ final class WebDAVTests: XCTestCase {
     func testForeignEscapingAliasedAndOverdeepHrefsAreRejected() throws {
         let p = profile(); let endpoint = try WebDAVEndpoint(profile: p)
         let root = FileLocation.webdav(profileID: p.id, path: try RemotePath("/"))
-        for href in ["https://evil.test/dav/team/a", "/dav/team/%2e%2e/escape", "/dav/team/a%2fb", "/dav/team/sub/a", "/outside/a", "/dav/team/a?secret=x", "/dav/team/a%5cb"] {
+        for href in ["https://evil.test/dav/team/a", "/dav/team/%2e%2e/escape", "/dav/team/a%2fb", "/dav/team/sub/a", "/outside/a", "/dav/team/a?secret=x", "/dav/team/a%5cb", "/dav//team/a", "/dav/team//a", "/dav/team/a//"] {
             XCTAssertThrowsError(try WebDAVListing.parse(document(response(href, props: "<d:resourcetype/>")), endpoint: endpoint, location: root, depth: 1), href)
         }
         let dup = document(response("/dav/team/a", props: "<d:resourcetype/>") + response("/dav/team/%61", props: "<d:resourcetype/>"))
         XCTAssertThrowsError(try WebDAVListing.parse(dup, endpoint: endpoint, location: root, depth: 1))
+    }
+    func testOutgoingPathsRejectNamesTheListingParserCannotRepresent() throws {
+        let endpoint = try WebDAVEndpoint(profile: profile())
+        for path in ["/bad\\name", "/bad\nname"] { XCTAssertThrowsError(try endpoint.url(RemotePath(path))) }
     }
     func testXMLDeclarationsAndOversizeBodiesAreRejected() throws {
         let p = profile(); let endpoint = try WebDAVEndpoint(profile: p)

@@ -3,7 +3,7 @@ import CommanderCore
 import Darwin
 
 actor TreeMemoryRemote: RemoteFileAccess {
-    nonisolated let root = FileLocation.sftp(profileID: UUID(), path: try! RemotePath("/"))
+    nonisolated let root: FileLocation
     struct Node { var kind: FileKind; var bytes: Data; var revision: Int }
     private var endpoint: RemoteEndpointSnapshot?
     func setEndpoint(_ value: RemoteEndpointSnapshot) { endpoint = value }
@@ -11,7 +11,7 @@ actor TreeMemoryRemote: RemoteFileAccess {
     private var nodes: [FileLocation: Node] = [:]
     var token: OperationCancellation?; var mutate: URL?; var loseRename = false; var raceRename = false; var tamperStage = false; var failReads = false; var readCount = 0
     private(set) var mutations = 0
-    init() { nodes[root] = .init(kind: .directory, bytes: Data(), revision: 0) }
+    init(protocolKind: ConnectionProtocol = .sftp) { root = .remote(kind: protocolKind, profileID: UUID(), path: try! RemotePath("/")); nodes[root] = .init(kind: .directory, bytes: Data(), revision: 0) }
     func configure(token: OperationCancellation? = nil, mutate: URL? = nil, loseRename: Bool = false, raceRename: Bool = false, tamperStage: Bool = false, failReads: Bool = false) { self.token = token; self.mutate = mutate; self.loseRename = loseRename; self.raceRename = raceRename; self.tamperStage = tamperStage; self.failReads = failReads }
     func seed(_ path: FileLocation, kind: FileKind = .file, bytes: Data = Data()) { nodes[path] = .init(kind: kind, bytes: bytes, revision: 0) }
     func data(_ path: FileLocation) -> Data? { nodes[path]?.bytes }
@@ -47,7 +47,7 @@ actor TreeMemoryRemote: RemoteFileAccess {
         let moving = nodes.filter { $0.key == source || $0.key.remotePath!.rawValue.hasPrefix(source.remotePath!.rawValue + "/") }
         for (old, value) in moving {
             let suffix = String(old.remotePath!.rawValue.dropFirst(source.remotePath!.rawValue.count))
-            let new = FileLocation.sftp(profileID: destination.profileID!, path: try RemotePath(destination.remotePath!.rawValue + suffix))
+            let new = FileLocation.remote(kind: destination.connectionProtocol!, profileID: destination.profileID!, path: try RemotePath(destination.remotePath!.rawValue + suffix))
             nodes[new] = value; nodes.removeValue(forKey: old)
         }
         if loseRename && nodes[destination]?.kind == .directory { loseRename = false; throw FileOperationError.message("lost reply") }

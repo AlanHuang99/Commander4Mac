@@ -59,6 +59,10 @@ public actor RemoteConnectionManager: RemoteFileAccess {
         do { return try await provider(location).list(location, options: options) }
         catch { if let id = location.profileID, !(await isConnected(id)) { setState(.disconnected, id: id) }; throw error }
     }
+    public func list(_ location: FileLocation, options: ListingOptions, limit: Int) async throws -> DirectorySnapshot {
+        do { return try await provider(location).list(location, options: options, limit: limit) }
+        catch { if let id = location.profileID, !(await isConnected(id)) { setState(.disconnected, id: id) }; throw error }
+    }
     public func metadata(_ location: FileLocation) async throws -> RemoteFileMetadata? { try await provider(location).metadata(location) }
     public func openFile(_ location: FileLocation, writeExclusive: Bool) async throws -> any RemoteFileChannel { try await provider(location).openFile(location, writeExclusive: writeExclusive) }
     public func rename(_ source: FileLocation, to destination: FileLocation) async throws { try await provider(source).rename(source, to: destination) }

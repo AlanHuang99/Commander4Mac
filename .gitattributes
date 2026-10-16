@@ -1,0 +1,3 @@
+
+# Preserve upstream formatting in the pinned dependency snapshot.
+Vendor/Citadel/** -whitespace

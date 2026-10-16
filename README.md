@@ -73,11 +73,13 @@ Text fields keep standard editing behavior. Hardware function-key settings can a
 
 ## Architecture and evidence
 
-`CommanderCore` owns provider listings, pane/tab state, bookmarks, persistence, transfer planning, a serial mutation gate, execution, and journals. The app supplies SwiftUI scenes, reusable AppKit table/collection views, menus, previews, and system integration. SFTP sessions are actor-owned with strict host-key validation. SMB serializes libsmb2 on bounded workers; WebDAV uses ephemeral URLSession authentication and bounded private disk spools. Network file channels use 64 KiB blocks. AMSMB2/libsmb2 revisions are pinned; see ThirdPartyNotices.txt. LGPL distribution/relinking requirements need review before shipping outside this development Mac. Credentials are kept in Keychain or memory. No privileged helper, recursive folder-size scanning, or eager thumbnails are used.
+`CommanderCore` owns provider listings, pane/tab state, bookmarks, persistence, transfer planning, a serial mutation gate, execution, and journals. The app supplies SwiftUI scenes, reusable AppKit table/collection views, menus, previews, and system integration. SFTP sessions are actor-owned with strict host-key validation. The [Citadel 0.12.1 snapshot](Vendor/Citadel/COMMANDER_PATCHES.md) supplies bounded READDIR, no-follow LSTAT, and packet limits. SMB serializes libsmb2 on bounded workers; WebDAV uses ephemeral URLSession authentication and bounded private disk spools. Network file channels use 64 KiB blocks. AMSMB2/libsmb2 revisions are pinned; see ThirdPartyNotices.txt. LGPL distribution/relinking requirements need review before shipping outside this development Mac. Credentials are kept in Keychain or memory. No privileged helper, recursive folder-size scanning, or eager thumbnails are used.
 
 - [Approved design](docs/superpowers/specs/2026-10-16-commander4mac-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-16-local-file-manager.md)
 - [Acceptance record](docs/verification/local-release.md)
 - [SFTP plan](docs/superpowers/plans/2026-10-16-sftp-connections.md)
+- [Network and folder acceptance](docs/verification/network-folders-release.md)
+- [Network final review and decisions](docs/verification/network-folders-final-review.md)
 - [SFTP acceptance](docs/verification/sftp-release.md)
 - [Performance measurements](docs/verification/local-performance.md)

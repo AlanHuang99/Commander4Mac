@@ -1,4 +1,4 @@
-import json,logging,secrets,socket,sys,os
+import json,logging,secrets,socket,sys,os,time,threading
 from pathlib import Path
 from impacket.smbserver import SimpleSMBServer
 from impacket import smb3structs
@@ -25,6 +25,15 @@ inner=server.getServer()
 for command in range(2, 19):
     original=inner.hookSmb2Command(command,None)
     if original is not None: inner.hookSmb2Command(command,proper_errors(original))
+query_lock=threading.Lock(); query_count=0
+original_query=inner.hookSmb2Command(14,None)
+def counted_query(*args):
+    global query_count
+    with query_lock:
+        query_count += 1; (root/'query-count').write_text(str(query_count))
+    if (root/'stall-query').exists(): time.sleep(15)
+    return original_query(*args)
+inner.hookSmb2Command(14,counted_query)
 server.addShare('OwnedShare',str(root/'data'),'Owned Commander4Mac fixture')
 server.addCredential(username,0,compute_lmhash(secret),compute_nthash(secret))
 (root/'fixture.json').write_text(json.dumps({'port':port,'username':username,'secret':secret}))

@@ -9,6 +9,20 @@ final class WebDAVIntegrationTests: XCTestCase, @unchecked Sendable {
         var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String); p.protocolKind = .webdav; p.secure = false; p.basePath = "/dav"
         return (root, p, c["secret"] as! String)
     }
+    func testEstablishedConnectionReopensWithoutPasswordAndKeepsExistingChannel() async throws {
+        let (_, p, secret) = try fixture(); let manager = RemoteConnectionManager(); try await manager.connect(p, secret: secret)
+        let root = FileLocation.webdav(profileID: p.id, path: try RemotePath("/"))
+        let reader = try await manager.openFile(root.appending("hello #中文.txt"), writeExclusive: false)
+        let upload = try root.appending("reuse-" + UUID().uuidString + ".txt")
+        let writer = try await manager.openFile(upload, writeExclusive: true); try await writer.write(Data("owned reused session".utf8), offset: 0)
+        do {
+            try await manager.connect(p, secret: "")
+            try await writer.close(); let uploaded = try await manager.metadata(upload); XCTAssertEqual(uploaded?.size, 20)
+            let listing = try await manager.list(root, options: .init()); XCTAssertFalse(listing.entries.isEmpty)
+            let bytes = try await reader.read(offset: 0, length: 65536); XCTAssertEqual(bytes, Data("owned WebDAV fixture".utf8)); try await reader.close()
+        } catch { await writer.abort(); await reader.abort(); await manager.disconnectAll(); throw error }
+        await manager.disconnectAll()
+    }
     func testUnifiedRouterConnectsAndKeepsProtocolIdentity() async throws {
         let (_, p, secret) = try fixture(); let manager = RemoteConnectionManager()
         try await manager.connect(p, secret: secret)

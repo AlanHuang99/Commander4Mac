@@ -69,6 +69,14 @@ final class RemoteTreeTransferTests: XCTestCase, @unchecked Sendable {
         let result = await RemoteTransferExecutor(remote: remote, journal: .init(directory: f.url.appendingPathComponent("journal"))).executeRequest(.init(kind: .copy, sources: [.local(source)], destinationDirectory: remote.root), cancellation: .init(), resolveConflict: { _ in .init(.skip) }, emit: { event in if case .progress(let value) = event { samples.set(value) } })
         XCTAssertEqual(result.state, .completed); XCTAssertEqual(samples.value.bytesCopied, 220000); XCTAssertEqual(samples.value.completedItems, 2); XCTAssertEqual(result.outcomes.count, 1)
     }
+    func testDestinationProtocolNamesInLaterRootRejectEntireBatchBeforeMutation() async throws {
+        for (kind, badName) in [(ConnectionProtocol.smb, "report:2026.txt"), (.smb, "bad\\name"), (.webdav, "bad\\name"), (.webdav, "bad\nname")] {
+            let f = try FixtureDirectory(); let first = try f.file("a-good.txt"); let later = try f.directory("z-later"); _ = try f.file("z-later/" + badName)
+            let remote = TreeMemoryRemote(protocolKind: kind)
+            let result = await RemoteTransferExecutor(remote: remote, journal: .init(directory: f.url.appendingPathComponent("journal"))).executeRequest(.init(kind: .copy, sources: [.local(first), .local(later)], destinationDirectory: remote.root), cancellation: .init(), resolveConflict: { _ in .init(.skip) }, emit: { _ in })
+            XCTAssertEqual(result.state, .failed); let writes = await remote.mutations; XCTAssertEqual(writes, 0, kind.rawValue + " " + badName)
+        }
+    }
     func testLocalUnicodeAliasesFailBeforeCreatingDestination() async throws {
         let f = try FixtureDirectory(); let dest = try f.directory("downloads"); let remote = TreeMemoryRemote(); let tree = try remote.root.appending("tree")
         await remote.seed(tree, kind: .directory); await remote.seed(try tree.appending("é.txt"), bytes: Data("one".utf8)); await remote.seed(try tree.appending("e\u{301}.txt"), bytes: Data("two".utf8))

@@ -47,6 +47,11 @@ public struct RemoteTransferExecutor: TransferExecuting {
             for source in sources {
                 let manifest = try await treePlanner.plan(source)
                 guard manifest.entries.count <= 100_000 - entryCount else { throw FileOperationError.message("This batch exceeds the 100,000 entry transfer limit.") }; entryCount += manifest.entries.count
+                if let kind = request.destinationDirectory.connectionProtocol {
+                    let root = try request.destinationDirectory.appending(source.title)
+                    try RemotePathRules.validate(root.remotePath!, for: kind)
+                    for entry in manifest.entries { try RemotePathRules.validate(manifest.location(entry, under: root).remotePath!, for: kind) }
+                }
                 try await treePlanner.validateLocalNames(manifest, destinationDirectory: request.destinationDirectory)
                 for entry in manifest.entries { let sum = total.addingReportingOverflow(entry.size ?? 0); guard !sum.overflow, sum.partialValue <= UInt64(Int64.max) else { throw FileOperationError.message("This batch exceeds the supported byte count.") }; total = sum.partialValue }
                 manifests.append(manifest)

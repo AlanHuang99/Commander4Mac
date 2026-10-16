@@ -12,6 +12,7 @@ public actor WebDAVConnectionManager: RemoteFileAccess {
     public func connect(_ raw: ConnectionProfile, secret: String, attempt: UUID = UUID()) async throws {
         let profile = try raw.validated(); guard profile.protocolKind == .webdav else { throw WebDAVEndpoint.invalid() }
         try identities.bind(profile); endpointSnapshots[profile.id] = .init(profile: profile); try Task.checkCancellation()
+        if sessions[profile.id] != nil { return }
         let session = Session(endpoint: try WebDAVEndpoint(profile: profile), transport: WebDAVHTTPTransport(profile: profile, secret: secret))
         if let old = pending.removeValue(forKey: profile.id) { old.1.transport.close() }
         pending[profile.id] = (attempt, session)
@@ -42,6 +43,10 @@ public actor WebDAVConnectionManager: RemoteFileAccess {
     public func list(_ location: FileLocation, options: ListingOptions) async throws -> DirectorySnapshot {
         guard let value = try await properties(location, depth: 1, session: session(location)), value.metadata?.kind == .directory else { throw FileOperationError.message("The WebDAV folder is unavailable.") }
         return .init(location: location, entries: value.entries.filter { options.includeHidden || !$0.name.hasPrefix(".") })
+    }
+    public func list(_ location: FileLocation, options: ListingOptions, limit: Int) async throws -> DirectorySnapshot {
+        let snapshot = try await list(location, options: options)
+        guard snapshot.entries.count <= limit else { throw FileOperationError.message("Directory entry limit exceeded.") }; return snapshot
     }
     public func metadata(_ location: FileLocation) async throws -> RemoteFileMetadata? { try await properties(location, depth: 0, session: session(location))?.metadata }
     public func openFile(_ location: FileLocation, writeExclusive: Bool) async throws -> any RemoteFileChannel {

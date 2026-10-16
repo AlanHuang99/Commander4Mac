@@ -9,6 +9,7 @@ public struct WebDAVEndpoint: Sendable {
         _ = try url(try RemotePath("/"))
     }
     public func url(_ path: RemotePath, collection: Bool = false) throws -> URL {
+        try RemotePathRules.validate(path, for: .webdav)
         var parts = URLComponents(); parts.scheme = profile.secure ? "https" : "http"
         parts.host = profile.host; parts.port = profile.port
         let base = profile.basePath == "/" ? "" : profile.basePath
@@ -22,7 +23,9 @@ public struct WebDAVEndpoint: Sendable {
             guard c.scheme?.lowercased() == (profile.secure ? "https" : "http"), c.host?.lowercased() == profile.host.lowercased(), (c.port ?? (profile.secure ? 443 : 80)) == profile.port else { throw Self.invalid() }
         }
         guard c.percentEncodedPath.hasPrefix("/") else { throw Self.invalid() }
-        let segments = try c.percentEncodedPath.split(separator: "/", omittingEmptySubsequences: true).map { segment -> String in
+        let encodedPath = c.percentEncodedPath
+        guard !encodedPath.contains("//") else { throw Self.invalid() }
+        let segments = try encodedPath.split(separator: "/", omittingEmptySubsequences: true).map { segment -> String in
             guard let value = String(segment).removingPercentEncoding, !value.isEmpty, value != ".", value != "..", !value.contains("/"), !value.contains("\\"), !value.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else { throw Self.invalid() }
             return value
         }

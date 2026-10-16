@@ -45,11 +45,42 @@ final class SMBIntegrationTests: XCTestCase, @unchecked Sendable {
         let connected = await manager.isConnected(profile.id); XCTAssertFalse(connected)
         do { _ = try await manager.list(location, options: .init()); XCTFail("Disconnected mounts cannot fall through to local directories") } catch { }
     }
+    func testBudgetedSMBListingStopsAfterOnePageAndCancellationInterruptsPage() async throws {
+        guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SMB_FIXTURE"] else { throw XCTSkip("Owned SMB fixture required") }
+        let root = URL(fileURLWithPath: fixture); let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
+        let folder = root.appendingPathComponent("data/budget"); try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
+        for n in 0..<1000 { try Data().write(to: folder.appendingPathComponent("file-\(n)")) }
+        var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String); p.protocolKind = .smb; p.share = "OwnedShare"
+        let manager = SMBConnectionManager(); try await manager.connect(p, secret: c["secret"] as! String)
+        let location = FileLocation.smb(profileID: p.id, path: try RemotePath("/budget")); let counter = root.appendingPathComponent("query-count")
+        func count() -> Int { Int((try? String(contentsOf: counter, encoding: .utf8)) ?? "0") ?? 0 }
+        let before = count()
+        do { _ = try await manager.list(location, options: .init(includeHidden: true), limit: 3); XCTFail("SMB listing must stop at budget") } catch { XCTAssertTrue(error.localizedDescription.contains("limit"), error.localizedDescription) }
+        XCTAssertEqual(count() - before, 1, "Budget rejection must precede fetching another directory page")
+        let trigger = root.appendingPathComponent("stall-query"); try Data().write(to: trigger); defer { try? FileManager.default.removeItem(at: trigger) }
+        let previous = count(); let task = Task { try await manager.list(location, options: .init(), limit: 100000) }
+        let deadline = ContinuousClock.now + .seconds(3); while count() == previous && ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertGreaterThan(count(), previous); let start = ContinuousClock.now; task.cancel()
+        do { _ = try await task.value; XCTFail("Canceled page cannot finish") } catch { }
+        XCTAssertLessThan(start.duration(to: .now), .seconds(3)); await manager.disconnect(p.id)
+    }
+    func testCancelInterruptsAcceptedButUnnegotiatedSMBConnection() async throws {
+        let peer = try OwnedStalledTCPPeer(); defer { peer.close() }
+        let manager = SMBConnectionManager(); var p = ConnectionProfile(host: "127.0.0.1", port: peer.port, username: "owned"); p.protocolKind = .smb; p.share = "Owned"
+        let captured = p; let task = Task { try await manager.connect(captured, secret: "owned disposable value") }
+        let deadline = ContinuousClock.now + .seconds(3)
+        while !peer.accepted && ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertTrue(peer.accepted); let start = ContinuousClock.now; task.cancel()
+        do { try await task.value; XCTFail("Canceled negotiation cannot connect") } catch { }
+        XCTAssertLessThan(start.duration(to: .now), .seconds(3), "Cancel must interrupt pending negotiation rather than waiting for library timeout")
+        let f = try FixtureDirectory(); _ = try f.file("local.txt"); let listing = try await LocalFileSystem().list(.local(f.url), options: .init()); XCTAssertTrue(listing.entries.contains { $0.name == "local.txt" })
+        await manager.disconnect(p.id)
+    }
     func testCancelInterruptsAnActuallyStoppedSMBPeer() async throws {
         guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SMB_FIXTURE"] else { throw XCTSkip("Owned SMB fixture required") }
         let root = URL(fileURLWithPath: fixture); let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
         let pid = try XCTUnwrap(Int32(String(contentsOf: root.appendingPathComponent("server.pid"), encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)))
-        var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String); p.protocolKind = .smb; p.share = "OwnedShare"
+        var p = ConnectionProfile(host: "localhost", port: c["port"] as! Int, username: c["username"] as! String); p.protocolKind = .smb; p.share = "OwnedShare"
         let manager = SMBConnectionManager(); try await manager.connect(p, secret: c["secret"] as! String)
         let location = FileLocation.smb(profileID: p.id, path: try RemotePath("/stopped.bin")); let writer = try await manager.openFile(location, writeExclusive: true)
         guard kill(pid, SIGSTOP) == 0 else { await manager.disconnect(p.id); throw FileOperationError.message("Could not stop owned SMB fixture") }

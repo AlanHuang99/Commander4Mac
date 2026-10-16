@@ -27,8 +27,7 @@ packages:
     url: https://github.com/amosavian/AMSMB2.git
     revision: 90737c486c9d1a6ed1c1d4307060587c7bb0dfec
   Citadel:
-    url: https://github.com/orlandos-nl/Citadel.git
-    exactVersion: 0.12.1
+    path: Vendor/Citadel
 targets:
   CommanderCore:
     type: framework

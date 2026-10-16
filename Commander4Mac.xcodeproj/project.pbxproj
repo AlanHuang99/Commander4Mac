@@ -25,6 +25,7 @@
 		0E307CA9C3EAD245D7A8DB8A /* FileEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA26D7D2BDA7E7CFF3B5AE54 /* FileEntry.swift */; };
 		0EE5A8E9954A0E580B5F4EC9 /* LocalFileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */; };
 		0F0B50459B26862F3E6A0D23 /* BlockingFileWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4889C45C31B19170BF226A /* BlockingFileWorker.swift */; };
+		13473E898925BB4C2B31F2E3 /* OwnedStalledTCPPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F3FBFBB2CA342AF8EA0D104 /* OwnedStalledTCPPeer.swift */; };
 		13899835E660FE71F05BE0FF /* FileNameRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C40797949EFF30487FC1ACE /* FileNameRules.swift */; };
 		14BBAF481511B47BF320A496 /* FileLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655885F9AC419AB3578D778 /* FileLocation.swift */; };
 		19A37553BF36B4119C2849FF /* RemoteConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48150E3D1860A90482B0270D /* RemoteConnectionManager.swift */; };
@@ -60,6 +61,8 @@
 		4BC51ABE603280E099A6FE1E /* LocalOperationExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88F532F0C5DC71711681DDA1 /* LocalOperationExecutor.swift */; };
 		4DE4142CE27DC180008346AE /* TransferModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8ECF77A78B4E44AF019ACEA /* TransferModels.swift */; };
 		50B2C7FFC09D74E3C49123DB /* CommanderCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; };
+		5445CB563EF7DB67DDA72980 /* SMBProtocolDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FF09B8E8689110543F0EDB /* SMBProtocolDriver.swift */; };
+		550C8FBC501D7928A581DE24 /* ListingBudgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 481857B0D550F8AB886402C0 /* ListingBudgetTests.swift */; };
 		570B4B5C2CA9D7D6D9DA5793 /* smb_fixture.py in Resources */ = {isa = PBXBuildFile; fileRef = E2748F0EEC8F41375EDA8BAF /* smb_fixture.py */; };
 		5A64A179A66019E312787241 /* OperationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA103E78FD38FCA081683D9 /* OperationModels.swift */; };
 		5B7CEA50DA97A9EA476F1A1E /* FileOperationBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 357D208077AA7716E636C38F /* FileOperationBackend.swift */; };
@@ -97,6 +100,7 @@
 		9864453705168F11B3EF6A6E /* WorkspaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */; };
 		99F2028F933983C6CDD810DE /* MetadataPreservationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A025CF0CC560BB2375AB9B3 /* MetadataPreservationTests.swift */; };
 		9A1AF0438EF4F8D548A08122 /* LocationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FE06ACC98AE4F4B758E606A /* LocationBarView.swift */; };
+		9D167E5475D085F2A9EDBCDD /* RemotePathRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D8636B0BAACC8DAC6DE2FF /* RemotePathRules.swift */; };
 		9ED946146C0A45F621765673 /* HostKeyVerification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36844EF27E5DD25BC36F9367 /* HostKeyVerification.swift */; };
 		A232ADE4B13798AC2C048C4B /* ActiveOperationMarkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1114B030AA3D1C2873A4E696 /* ActiveOperationMarkerTests.swift */; };
 		A3077F82E274695CD284D37F /* Module.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73667F5A96BCAEDB82685389 /* Module.swift */; };
@@ -109,6 +113,7 @@
 		AD03696D5702E2A6431D15E6 /* WebDAVConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 594DB6C0A701C921C7A7EDBC /* WebDAVConnectionManager.swift */; };
 		AE31F25719618160DF8F3A42 /* LocalTransferPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A4664A4B58D53C5566AA9C /* LocalTransferPlanner.swift */; };
 		AE65D5D30CC1A7AE2D47AB7D /* ActiveOperationMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3BB16E2F33F70B1771058CA /* ActiveOperationMarker.swift */; };
+		AF1F050029881343628CD150 /* sftp_oversized.py in Resources */ = {isa = PBXBuildFile; fileRef = 81081D644B26261362546429 /* sftp_oversized.py */; };
 		AF6F2F8F8F395F207C8EFD96 /* RuntimeIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EC12DBF0F1E980DC18D1D04 /* RuntimeIdentity.swift */; };
 		B22F8A85BB360F2809E0F7D2 /* LocalCopyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12A7F869D37BB4EEA009EF4B /* LocalCopyEngine.swift */; };
 		B24FE0DCA8CFD181D726542E /* ApplicationStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC65A623852E31652E902D9F /* ApplicationStateStore.swift */; };
@@ -223,10 +228,12 @@
 		20EF1F852FC06879A903CCF2 /* ShelfTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfTransferTests.swift; sourceTree = "<group>"; };
 		241A480D4265AC713A6E25CB /* PaneSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneSession.swift; sourceTree = "<group>"; };
 		247D989E506298E7253F787C /* LocalPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPerformanceTests.swift; sourceTree = "<group>"; };
+		258E9BBEF58E75A90BD1A426 /* Citadel */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Citadel; path = Vendor/Citadel; sourceTree = SOURCE_ROOT; };
 		261BAC57B0275ABE03D120CC /* ConnectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionController.swift; sourceTree = "<group>"; };
 		2B0C77CF218B353BED26175C /* CitadelSFTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitadelSFTPTransport.swift; sourceTree = "<group>"; };
 		2C37E971E468B34209FE2FF5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2C4F68758672A5715B949B52 /* RemoteTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTransferTests.swift; sourceTree = "<group>"; };
+		2F3FBFBB2CA342AF8EA0D104 /* OwnedStalledTCPPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwnedStalledTCPPeer.swift; sourceTree = "<group>"; };
 		2FA103E78FD38FCA081683D9 /* OperationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationModels.swift; sourceTree = "<group>"; };
 		2FE06ACC98AE4F4B758E606A /* LocationBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationBarView.swift; sourceTree = "<group>"; };
 		33B1E27DBC0814D3A0EF4C6D /* RemoteEndpointSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteEndpointSnapshot.swift; sourceTree = "<group>"; };
@@ -235,12 +242,14 @@
 		3BB07A99CCEB26605793A527 /* FileNameRulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameRulesTests.swift; sourceTree = "<group>"; };
 		3EEFBEF79A9C05E68935B39E /* TransferTreeManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferTreeManifest.swift; sourceTree = "<group>"; };
 		40FA1790AA7A04AA0FEE5375 /* Commander4Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Commander4Mac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		43FF09B8E8689110543F0EDB /* SMBProtocolDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMBProtocolDriver.swift; sourceTree = "<group>"; };
 		455376E03CE555A9E9195F01 /* LocalFileActionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileActionsTests.swift; sourceTree = "<group>"; };
 		45B1FCFB9E853975226DC8B5 /* KeyboardAndAccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardAndAccessibilityTests.swift; sourceTree = "<group>"; };
 		463511A9C36B8B32380BD440 /* FileActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActionTests.swift; sourceTree = "<group>"; };
 		4692A579CAE6CC7633842217 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		477C02739ACFF162E896A5A5 /* FavoriteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteStore.swift; sourceTree = "<group>"; };
 		48150E3D1860A90482B0270D /* RemoteConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteConnectionManager.swift; sourceTree = "<group>"; };
+		481857B0D550F8AB886402C0 /* ListingBudgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingBudgetTests.swift; sourceTree = "<group>"; };
 		48679DE71936313CF95F1DFC /* ProviderRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderRouter.swift; sourceTree = "<group>"; };
 		49A16316BE7E596BECD0C16F /* ConnectionProfileCommit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionProfileCommit.swift; sourceTree = "<group>"; };
 		49A8AC653C2A184D9DB1FC77 /* DirectoryLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryLoaderTests.swift; sourceTree = "<group>"; };
@@ -276,6 +285,7 @@
 		75013AFAA41241CA682C65D7 /* ConnectionProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionProfileTests.swift; sourceTree = "<group>"; };
 		7C40797949EFF30487FC1ACE /* FileNameRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameRules.swift; sourceTree = "<group>"; };
 		7FA67393A511ABAB1DCC9E49 /* FaultInjectingFileOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaultInjectingFileOperations.swift; sourceTree = "<group>"; };
+		81081D644B26261362546429 /* sftp_oversized.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = sftp_oversized.py; sourceTree = "<group>"; };
 		819A2BBCF203753509D5D124 /* DirectoryWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryWatcher.swift; sourceTree = "<group>"; };
 		827BC5B654DBB99FF420B552 /* ConnectionWorkflowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionWorkflowTests.swift; sourceTree = "<group>"; };
 		83DE360CE5F00928FABD22BD /* FileTableCommandHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTableCommandHandler.swift; sourceTree = "<group>"; };
@@ -287,6 +297,7 @@
 		8F09FB44A7FF94910A49EAEA /* NetworkRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRecoveryTests.swift; sourceTree = "<group>"; };
 		920607C712067FD37F06CBE2 /* DirectoryLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryLoader.swift; sourceTree = "<group>"; };
 		93B3B3A30AFD74C96629C12B /* WebDAVHTTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVHTTPTransport.swift; sourceTree = "<group>"; };
+		93D8636B0BAACC8DAC6DE2FF /* RemotePathRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemotePathRules.swift; sourceTree = "<group>"; };
 		94942DC724D739D1A980A2B0 /* TreeMemoryRemote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeMemoryRemote.swift; sourceTree = "<group>"; };
 		9D76476D645CD4627BB18849 /* PaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneView.swift; sourceTree = "<group>"; };
 		9E864C93BDF18401490D033C /* TransferQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferQueue.swift; sourceTree = "<group>"; };
@@ -421,6 +432,7 @@
 				7FA67393A511ABAB1DCC9E49 /* FaultInjectingFileOperations.swift */,
 				5F8C524CE10BC6C906B9DD97 /* FixtureDirectory.swift */,
 				0CDF0783F8894433BFE3AC86 /* NetworkTreeRoundTrip.swift */,
+				2F3FBFBB2CA342AF8EA0D104 /* OwnedStalledTCPPeer.swift */,
 				94942DC724D739D1A980A2B0 /* TreeMemoryRemote.swift */,
 				C3477FE7A937F59D471F091D /* Network */,
 			);
@@ -517,6 +529,7 @@
 				E5B6FA93715B90AE27341C86 /* Commander4MacUITests */,
 				BD3ABC2A6EF50B176318FB9E /* CommanderCore */,
 				BC34CE8F4AEF6381D3491575 /* CommanderCoreTests */,
+				F164FF9FD4D034633D96F8E8 /* Packages */,
 				D893F580CCC1EB66106D12F3 /* Resources */,
 				3782926CF6CFA2E424D11E8D /* Support */,
 				60D43AD2700328EF6AABDEB9 /* Products */,
@@ -541,6 +554,7 @@
 				3BB07A99CCEB26605793A527 /* FileNameRulesTests.swift */,
 				D89B82894663940920DADBED /* HostKeyVerificationTests.swift */,
 				A4066ABB17A10AA18079E81C /* KeychainIntegrationTests.swift */,
+				481857B0D550F8AB886402C0 /* ListingBudgetTests.swift */,
 				455376E03CE555A9E9195F01 /* LocalFileActionsTests.swift */,
 				4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */,
 				6521A02F3E8B54DDFA417B40 /* LocalOperationExecutorTests.swift */,
@@ -585,6 +599,7 @@
 		C3477FE7A937F59D471F091D /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				81081D644B26261362546429 /* sftp_oversized.py */,
 				E2748F0EEC8F41375EDA8BAF /* smb_fixture.py */,
 				A9C48A3A1610AC97C59D6245 /* webdav_fixture.py */,
 			);
@@ -631,10 +646,12 @@
 				36844EF27E5DD25BC36F9367 /* HostKeyVerification.swift */,
 				601E8BF83FD10F0131818E8E /* LocalKeyMaterial.swift */,
 				48150E3D1860A90482B0270D /* RemoteConnectionManager.swift */,
+				93D8636B0BAACC8DAC6DE2FF /* RemotePathRules.swift */,
 				B209BFF4D5897F2C5DFC308A /* RemoteTransferExecutor.swift */,
 				176AAC8A2C1693E92A6229B0 /* RemoteTreeTransferExecutor.swift */,
 				DE4EE2ADC87D82A96BBBA25A /* SFTPTransport.swift */,
 				5C1160A69DD895ACD7E8DCAD /* SMBConnectionManager.swift */,
+				43FF09B8E8689110543F0EDB /* SMBProtocolDriver.swift */,
 				3EEFBEF79A9C05E68935B39E /* TransferTreeManifest.swift */,
 				594DB6C0A701C921C7A7EDBC /* WebDAVConnectionManager.swift */,
 				F7D97C19E247054458546A8D /* WebDAVFileChannel.swift */,
@@ -674,6 +691,14 @@
 				87A775AE5AA0E5FF01255992 /* ViewOptions.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		F164FF9FD4D034633D96F8E8 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				258E9BBEF58E75A90BD1A426 /* Citadel */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -799,7 +824,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C0FE76E9D701D89CF72B8AAE /* XCRemoteSwiftPackageReference "AMSMB2" */,
-				3CE6F904E08D3451E8F1838E /* XCRemoteSwiftPackageReference "Citadel" */,
+				A334B31E3D2BE489BBF47056 /* XCLocalSwiftPackageReference "Vendor/Citadel" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 60D43AD2700328EF6AABDEB9 /* Products */;
@@ -827,6 +852,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF1F050029881343628CD150 /* sftp_oversized.py in Resources */,
 				570B4B5C2CA9D7D6D9DA5793 /* smb_fixture.py in Resources */,
 				31BCAD05D6AC2595B5158A68 /* webdav_fixture.py in Resources */,
 			);
@@ -880,10 +906,12 @@
 				A963D2C065F2411E62539F7E /* ProviderRouter.swift in Sources */,
 				19A37553BF36B4119C2849FF /* RemoteConnectionManager.swift in Sources */,
 				75835828A6294B5AC607EDB7 /* RemoteEndpointSnapshot.swift in Sources */,
+				9D167E5475D085F2A9EDBCDD /* RemotePathRules.swift in Sources */,
 				A37E32425DE62FE1F1924A17 /* RemoteTransferExecutor.swift in Sources */,
 				7424C382BFB12D584C4F1956 /* RemoteTreeTransferExecutor.swift in Sources */,
 				3EA1EE23E0913B7C10D89711 /* SFTPTransport.swift in Sources */,
 				8BE20E51982083E328E1EA8C /* SMBConnectionManager.swift in Sources */,
+				5445CB563EF7DB67DDA72980 /* SMBProtocolDriver.swift in Sources */,
 				D6C13C93BE428FB5D6CC5393 /* ShelfStore.swift in Sources */,
 				42C5F443EB7EADEFB9F05269 /* TabSession.swift in Sources */,
 				4DE4142CE27DC180008346AE /* TransferModels.swift in Sources */,
@@ -918,6 +946,7 @@
 				7A2441D58D5D07AA41BCCCD6 /* FixtureDirectory.swift in Sources */,
 				8C16F787FAFAADE1A9A6A9CE /* HostKeyVerificationTests.swift in Sources */,
 				05C10E36A1A3A82F5AB57E3C /* KeychainIntegrationTests.swift in Sources */,
+				550C8FBC501D7928A581DE24 /* ListingBudgetTests.swift in Sources */,
 				D28600E34F40517EE32E5DFB /* LocalFileActionsTests.swift in Sources */,
 				C1FF19CCC00E8F7EDD587B9F /* LocalFileSystemTests.swift in Sources */,
 				D4154CF2C7E9427850D107B6 /* LocalOperationExecutorTests.swift in Sources */,
@@ -928,6 +957,7 @@
 				33879676C8714B41CA0CB646 /* NetworkProfileTests.swift in Sources */,
 				C1CEB9A553DBB1BFFEA87882 /* NetworkRecoveryTests.swift in Sources */,
 				30DBB1CEB9BA0A1A2EC27011 /* NetworkTreeRoundTrip.swift in Sources */,
+				13473E898925BB4C2B31F2E3 /* OwnedStalledTCPPeer.swift in Sources */,
 				0923CF1A40F44184527AF318 /* PreferencesStoreTests.swift in Sources */,
 				7401DC036054E57B95B94DE3 /* ProviderRouterTests.swift in Sources */,
 				C17C5929028F89CFD315FC4D /* RemoteLocationTests.swift in Sources */,
@@ -1485,15 +1515,14 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		3CE6F904E08D3451E8F1838E /* XCRemoteSwiftPackageReference "Citadel" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/orlandos-nl/Citadel.git";
-			requirement = {
-				kind = exactVersion;
-				version = 0.12.1;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		A334B31E3D2BE489BBF47056 /* XCLocalSwiftPackageReference "Vendor/Citadel" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Vendor/Citadel;
 		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
 		C0FE76E9D701D89CF72B8AAE /* XCRemoteSwiftPackageReference "AMSMB2" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/amosavian/AMSMB2.git";
@@ -1512,7 +1541,6 @@
 		};
 		91AF30F306E324F5DE6565DE /* Citadel */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3CE6F904E08D3451E8F1838E /* XCRemoteSwiftPackageReference "Citadel" */;
 			productName = Citadel;
 		};
 		A599BDC2D476B8C3F861B893 /* AMSMB2 */ = {

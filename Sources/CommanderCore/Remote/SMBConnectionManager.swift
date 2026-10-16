@@ -19,19 +19,46 @@ final class SMBSession: @unchecked Sendable {
         stateLock.withLock { aborted = true; if let socket { _ = shutdown(socket, SHUT_RDWR) } }
     }
     var connected: Bool { stateLock.withLock { !aborted && socket != nil } }
+    func checkActive() throws { guard !stateLock.withLock({ aborted }) else { throw CancellationError() } }
     func activateSocket() throws {
-        let descriptor = fcntl(smb2_get_fd(context), F_DUPFD_CLOEXEC, 0)
-        guard descriptor >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+        let current = smb2_get_fd(context)
+        guard current >= 0 else { return }
         try stateLock.withLock {
-            guard !aborted else { _ = shutdown(descriptor, SHUT_RDWR); Darwin.close(descriptor); throw CancellationError() }
-            socket = descriptor
+            guard !aborted else { throw CancellationError() }
+            let descriptor = fcntl(current, F_DUPFD_CLOEXEC, 0)
+            guard descriptor >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+            if let socket { Darwin.close(socket) }; socket = descriptor
         }
+    }
+    /// Called only under the context operation lock. No concurrent raw C access.
+    func service(_ reply: SMBAsyncReply, deadline: TimeInterval = ProcessInfo.processInfo.systemUptime + 30) throws {
+        while reply.status == nil {
+            try checkActive()
+            guard ProcessInfo.processInfo.systemUptime < deadline else { abort(); throw NSError(domain: NSPOSIXErrorDomain, code: Int(ETIMEDOUT)) }
+            try activateSocket()
+            var count = 0; var timeout: Int32 = -1
+            let fds = smb2_get_fds(context, &count, &timeout)
+            var descriptors = (0..<count).map { pollfd(fd: fds![$0], events: Int16(smb2_which_events(context)), revents: 0) }
+            let interval: Int32 = timeout >= 0 ? min(timeout, 100) : 100
+            let result = poll(&descriptors, nfds_t(descriptors.count), interval)
+            if result < 0 { if errno == EINTR { continue }; abort(); throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+            try checkActive()
+            if let ready = descriptors.first(where: { $0.revents != 0 }) {
+                // Darwin can signal a refused connecting address with HUP rather
+                // than ERR. Let libsmb2's error branch try its next address.
+                let events = ready.revents & Int16(POLLHUP) != 0 ? ready.revents | Int16(POLLERR) : ready.revents
+                if smb2_service_fd(context, ready.fd, Int32(events)) < 0 { abort(); throw NSError(domain: NSPOSIXErrorDomain, code: Int(EIO)) }
+            } else if timeout >= 0 && interval >= timeout {
+                if smb2_service_fd(context, -1, 0) < 0 { abort(); throw NSError(domain: NSPOSIXErrorDomain, code: Int(EIO)) }
+            }
+        }
+        try checkActive()
     }
     func run<T: Sendable>(_ operation: @escaping @Sendable (UnsafeMutablePointer<smb2_context>) throws -> T) async throws -> T {
         do {
             return try await withTaskCancellationHandler {
                 try Task.checkCancellation()
-                return try await BlockingFileWorker.run { [self] in
+                return try await SMBNetworkWorker.run { [self] in
                     try lock.withLock { guard !stateLock.withLock({ aborted }) else { throw CancellationError() }; return try operation(context) }
                 }
             } onCancel: { self.abort() }
@@ -52,10 +79,7 @@ final class SMBSession: @unchecked Sendable {
     }
     static func path(_ location: FileLocation) throws -> String {
         guard location.connectionProtocol == .smb, let path = location.remotePath else { throw FileOperationError.message("This action requires a connected SMB location.") }
-        for component in path.rawValue.split(separator: "/") {
-            _ = try FileNameRules.validateComponent(String(component))
-            guard !component.contains("\\"), !component.contains(":") else { throw FileOperationError.message("SMB backslash and alternate-stream paths are not supported.") }
-        }
+        try RemotePathRules.validate(path, for: .smb)
         return String(path.rawValue.dropFirst())
     }
 }
@@ -77,11 +101,7 @@ public actor SMBConnectionManager: RemoteFileAccess {
         let session = try SMBSession(); pending[profile.id] = session; attempts[profile.id] = attempt
         do {
             try await session.run { context in
-                smb2_set_user(context, profile.authentication == .guest ? "" : profile.username)
-                smb2_set_password(context, secret); smb2_set_domain(context, profile.domain)
-                if profile.authentication != .guest { smb2_set_security_mode(context, UInt16(SMB2_NEGOTIATE_SIGNING_REQUIRED)) }
-                try SMBSession.check(smb2_connect_share(context, profile.host + ":" + String(profile.port), profile.share, profile.authentication == .guest ? "" : profile.username))
-                try session.activateSocket()
+                try SMBProtocolDriver.connect(session, profile: profile, secret: secret)
             }
             guard attempts[profile.id] == attempt, !Task.isCancelled else { session.abort(); throw CancellationError() }
             pending.removeValue(forKey: profile.id); sessions[profile.id] = session
@@ -99,25 +119,11 @@ public actor SMBConnectionManager: RemoteFileAccess {
         return session
     }
     public func list(_ location: FileLocation, options: ListingOptions) async throws -> DirectorySnapshot {
-        let session = try session(location); let path = try SMBSession.path(location)
-        return try await session.run { context in
-            guard let directory = smb2_opendir(context, path) else { throw SMBSession.error(context) }
-            defer { smb2_closedir(context, directory) }
-            var entries: [FileEntry] = []
-            while let item = smb2_readdir(context, directory) {
-                guard let namePointer = item.pointee.name else { throw FileOperationError.message("SMB returned a missing name.") }
-                let name = String(cString: namePointer)
-                if name == "." || name == ".." { continue }
-                let child = try location.appending(name); _ = try SMBSession.path(child)
-                if !options.includeHidden && name.hasPrefix(".") { continue }
-                let metadata = SMBSession.metadata(item.pointee.st)
-                entries.append(.init(location: child, name: name, kind: metadata.kind,
-                    byteSize: metadata.kind == .directory ? nil : metadata.size.flatMap(Int64.init(exactly:)), modificationDate: metadata.modified, placeholderState: .unknown))
-                guard entries.count <= 100_000 else { throw FileOperationError.message("The SMB directory exceeds 100,000 items.") }
-            }
-            guard Set(entries.map(\.id)).count == entries.count else { throw FileOperationError.message("SMB returned duplicate names.") }
-            return .init(location: location, entries: entries)
-        }
+        try await list(location, options: options, limit: 100_000)
+    }
+    public func list(_ location: FileLocation, options: ListingOptions, limit: Int) async throws -> DirectorySnapshot {
+        let session = try session(location)
+        return try await session.run { _ in try SMBProtocolDriver.list(session, location: location, options: options, limit: limit) }
     }
     public func metadata(_ location: FileLocation) async throws -> RemoteFileMetadata? {
         let session = try session(location); let path = try SMBSession.path(location)

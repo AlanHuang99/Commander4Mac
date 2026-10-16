@@ -55,8 +55,8 @@ public struct TransferTreePlanner: Sendable {
         let before = try await node(location, relative: relative); entries.append(before)
         guard before.kind == .directory else { return }
         let listing: DirectorySnapshot
-        if location.isLocal { listing = try await LocalFileSystem().list(location, options: .init(includeHidden: true)) }
-        else { listing = try await remote.list(location, options: .init(includeHidden: true)) }
+        if location.isLocal { listing = try await LocalFileSystem().list(location, options: .init(includeHidden: true), limit: maxEntries - entries.count) }
+        else { listing = try await remote.list(location, options: .init(includeHidden: true), limit: maxEntries - entries.count) }
         var names = Set<Data>()
         for entry in listing.entries.sorted(by: { $0.name.utf8.lexicographicallyPrecedes($1.name.utf8) }) {
             try Task.checkCancellation(); _ = try FileNameRules.validateComponent(entry.name)

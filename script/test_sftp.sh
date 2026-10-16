@@ -16,11 +16,14 @@ mkdir "$FIXTURE_ROOT/data"
 printf 'SFTP fixture' > "$FIXTURE_ROOT/data/hello.txt"
 python3 - "$FIXTURE_ROOT" <<'PY'
 from pathlib import Path
-import socket,json,getpass,sys
+import socket,json,getpass,sys,shlex
 root=Path(sys.argv[1])
 with socket.socket() as s:
     s.bind(('127.0.0.1',0)); port=s.getsockname()[1]
 (root/'fixture.json').write_text(json.dumps({'port':port,'username':getpass.getuser()}))
+oversized=Path('Tests/Support/Network/sftp_oversized.py').resolve()
+(root/'sftp-wrapper').write_text('#!/bin/sh\nif [ -f ' + shlex.quote(str(root/'oversize-packets')) + ' ]; then\n exec ' + shlex.quote(sys.executable) + ' ' + shlex.quote(str(oversized)) + '\nfi\nexec /usr/libexec/sftp-server -e -l DEBUG3 2>>' + shlex.quote(str(root/'sftp-events.log')) + '\n')
+(root/'sftp-wrapper').chmod(0o700)
 (root/'sshd_config').write_text(f'''Port {port}
 ListenAddress 127.0.0.1
 HostKey "{root}/host_key"
@@ -33,7 +36,7 @@ UsePAM no
 UseDNS no
 PermitRootLogin no
 AllowUsers {getpass.getuser()}
-Subsystem sftp internal-sftp
+Subsystem sftp "{root}/sftp-wrapper"
 LogLevel ERROR
 ''')
 PY

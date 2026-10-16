@@ -30,4 +30,11 @@ public struct ListingOptions: Sendable {
 }
 public protocol DirectoryProviding: Sendable {
     func list(_ location: FileLocation, options: ListingOptions) async throws -> DirectorySnapshot
+    func list(_ location: FileLocation, options: ListingOptions, limit: Int) async throws -> DirectorySnapshot
+}
+public extension DirectoryProviding {
+    func list(_ location: FileLocation, options: ListingOptions, limit: Int) async throws -> DirectorySnapshot {
+        let snapshot = try await list(location, options: options)
+        guard snapshot.entries.count <= limit else { throw FileOperationError.message("Directory entry limit exceeded.") }; return snapshot
+    }
 }

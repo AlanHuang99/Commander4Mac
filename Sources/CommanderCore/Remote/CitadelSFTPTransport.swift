@@ -150,13 +150,16 @@ public actor SFTPConnectionManager: RemoteFileAccess {
         await disconnect(id)
     }
     public func list(_ location: FileLocation, options: ListingOptions) async throws -> DirectorySnapshot {
+        try await list(location, options: options, limit: 100_000)
+    }
+    public func list(_ location: FileLocation, options: ListingOptions, limit: Int) async throws -> DirectorySnapshot {
         let session = try session(location); let deadline = timer(for: location, token: session.token); defer { deadline.cancel() }
         let token = session.token
         do {
         return try await withTaskCancellationHandler {
         try Task.checkCancellation()
         return try await session.client.withSFTP(logger: Self.quietLogger) { sftp in
-            let groups = try await sftp.listDirectory(atPath: location.remotePath!.rawValue)
+            let groups = try await sftp.listDirectory(atPath: location.remotePath!.rawValue, maxEntries: limit)
             var entries: [FileEntry] = []
             for component in groups.flatMap(\.components) {
                 let name = component.filename
@@ -178,17 +181,14 @@ public actor SFTPConnectionManager: RemoteFileAccess {
     }
     public func metadata(_ location: FileLocation) async throws -> RemoteFileMetadata? {
         let session = try session(location); let deadline = timer(for: location, token: session.token); defer { deadline.cancel() }
-        // READDIR retains symlink type, unlike STAT, which follows it.
+        // Direct LSTAT retains symlink type without rereading the parent directory.
         let token = session.token
         do {
         return try await withTaskCancellationHandler {
         try Task.checkCancellation()
         return try await session.client.withSFTP(logger: Self.quietLogger) { sftp in
-            if location.remotePath!.rawValue == "/" { return Self.metadata(try await sftp.getAttributes(at: "/")) }
-            let groups = try await sftp.listDirectory(atPath: location.parent.remotePath!.rawValue)
-            let matches = groups.flatMap(\.components).filter { $0.filename.utf8.elementsEqual(location.url.lastPathComponent.utf8) }
-            guard matches.count <= 1 else { throw FileOperationError.message("The server returned an ambiguous filename.") }
-            return matches.first.map { Self.metadata($0.attributes) }
+            do { return Self.metadata(try await sftp.getAttributes(at: location.remotePath!.rawValue, followSymlinks: false)) }
+            catch let status as SFTPMessage.Status where status.errorCode == .noSuchFile { return nil }
         }
         } onCancel: { Task { await self.expire(location.profileID, token: token) } }
         } catch { throw sftpError(error) }
@@ -293,6 +293,7 @@ private actor CitadelFileChannel: RemoteFileChannel {
 }
 
 private func sftpError(_ error: Error) -> any Error {
+    if case SFTPError.directoryListingLimitExceeded(let limit) = error { return FileOperationError.message("Directory entry limit exceeded (\(limit)).") }
     guard let status = error as? SFTPMessage.Status else { return error }
     let message: String
     switch status.errorCode {

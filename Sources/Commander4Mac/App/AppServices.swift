@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 import Observation
 import OSLog
 import CommanderCore
@@ -55,7 +56,16 @@ final class AppServices {
     var openWorkspaceWindow: (() -> Void)?
     private weak var activeController: WorkspaceController?
     private var incomingFolders: [URL] = []
-    func activate(_ controller: WorkspaceController) { activeController = controller }
+    @ObservationIgnored private var commandUpdateObserver: NotificationToken?
+    func activate(_ controller: WorkspaceController) { activeController = controller; invalidateCommandFocus() }
+    func invalidateCommandFocus() {
+        let target = commandController(for: NSApp.keyWindow)
+        if WindowCommandContext.shared.controller !== target { WindowCommandContext.shared.controller = target }
+    }
+    func commandController(for window: NSWindow?) -> WorkspaceController? {
+        guard NSApp.isActive, let window, window.isKeyWindow, window.attachedSheet == nil, NSApp.modalWindow == nil else { return nil }
+        return controllers.values.compactMap(\.value).first { $0.window === window }
+    }
     func acceptIncomingFolders(_ urls: [URL]) {
         incomingFolders.append(contentsOf: urls)
         if let controller = activeController ?? controllers.values.compactMap(\.value).first { routeIncoming(to: controller) }
@@ -92,6 +102,11 @@ final class AppServices {
         transferQueue = TransferQueue(executor: RemoteTransferExecutor(remote: remote, journal: operationJournal), gate: gate)
         marker = ActiveOperationMarker(directory: directory)
          pendingWindows = initialPreferences.restoreSession ? loaded.state.windows : []; startupDiagnostic = loaded.diagnostic
+        // AppKit can end a sheet after its key-window notification. Publish only
+        // actual target changes at the end of the native update cycle.
+        commandUpdateObserver = NotificationToken(NotificationCenter.default.addObserver(forName: NSApplication.didUpdateNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.invalidateCommandFocus() }
+        })
         observationTask = Task { [weak self, transferQueue, operationJournal] in
             do { self?.recoveryRecords = try await BlockingFileWorker.run { try operationJournal.recoverableJobs() } }
             catch { self?.recoveryDiagnostic = "Could not read interrupted-operation records: \(error.localizedDescription)" }
@@ -150,7 +165,7 @@ final class AppServices {
     }
     func unregister(_ controller: WorkspaceController) {
         guard !isTerminating else { return }
-        controllers.removeValue(forKey: controller.workspace.id)
+        controllers.removeValue(forKey: controller.workspace.id); invalidateCommandFocus()
         conflictRouting.unregister(controller.workspace.id)
         saveNow()
     }

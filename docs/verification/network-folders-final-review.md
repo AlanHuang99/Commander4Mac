@@ -43,3 +43,7 @@ Connect toolbar actions were used in the final native pass. Cmd-K did not open t
 ## Disposition
 
 All six Important findings have regression-first evidence and a green full suite. The three Minor findings remain deferred. Keep codex/local-file-manager and its attached worktree; no merge or push was requested. External distribution is not claimed.
+
+## Follow-up
+
+The three minors and the Cmd-K gap were addressed in the subsequent [reliability and installer phase](reliability-icon-installer.md). The results above remain the historical record for the network phase.

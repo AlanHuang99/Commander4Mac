@@ -1,7 +1,15 @@
 import Foundation
 import MachO
+import CommanderCore
 
 struct RuntimeIdentity {
+    static var needsInstallation: Bool {
+        #if COMMANDER_UI_TEST_HOST
+        false
+        #else
+        !InstallationLocation.isInstalled(bundleURL, homeDirectory: FileManager.default.homeDirectoryForCurrentUser)
+        #endif
+    }
     static var bundleIdentifier: String { Bundle.main.bundleIdentifier ?? "unknown" }
     static var bundleURL: URL { Bundle.main.bundleURL }
     static var executableURL: URL? { Bundle.main.executableURL }

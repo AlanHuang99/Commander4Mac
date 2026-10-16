@@ -3,6 +3,24 @@ import CommanderCore
 import Darwin
 
 final class SFTPIntegrationTests: XCTestCase, @unchecked Sendable {
+    func testUnifiedRouterRetiresAndReconnectsSFTPAfterChannelAbort() async throws {
+        guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SFTP_FIXTURE"] else { throw XCTSkip("Owned SFTP fixture required") }
+        let root = URL(fileURLWithPath: fixture); let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
+        let source = root.appendingPathComponent("data/router-" + UUID().uuidString + ".txt"); try Data("router bytes".utf8).write(to: source)
+        var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String, authentication: .ed25519Key)
+        p.keyReference = try LocationResolver().reference(for: .local(root.appendingPathComponent("user_key")))
+        p.serverKey = try String(contentsOf: root.appendingPathComponent("host_key.pub"), encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)
+        let manager = RemoteConnectionManager(); let stream = await manager.snapshots(); var states = stream.makeAsyncIterator(); _ = await states.next()
+        try await manager.connect(p, secret: ""); let first = await states.next(); XCTAssertEqual(first?[p.id], .connected)
+        let location = FileLocation.sftp(profileID: p.id, path: try RemotePath(source.path))
+        let reader = try await manager.openFile(location, writeExclusive: false); await reader.abort()
+        let retired = await states.next(); XCTAssertEqual(retired?[p.id], .disconnected)
+        try await manager.connect(p, secret: "")
+        try await Task.sleep(for: .milliseconds(30))
+        let restored = await states.next(); XCTAssertEqual(restored?[p.id], .connected)
+        let metadata = try await manager.metadata(location); XCTAssertEqual(metadata?.size, 12)
+        await manager.disconnect(p.id)
+    }
     func testRealSFTPKeyVerificationListingAndFileOperations() async throws {
         guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SFTP_FIXTURE"] else { throw XCTSkip("Owned loopback SFTP fixture required") }
         let root = URL(fileURLWithPath: fixture)

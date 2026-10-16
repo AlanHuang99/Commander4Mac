@@ -68,8 +68,19 @@ final class SMBSession: @unchecked Sendable {
             throw error
         }
     }
-    static func check(_ code: Int32) throws { guard code >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(-code)) } }
+    static func check(_ code: Int32, context: UnsafeMutablePointer<smb2_context>? = nil) throws {
+        guard code < 0 else { return }
+        // Pinned libsmb2 sync.c returns bare -1 when its poll/service loop fails.
+        // A server's legitimate -EPERM response has a different diagnostic.
+        let transportFailure = code == -1 && context.map(hasTransportFailure) == true
+        throw NSError(domain: NSPOSIXErrorDomain, code: Int(transportFailure ? EIO : -code))
+    }
+    private static func hasTransportFailure(_ context: UnsafeMutablePointer<smb2_context>) -> Bool {
+        let diagnostic = String(cString: smb2_get_error(context))
+        return diagnostic.hasPrefix("smb2_service failed with") || diagnostic.hasPrefix("Poll failed") || diagnostic.hasPrefix("Timeout expired and no connection exists")
+    }
     static func error(_ context: UnsafeMutablePointer<smb2_context>) -> NSError {
+        if hasTransportFailure(context) { return NSError(domain: NSPOSIXErrorDomain, code: Int(EIO)) }
         let code = nterror_to_errno(UInt32(bitPattern: smb2_get_nterror(context)))
         return NSError(domain: NSPOSIXErrorDomain, code: Int(code > 0 ? code : EIO))
     }
@@ -129,7 +140,7 @@ public actor SMBConnectionManager: RemoteFileAccess {
         let session = try session(location); let path = try SMBSession.path(location)
         return try await session.run { context in
             var value = smb2_stat_64(); let code = smb2_stat(context, path, &value)
-            if code == -ENOENT { return nil }; try SMBSession.check(code); return SMBSession.metadata(value)
+            if code == -ENOENT { return nil }; try SMBSession.check(code, context: context); return SMBSession.metadata(value)
         }
     }
     public func openFile(_ location: FileLocation, writeExclusive: Bool) async throws -> any RemoteFileChannel {
@@ -144,11 +155,11 @@ public actor SMBConnectionManager: RemoteFileAccess {
         guard source.providerID == destination.providerID else { throw FileOperationError.message("Rename requires the same share.") }
         let session = try session(source); let from = try SMBSession.path(source); let to = try SMBSession.path(destination)
         // Pinned libsmb2's rename encodes replace_if_exist = 0.
-        try await session.run { try SMBSession.check(smb2_rename($0, from, to)) }
+        try await session.run { context in try SMBSession.check(smb2_rename(context, from, to), context: context) }
     }
     public func createDirectory(_ location: FileLocation) async throws {
         let session = try session(location); let path = try SMBSession.path(location)
-        try await session.run { try SMBSession.check(smb2_mkdir($0, path)) }
+        try await session.run { context in try SMBSession.check(smb2_mkdir(context, path), context: context) }
     }
 }
 private struct SMBFileHandle: @unchecked Sendable { let pointer: OpaquePointer; init(_ pointer: OpaquePointer) { self.pointer = pointer } }
@@ -164,7 +175,7 @@ private actor SMBFileChannel: RemoteFileChannel {
         return try await session.run { context in
             var data = Data(count: Int(min(length, 65536)))
             let count = data.withUnsafeMutableBytes { smb2_pread(context, file.pointer, $0.baseAddress!.assumingMemoryBound(to: UInt8.self), UInt32($0.count), offset) }
-            try SMBSession.check(count); guard count <= data.count else { throw FileOperationError.message("SMB returned an oversized read.") }; return Data(data.prefix(Int(count)))
+            try SMBSession.check(count, context: context); guard count <= data.count else { throw FileOperationError.message("SMB returned an oversized read.") }; return Data(data.prefix(Int(count)))
         }
     }
     func write(_ data: Data, offset: UInt64) async throws {
@@ -172,7 +183,7 @@ private actor SMBFileChannel: RemoteFileChannel {
         let file = file
         try await session.run { context in
             let count = data.withUnsafeBytes { smb2_pwrite(context, file.pointer, $0.baseAddress!.assumingMemoryBound(to: UInt8.self), UInt32($0.count), offset) }
-            try SMBSession.check(count); guard count == data.count else { throw FileOperationError.message("SMB accepted only part of the write.") }
+            try SMBSession.check(count, context: context); guard count == data.count else { throw FileOperationError.message("SMB accepted only part of the write.") }
         }
     }
     func close() async throws {
@@ -180,8 +191,8 @@ private actor SMBFileChannel: RemoteFileChannel {
         let file = file; let writable = writable
         try await session.run { context in
             var error: (any Error)?
-            if writable { do { try SMBSession.check(smb2_fsync(context, file.pointer)) } catch let e { error = e } }
-            let code = smb2_close(context, file.pointer); if let error { throw error }; try SMBSession.check(code)
+            if writable { do { try SMBSession.check(smb2_fsync(context, file.pointer), context: context) } catch let e { error = e } }
+            let code = smb2_close(context, file.pointer); if let error { throw error }; try SMBSession.check(code, context: context)
         }
     }
 }

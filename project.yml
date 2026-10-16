@@ -53,6 +53,7 @@ targets:
       path: Configuration/Info.plist
       properties:
         CFBundleDisplayName: $(APP_DISPLAY_NAME)
+        CFBundleIconFile: AppIcon
         LSMinimumSystemVersion: "15.0"
         NSHighResolutionCapable: true
         NSDesktopFolderUsageDescription: Browse and organize files on your Desktop.
@@ -79,6 +80,7 @@ targets:
           PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac
           APP_DISPLAY_NAME: Commander4Mac
         UITest:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) COMMANDER_UI_TEST_HOST"
           PRODUCT_NAME: Commander4MacUITestHost
           PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac.uitest
           APP_DISPLAY_NAME: Commander4Mac UI Tests

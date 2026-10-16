@@ -83,3 +83,11 @@ Text fields keep standard editing behavior. Hardware function-key settings can a
 - [Network final review and decisions](docs/verification/network-folders-final-review.md)
 - [SFTP acceptance](docs/verification/sftp-release.md)
 - [Performance measurements](docs/verification/local-performance.md)
+
+## Icon and installer
+
+The selected blue/teal folded-pane icon is included in the app, with its PNG source, ten-size iconset, and `.icns` export. See [icon design and format guide](Design/AppIcon/README.md).
+
+A signed local drag-to-Applications DMG can be built with `./script/build_dmg.sh`. It includes Retina background artwork, the Applications shortcut, and first-launch installation guidance before Full Disk Access setup. See [installer design and build instructions](Packaging/README.md). External distribution still requires the licensing and notarization work documented there.
+
+See [reliability, icon and installer acceptance](docs/verification/reliability-icon-installer.md) for the latest test and installed-app evidence.

@@ -5,6 +5,30 @@ final class RemoteTreeTransferTests: XCTestCase, @unchecked Sendable {
     private func run(_ source: FileLocation, to destination: FileLocation, remote: TreeMemoryRemote, journal: URL, decision: ConflictDecision = .skip, token: OperationCancellation = .init()) async -> OperationResult {
         await RemoteTransferExecutor(remote: remote, journal: .init(directory: journal)).executeRequest(.init(kind: .copy, sources: [source], destinationDirectory: destination), cancellation: token, resolveConflict: { conflict in XCTAssertTrue(conflict.isDirectory); XCTAssertFalse(conflict.supportsReplacement); return .init(decision) }, emit: { _ in })
     }
+    func testApplyToAllSpansFilesAndFoldersInMixedBatch() async throws {
+        for decision in [ConflictDecision.skip, .keepBoth] {
+            let f = try FixtureDirectory(); let fileA = try f.file("a-file.txt", content: "new a")
+            let folder = try f.directory("b-folder"); _ = try f.file("b-folder/child.txt", content: "new child")
+            let fileC = try f.file("c-file.txt", content: "new c"); let remote = TreeMemoryRemote()
+            let a = try remote.root.appending("a-file.txt"); let b = try remote.root.appending("b-folder"); let c = try remote.root.appending("c-file.txt")
+            await remote.seed(a, bytes: Data("original a".utf8)); await remote.seed(b, kind: .directory); await remote.seed(c, bytes: Data("original c".utf8))
+            let prompts = MixedBatchPrompts()
+            let result = await RemoteTransferExecutor(remote: remote, journal: .init(directory: f.url.appendingPathComponent("journal"))).executeRequest(.init(kind: .copy, sources: [.local(fileA), .local(folder), .local(fileC)], destinationDirectory: remote.root), cancellation: .init(), resolveConflict: { _ in
+                await prompts.record(); return .init(decision, applyToAll: true)
+            }, emit: { _ in })
+            let count = await prompts.count; XCTAssertEqual(count, 1, "One decision must cover every root in the batch")
+            XCTAssertEqual(result.state, .completed); XCTAssertEqual(result.outcomes.count, 3)
+            let originalA = await remote.data(a); let originalC = await remote.data(c)
+            XCTAssertEqual(originalA, Data("original a".utf8)); XCTAssertEqual(originalC, Data("original c".utf8))
+            if decision == .skip { XCTAssertTrue(result.outcomes.allSatisfy { $0.state == .skipped }) }
+            else {
+                XCTAssertTrue(result.outcomes.allSatisfy { $0.state == .completed })
+                let copied = await remote.data(try remote.root.appending("b-folder copy").appending("child.txt")); XCTAssertEqual(copied, Data("new child".utf8))
+                let copiedA = await remote.data(try remote.root.appending("a-file copy.txt")); XCTAssertEqual(copiedA, Data("new a".utf8))
+                let copiedC = await remote.data(try remote.root.appending("c-file copy.txt")); XCTAssertEqual(copiedC, Data("new c".utf8))
+            }
+        }
+    }
     func testNestedEmptyAndUnicodeTreesRoundTripAndRootConflicts() async throws {
         let f = try FixtureDirectory(); let source = try f.directory("tree #中文"); try FileManager.default.createDirectory(at: source.appendingPathComponent("empty"), withIntermediateDirectories: false)
         let nested = source.appendingPathComponent("nested"); try FileManager.default.createDirectory(at: nested, withIntermediateDirectories: false)
@@ -90,3 +114,5 @@ private final class TreeProgressSamples: @unchecked Sendable {
     var value: CopyProgress { lock.withLock { current } }
     func set(_ value: CopyProgress) { lock.withLock { current = value } }
 }
+
+private actor MixedBatchPrompts { var count = 0; func record() { count += 1 } }

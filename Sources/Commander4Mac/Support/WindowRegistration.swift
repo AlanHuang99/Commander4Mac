@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import OSLog
 
 struct WindowRegistration: NSViewRepresentable {
     var controller: WorkspaceController
@@ -10,8 +11,9 @@ struct WindowRegistration: NSViewRepresentable {
     final class RegistrationView: NSView {
         weak var controller: WorkspaceController?
         private var observer: NotificationToken?
+        private var resignObserver: NotificationToken?
         private var closeDelegate: FileWindowCloseDelegate?
-        private var closeKeyMonitor: Any?
+        private var commandKeyMonitor: Any?
         private weak var delegateWindow: NSWindow?
         private func detachDelegate() {
             if let window = delegateWindow, let proxy = closeDelegate, window.delegate === proxy { window.delegate = proxy.forwardedDelegate }
@@ -19,7 +21,7 @@ struct WindowRegistration: NSViewRepresentable {
         }
         isolated deinit {
             detachDelegate()
-            if let closeKeyMonitor { NSEvent.removeMonitor(closeKeyMonitor) }
+            if let commandKeyMonitor { NSEvent.removeMonitor(commandKeyMonitor) }
         }
         func installCloseDelegate() {
             guard let window, let controller else { return }
@@ -30,19 +32,29 @@ struct WindowRegistration: NSViewRepresentable {
             closeDelegate = proxy; delegateWindow = window; window.delegate = proxy
         }
         override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow(); detachDelegate(); observer = nil
-            if let closeKeyMonitor { NSEvent.removeMonitor(closeKeyMonitor); self.closeKeyMonitor = nil }
+            super.viewDidMoveToWindow(); detachDelegate(); observer = nil; resignObserver = nil
+            if let commandKeyMonitor { NSEvent.removeMonitor(commandKeyMonitor); self.commandKeyMonitor = nil }
             guard let window else { return }
             installCloseDelegate()
-            // SwiftUI can reinstall its window delegate after a tab updates. Route the
-            // tab shortcut before AppKit dispatches the built-in window Close command.
-            closeKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            // Route window shortcuts from their actual event window. Menu routing
+            // remains valid even when a native panel changes SwiftUI focus scope.
+            commandKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
                 guard let self, event.window === self.window,
                       event.modifierFlags.intersection([.command, .shift, .option, .control]) == .command,
-                      event.charactersIgnoringModifiers?.lowercased() == "w", let controller = self.controller else { return event }
-                controller.closeTab()
-                return nil
+                      let controller = self.controller else { return event }
+                switch event.charactersIgnoringModifiers?.lowercased() {
+                case "w": controller.closeTab(); return nil
+                case "k":
+                    guard !event.isARepeat, !controller.showConnections,
+                          controller.services.commandController(for: self.window) === controller else { return event }
+                    Logger(subsystem: Bundle.main.bundleIdentifier ?? "Commander4Mac", category: "CommandRouting").info("Connect shortcut routed to window \(self.window?.windowNumber ?? -1)")
+                    controller.manageConnection(); return nil
+                default: return event
+                }
             }
+            resignObserver = NotificationToken(NotificationCenter.default.addObserver(forName: NSWindow.didResignKeyNotification, object: window, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.controller?.services.invalidateCommandFocus() }
+            })
             if window.isKeyWindow, let controller { controller.services.activate(controller) }
             observer = NotificationToken(NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated {

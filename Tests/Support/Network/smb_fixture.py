@@ -2,7 +2,7 @@ import json,logging,secrets,socket,sys,os,time,threading
 from pathlib import Path
 from impacket.smbserver import SimpleSMBServer
 from impacket import smb3structs
-from impacket.nt_errors import STATUS_SUCCESS
+from impacket.nt_errors import STATUS_SUCCESS,STATUS_PRIVILEGE_NOT_HELD
 from impacket.ntlm import compute_lmhash,compute_nthash
 logging.disable(logging.CRITICAL)
 root=Path(sys.argv[1]); (root/'data').mkdir(exist_ok=True)
@@ -16,6 +16,12 @@ server.setSMB2Support(True)
 # Emit the SMB2 error body required by the protocol, not a relaxed client parser.
 def proper_errors(original):
     def handler(*args):
+        if (root/'drop-next-command').exists():
+            (root/'drop-next-command').unlink()
+            raise ConnectionResetError('Owned fixture intentionally closed this session')
+        if (root/'deny-next-command').exists():
+            (root/'deny-next-command').unlink()
+            return [smb3structs.SMB2Error()], None, STATUS_PRIVILEGE_NOT_HELD
         commands, packets, status = original(*args)
         if status != STATUS_SUCCESS and packets is None:
             return [smb3structs.SMB2Error()], None, status

@@ -26,7 +26,8 @@ public struct RemoteTransferExecutor: TransferExecuting {
         if request.destinationDirectory.isLocal && request.sources.allSatisfy(\.isLocal) {
             return await local.executeRequest(request, cancellation: cancellation, resolveConflict: resolveConflict, emit: emit)
         }
-        let work = Task { await executeRemoteRequest(request, cancellation: cancellation, resolveConflict: resolveConflict, emit: emit) }
+        let conflicts = RemoteBatchConflicts(resolve: resolveConflict)
+        let work = Task { await executeRemoteRequest(request, cancellation: cancellation, resolveConflict: { await conflicts.resolve($0) }, emit: emit) }
         let observer = cancellation.observe { work.cancel() }
         defer { cancellation.removeObserver(observer) }
         return await withTaskCancellationHandler { await work.value } onCancel: { cancellation.cancel() }
@@ -299,4 +300,17 @@ public struct RemoteTransferExecutor: TransferExecuting {
         }
     }
     private func write(_ record: JournalRecord) async throws { try await BlockingFileWorker.run { try journal.record(record) } }
+}
+
+/// One user decision spans every root, including children delegated to another executor.
+private actor RemoteBatchConflicts {
+    private var all: ConflictResolution?
+    private let present: @Sendable (TransferConflict) async -> ConflictResolution
+    init(resolve: @escaping @Sendable (TransferConflict) async -> ConflictResolution) { present = resolve }
+    func resolve(_ conflict: TransferConflict) async -> ConflictResolution {
+        if let all { return all }
+        let decision = await present(conflict)
+        if decision.applyToAll && decision.decision != .cancel { all = decision }
+        return decision
+    }
 }

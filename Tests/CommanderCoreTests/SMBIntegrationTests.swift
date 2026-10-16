@@ -3,6 +3,44 @@ import CommanderCore
 import Darwin
 
 final class SMBIntegrationTests: XCTestCase, @unchecked Sendable {
+    func testTransportFailureRetiresSessionWithoutMisreportingPermission() async throws {
+        guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SMB_FIXTURE"] else { throw XCTSkip("Owned SMB fixture required") }
+        let root = URL(fileURLWithPath: fixture); let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
+        var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String); p.protocolKind = .smb; p.share = "OwnedShare"
+        let manager = RemoteConnectionManager(); let stream = await manager.snapshots(); var states = stream.makeAsyncIterator(); _ = await states.next(); try await manager.connect(p, secret: c["secret"] as! String)
+        let location = FileLocation.smb(profileID: p.id, path: try RemotePath("/hello #中文.txt"))
+        try Data().write(to: root.appendingPathComponent("deny-next-command"))
+        do { _ = try await manager.metadata(location); XCTFail("Server denied metadata") }
+        catch { XCTAssertEqual((error as NSError).code, Int(EPERM)) }
+        let alive = await manager.isConnected(p.id); XCTAssertTrue(alive, "A real server permission response must keep the session usable")
+        let before = try await manager.metadata(location); XCTAssertNotNil(before)
+        try Data().write(to: root.appendingPathComponent("drop-next-command"))
+        do { _ = try await manager.metadata(location); XCTFail("Closed socket cannot provide metadata") }
+        catch { XCTAssertNotEqual((error as NSError).code, Int(EPERM), "A transport failure must not become a permission error") }
+        let connected = await manager.isConnected(p.id); XCTAssertFalse(connected, "Retire on the first failed operation")
+        let latest = await states.next(); XCTAssertEqual(latest?[p.id], .disconnected, "Sidebar state must retire on metadata failure too")
+        await manager.disconnect(p.id)
+    }
+    func testOpenAndChannelFailuresUpdateSidebarWithoutAnotherListing() async throws {
+        guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SMB_FIXTURE"] else { throw XCTSkip("Owned SMB fixture required") }
+        let root = URL(fileURLWithPath: fixture); let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
+        for openFailure in [true, false] {
+            var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String); p.protocolKind = .smb; p.share = "OwnedShare"
+            let manager = RemoteConnectionManager(); let stream = await manager.snapshots(); var states = stream.makeAsyncIterator(); _ = await states.next()
+            try await manager.connect(p, secret: c["secret"] as! String)
+            let location = FileLocation.smb(profileID: p.id, path: try RemotePath("/hello #中文.txt"))
+            let reader: (any RemoteFileChannel)? = openFailure ? nil : try await manager.openFile(location, writeExclusive: false)
+            try Data().write(to: root.appendingPathComponent("drop-next-command"))
+            do {
+                if let reader { _ = try await reader.read(offset: 0, length: 64) }
+                else { _ = try await manager.openFile(location, writeExclusive: false) }
+                XCTFail("Dropped session must fail")
+            } catch { XCTAssertNotEqual((error as NSError).code, Int(EPERM)) }
+            let latest = await states.next(); XCTAssertEqual(latest?[p.id], .disconnected)
+            let alive = await manager.isConnected(p.id); XCTAssertFalse(alive)
+            await reader?.abort(); await manager.disconnect(p.id)
+        }
+    }
     func testOwnedSMBBrowsingAndNonReplacingOperations() async throws {
         guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SMB_FIXTURE"] else { throw XCTSkip("Owned loopback SMB fixture required") }
         let root = URL(fileURLWithPath: fixture)

@@ -1,6 +1,23 @@
 import XCTest
 
 @MainActor final class KeyboardAndAccessibilityTests: XCTestCase {
+    func testConnectShortcutSurvivesSheetsSettingsAndNewWindows() {
+        let app = XCUIApplication(); app.launchArguments = ["-accessSetupAcknowledged", "YES"]; app.launch()
+        XCTAssertTrue(app.tables["left.fileTable"].waitForExistence(timeout: 8))
+        for _ in 0..<3 {
+            app.typeKey("k", modifierFlags: .command)
+            XCTAssertTrue(app.buttons["connection.cancel"].waitForExistence(timeout: 3))
+            app.buttons["connection.cancel"].click()
+        }
+        app.typeKey(",", modifierFlags: .command)
+        let settings = app.windows["com_apple_SwiftUI_Settings_window"]; XCTAssertTrue(settings.waitForExistence(timeout: 3))
+        app.typeKey("w", modifierFlags: .command); XCTAssertTrue(settings.waitForNonExistence(timeout: 3))
+        app.typeKey("n", modifierFlags: .command)
+        app.textFields["right.path"].firstMatch.click()
+        app.typeKey("k", modifierFlags: .command)
+        XCTAssertTrue(app.buttons["connection.cancel"].waitForExistence(timeout: 3))
+        app.buttons["connection.cancel"].click(); app.terminate()
+    }
     func testCommandWClosesTabBeforeWindow() {
         let app = XCUIApplication(); app.launchArguments = ["-accessSetupAcknowledged", "YES"]; app.launch()
         XCTAssertTrue(app.tables["left.fileTable"].waitForExistence(timeout: 8))

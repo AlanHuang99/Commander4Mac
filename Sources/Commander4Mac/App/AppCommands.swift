@@ -2,18 +2,11 @@ import SwiftUI
 import AppKit
 import CommanderCore
 
-private struct WorkspaceFocusKey: FocusedValueKey { typealias Value = WorkspaceController }
-extension FocusedValues {
-    var workspaceController: WorkspaceController? {
-        get { self[WorkspaceFocusKey.self] }
-        set { self[WorkspaceFocusKey.self] = newValue }
-    }
-}
 struct AppCommands: Commands {
-    @FocusedValue(\.workspaceController) private var focusedController
+    @Bindable private var commandContext = WindowCommandContext.shared
     private var controller: WorkspaceController? {
-        guard let controller = focusedController, controller.window?.isKeyWindow == true else { return nil }
-        return controller
+        guard !RuntimeIdentity.needsInstallation, let target = commandContext.controller else { return nil }
+        return target.services.commandController(for: NSApp.keyWindow)
     }
     @Environment(\.openWindow) private var openWindow
     private var hasSelection: Bool { controller?.workspace.activeTab.selection.isEmpty == false && controller?.isEditingText == false && controller?.workspace.activeTab.failure == nil }

@@ -3,8 +3,8 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans inline, preserving the user's standing authorization and requested delivery order.
 
 **Goal:** Deliver SMB, then WebDAV, then staged recursive copies in existing panes.
-**Architecture:** Protocol-qualified models and one connection router dispatch to SFTP, native private SMB mounts, and direct HTTPS WebDAV. A manifest-based tree executor reuses bounded regular-file copies and exclusive root publication.
-**Tech Stack:** Swift 6, macOS 15+, NetFS, URLSession/FoundationXML, existing Citadel 0.12.1.
+**Architecture:** Protocol-qualified models and one connection router dispatch to SFTP, direct serialized SMB sessions, and direct HTTPS WebDAV. A manifest-based tree executor reuses bounded regular-file copies and exclusive root publication.
+**Tech Stack:** Swift 6, macOS 15+, libsmb2 through pinned AMSMB2, URLSession/FoundationXML, existing Citadel 0.12.1.
 **Spec:** docs/superpowers/specs/2026-10-16-network-folders-design.md
 
 ## Global Constraints
@@ -18,7 +18,7 @@
 ## Review Focus
 
 1. Protocol, root, domain, endpoint, or authentication edits must not retarget queued jobs, reuse another endpoint's secret, or lose the captured pane through credential entry.
-2. A canceled/late SMB mount or external unmount must never expose its underlying local directory or unmount a user-owned share.
+2. A canceled or late SMB handshake must close only its owned transport; SMB protocol paths must never expose matching local directories or alter user mounts.
 3. Malicious WebDAV hrefs, redirects, XML entities, failed propstats, or partial mutation responses must not leak credentials, escape the base collection, or report success.
 4. Folder cancellation, collision, aliasing, and source changes must retain sources/existing destinations and identify uncertain artifacts after profile retirement.
 5. Restored remote trees and background saves must not mount, connect, prompt, or touch matching local paths.
@@ -31,12 +31,12 @@
 - [ ] Implement models, validation, credential scopes, remote construction/navigation and Codable compatibility.
 - [ ] Run full ./script/test.sh; expect all enabled tests pass. Commit.
 
-### Task 2: Native SMB provider and owned fixture
-**Files:** Remote/SMBConnectionManager.swift, Remote/NativeSMBMounter.swift, Remote/MountedFileChannel.swift, script/test_smb.sh; SMBTests.swift, SMBIntegrationTests.swift.
-**Interfaces:** `SMBMounting.mount(profile:secret:) async throws -> SMBMount`, `unmount(_:)`; `SMBConnectionManager: RemoteFileAccess` with connect/disconnect/isConnected and mount identity checks.
-- [ ] Write failing mount-boundary and owned integration tests: real listing/bytes/exclusive collision/rename/mkdir, cancellation, private mount mismatch and disconnected fallback rejection.
+### Task 2: Direct SMB provider and owned fixture
+**Files:** Remote/SMBConnectionManager.swift, project.yml, dependency notices, script/test_smb.sh; SMBTests.swift, SMBIntegrationTests.swift.
+**Interfaces:** `SMBConnectionManager: RemoteFileAccess` with connect/disconnect/isConnected, owned socket cancellation, and protocol-qualified paths.
+- [ ] Write failing mount-boundary and owned integration tests: real listing/bytes/exclusive collision/rename/mkdir, queued handshake cancellation and local fallback rejection.
 - [ ] Run targeted tests; expect missing provider RED.
-- [ ] Implement asynchronous NetFS lifecycle, owned mount guards, mounted worker I/O; create disposable loopback SMB2 fixture in isolated test environment.
+- [ ] Implement direct serialized libsmb2 lifecycle, timeout/cancel, protocol paths and bounded worker I/O; create disposable loopback SMB2 fixture in isolated test environment.
 - [ ] Run core and real SMB integration; report any concrete platform limitation. Commit.
 
 ### Task 3: SMB connection UI and dispatch

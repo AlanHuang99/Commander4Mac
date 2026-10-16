@@ -10,9 +10,9 @@ Add protocol-qualified SMB and WebDAV profiles/locations alongside SFTP. Old pro
 
 ## SMB
 
-Use macOS NetFS asynchronous mounting into a new application-owned private mount directory, with no NetAuth UI, a new authentication session, soft mount semantics, and a cancellable 30-second connection deadline. Profiles specify server, port, share, optional domain, username/password or Guest, and an initial path within that share. Credentials are separate NetFS parameters, never URL/arguments. Validate the returned mountpoint and mounted filesystem identity before every resolution. A disconnected mount must never turn into an ordinary local directory. Never reuse, force-unmount, or clean a Finder/user-owned mount. Disconnect uses the shared mutation gate and reports busy/failure. Filesystem I/O stays on bounded workers and follows macOS soft-mount error behavior; do not promise an independent hard timeout for kernel filesystem I/O.
+Use a direct libsmb2 connection per profile, consumed through the pinned AMSMB2 dynamic package. Native NetFS was tested successfully for browsing, but the real volume rejected RENAME_EXCL; a mixed mount/protocol rename then produced stale destination metadata. The direct provider keeps all listing, stat, streaming, and ReplaceIfExists=false rename on the same protocol context. Password sessions require signing; server-required encryption uses the library's SMB3 negotiation. Profiles specify server, port, share, optional domain, username/password or Guest, and an initial path within that share.
 
-Expose SMB through provider-qualified remote locations, not persistent local mountpoint bookmarks. Implement browse/stat/read/exclusive-create/non-replacing rename/mkdir through the private mount. Keep system mounted volumes browsable locally as before.
+Never mount or unmount system shares. Protocol paths cannot fall through to local paths. Serialize each C context on bounded workers, set network operation timeout to 30 seconds, and shut down only its owned socket on cancel/disconnect. Keep credentials in memory/Keychain and outside URLs/arguments. Enforce exclusive CREATE, no-replacement rename, literal paths, and explicit disconnected errors. Preserve pinned source revisions and LGPL notices; distribution packaging needs the dependency's licensing/relinking review before release.
 
 ## WebDAV
 

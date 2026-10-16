@@ -23,6 +23,9 @@ settings:
     UITest:
       ONLY_ACTIVE_ARCH: YES
 packages:
+  AMSMB2:
+    url: https://github.com/amosavian/AMSMB2.git
+    revision: 90737c486c9d1a6ed1c1d4307060587c7bb0dfec
   Citadel:
     url: https://github.com/orlandos-nl/Citadel.git
     exactVersion: 0.12.1
@@ -33,6 +36,7 @@ targets:
     sources: [Sources/CommanderCore]
     dependencies:
       - package: Citadel
+      - package: AMSMB2
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac.core
       DEFINES_MODULE: YES
@@ -43,6 +47,8 @@ targets:
     sources: [Sources/Commander4Mac, Resources]
     dependencies:
       - target: CommanderCore
+        embed: true
+      - package: AMSMB2
         embed: true
     info:
       path: Configuration/Info.plist

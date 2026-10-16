@@ -128,6 +128,7 @@
 		B3C5B57F6F2EFB82911ABBBD /* WebDAVIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4911584B04BAA678BFC11F /* WebDAVIntegrationTests.swift */; };
 		B3D8E76A489BA8A75D1F4345 /* ConflictSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F290E2E8E06F0AD40C35E834 /* ConflictSheet.swift */; };
 		B406D4CE13054A68C7ED243C /* BrowserInteractionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A942D3A00509227C85DD22A5 /* BrowserInteractionTests.swift */; };
+		B44A3D518C33F53521B031D1 /* Commander4MacLicense.txt in Resources */ = {isa = PBXBuildFile; fileRef = 5FC1A697908A90EAECAE9A81 /* Commander4MacLicense.txt */; };
 		B8E7563AC88AC00CA88ECC40 /* CommandRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CDBB08D94AEE4169D9CEA41 /* CommandRouter.swift */; };
 		BB0B6D200F51AF2D666A7BFA /* FilePasteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBAE09C3122833AF7AE7ABAA /* FilePasteboard.swift */; };
 		BB408EB956EE6FAB4F57737A /* RemoteTreeTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC92D35DA9B7BD29DDFF824E /* RemoteTreeTransferTests.swift */; };
@@ -149,6 +150,7 @@
 		CED2E9C80B5EF303B2B5165F /* WorkspaceSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB2080DAA2004B04E71CA2C /* WorkspaceSessionTests.swift */; };
 		CF20A7C0521695BF46D4474C /* PreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BCFD19677246801F3C2460 /* PreferencesStore.swift */; };
 		D28600E34F40517EE32E5DFB /* LocalFileActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455376E03CE555A9E9195F01 /* LocalFileActionsTests.swift */; };
+		D3D3E0DC647EA6F6227A786E /* requirements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 98818A61F4EE0F00538D3157 /* requirements.txt */; };
 		D4154CF2C7E9427850D107B6 /* LocalOperationExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6521A02F3E8B54DDFA417B40 /* LocalOperationExecutorTests.swift */; };
 		D6C13C93BE428FB5D6CC5393 /* ShelfStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F5DAB797FCE75088E0E5B3 /* ShelfStore.swift */; };
 		D81F508D4222E8D7CB7A3688 /* WorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D577A7A61D119822121457AF /* WorkspaceView.swift */; };
@@ -283,6 +285,7 @@
 		5E8C028CD31875E827F4EAD5 /* WebDAVTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVTests.swift; sourceTree = "<group>"; };
 		5EC12DBF0F1E980DC18D1D04 /* RuntimeIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeIdentity.swift; sourceTree = "<group>"; };
 		5F8C524CE10BC6C906B9DD97 /* FixtureDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureDirectory.swift; sourceTree = "<group>"; };
+		5FC1A697908A90EAECAE9A81 /* Commander4MacLicense.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Commander4MacLicense.txt; sourceTree = "<group>"; };
 		5FCE9635200200733670C837 /* CrossVolumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossVolumeTests.swift; sourceTree = "<group>"; };
 		5FD93CDDFD32F889106D260A /* FileDropRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDropRequest.swift; sourceTree = "<group>"; };
 		601E8BF83FD10F0131818E8E /* LocalKeyMaterial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalKeyMaterial.swift; sourceTree = "<group>"; };
@@ -315,6 +318,7 @@
 		93B3B3A30AFD74C96629C12B /* WebDAVHTTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVHTTPTransport.swift; sourceTree = "<group>"; };
 		93D8636B0BAACC8DAC6DE2FF /* RemotePathRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemotePathRules.swift; sourceTree = "<group>"; };
 		94942DC724D739D1A980A2B0 /* TreeMemoryRemote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeMemoryRemote.swift; sourceTree = "<group>"; };
+		98818A61F4EE0F00538D3157 /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
 		9D76476D645CD4627BB18849 /* PaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneView.swift; sourceTree = "<group>"; };
 		9E864C93BDF18401490D033C /* TransferQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferQueue.swift; sourceTree = "<group>"; };
 		A4066ABB17A10AA18079E81C /* KeychainIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainIntegrationTests.swift; sourceTree = "<group>"; };
@@ -619,6 +623,7 @@
 		C3477FE7A937F59D471F091D /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				98818A61F4EE0F00538D3157 /* requirements.txt */,
 				81081D644B26261362546429 /* sftp_oversized.py */,
 				E2748F0EEC8F41375EDA8BAF /* smb_fixture.py */,
 				A9C48A3A1610AC97C59D6245 /* webdav_fixture.py */,
@@ -656,6 +661,7 @@
 			isa = PBXGroup;
 			children = (
 				4362668036252AF881104E19 /* AppIcon.icns */,
+				5FC1A697908A90EAECAE9A81 /* Commander4MacLicense.txt */,
 				22F549471CB7B639C7B174F5 /* Credits.rtf */,
 				F90CBBE4E0ECF72BFFE0A0A9 /* ThirdPartyNotices.txt */,
 			);
@@ -869,6 +875,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				79274BD795A5BC3AB71C516F /* AppIcon.icns in Resources */,
+				B44A3D518C33F53521B031D1 /* Commander4MacLicense.txt in Resources */,
 				5678525B24B187ABD6691627 /* Credits.rtf in Resources */,
 				DAF4162C644D64DCF2F4B6CB /* OpenSource in Resources */,
 				5D64675E0AC6ED720D385C1C /* ThirdPartyNotices.txt in Resources */,
@@ -879,6 +886,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3D3E0DC647EA6F6227A786E /* requirements.txt in Resources */,
 				AF1F050029881343628CD150 /* sftp_oversized.py in Resources */,
 				570B4B5C2CA9D7D6D9DA5793 /* smb_fixture.py in Resources */,
 				31BCAD05D6AC2595B5158A68 /* webdav_fixture.py in Resources */,

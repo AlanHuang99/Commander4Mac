@@ -1,99 +1,102 @@
+<div align="center">
+
+<img src="docs/images/icon.png" width="128" height="128" alt="Commander4Mac blue and teal folded-pane icon">
+
 # Commander4Mac
 
-A native macOS file manager with two independent panes. The local development build is installed at `/Applications/Commander4Mac Dev.app`.
+**A native, two-pane file manager for macOS.**
 
-## Local development build
+Tabs, pinned folders, a shared shelf and direct server connections, with your files side by side.
 
-Implemented: independent tabs and histories, locked and navigable pins, bookmarks and favorite routing, a shared staging shelf, list and icon views, System/Light/Dark appearance, independent text/icon sizing, and workspace restoration. Local operations include queued copy/move, explicit conflicts, cancellation, metadata preservation, rename, new folder, macOS Trash, safe rename/new-folder undo, file URL clipboard actions, Quick Look, and Open With.
+[Download for Mac](https://github.com/AlanHuang99/Commander4Mac/releases/latest) · [Report an issue](https://github.com/AlanHuang99/Commander4Mac/issues) · [Development guide](docs/DEVELOPMENT.md)
 
-The app is a signed development build. Native drag source/destination handlers are implemented, but end-to-end drag completion remains unverified. The XCTest UI runner stalls on this Mac. See [local acceptance](docs/verification/local-release.md) for exact coverage and limitations. SFTP, SMB, and WebDAV connections are implemented, including staged folder copies between local and remote panes. Existing mounted volumes can be browsed through the local provider.
+[![CI](https://github.com/AlanHuang99/Commander4Mac/actions/workflows/ci.yml/badge.svg)](https://github.com/AlanHuang99/Commander4Mac/actions/workflows/ci.yml)
+[![Release](https://github.com/AlanHuang99/Commander4Mac/actions/workflows/release.yml/badge.svg)](https://github.com/AlanHuang99/Commander4Mac/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/AlanHuang99/Commander4Mac)](https://github.com/AlanHuang99/Commander4Mac/releases/latest)
+[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
+![macOS 15+](https://img.shields.io/badge/macOS-15%2B-black?logo=apple)
 
-## Server connections
+</div>
 
-Use Connect or Command-K, choose a protocol, and open the saved connection in either pane. Saved secrets use Keychain. Restored remote tabs remain disconnected until explicitly opened from Connections.
+## Your workspace, side by side
 
-- SFTP supports passwords or OpenSSH Ed25519 keys, with explicit host fingerprint verification.
-- SMB connects directly to a share, with an optional domain, password or Guest access. It does not mount or unmount system shares.
-- WebDAV uses HTTPS with system certificate validation. Enter the server, port, and base collection such as `/dav/team`. Authentication supports HTTP Basic/Digest or Anonymous. Redirects are refused; save the final endpoint. Plain HTTP is restricted to numeric loopback test servers.
+- **Two independent panes:** tabs, folder history, list and icon views, sorting and filtering.
+- **Two kinds of pins:** lock a tab to its folder, or browse within a pinned tab and return to its saved path.
+- **Favorites and shelf:** open favorites in the current, left or right pane; collect references before transferring them.
+- **Local file operations:** queued copy and move, conflict choices, cancellation, new folders, rename and macOS Trash. Local copies preserve file metadata.
+- **Mac integration:** Quick Look, Open With, clipboard file actions and restored workspaces.
+- **Your preferred appearance:** System, Light or Dark, plus text and icon sizes.
+- **Direct server access:** SFTP, SMB and HTTPS WebDAV, with saved secrets in Keychain and explicit SSH host-key verification.
+- **Folder transfers:** copy files and directory trees between local and remote panes, with Skip, Keep Both or Cancel when a destination already exists.
 
-Browse, filter, sort, rename, create folders, and copy regular files or directory trees between one local and one remote pane. Copies retain the source and support root-level Skip, Keep Both, and Cancel. A temporary tree is verified before one non-replacing root rename. Existing destination trees are never merged or replaced. Local-only operations keep their existing metadata-preserving engine.
+Inspired by the efficiency of dual-pane file managers, with an original macOS interface.
 
-Remote copies preserve contents and structure, without preserving permissions, timestamps, ACLs, extended attributes, or resource forks. Packages, symlinks, special files, and undownloaded placeholders are rejected before mutation. Transfers are bounded to 100,000 entries and 128 levels. Remote Move, Trash, replacement, and server-to-server copies remain unavailable. Interrupted remote artifacts are retained for explicit review; recovery records include a non-secret endpoint identity. Activity copies readable remote paths and reveals only local files in Finder.
+## Install
 
-The installed app and owned loopback fixtures have been exercised with OpenSSH SFTP, Impacket SMB2, and WsgiDAV. Real LAN/NAS/public-server interoperability still needs acceptance on those environments. SFTP password authentication and encrypted keys also remain unverified here. See [network and folder acceptance](docs/verification/network-folders-release.md), [SFTP acceptance](docs/verification/sftp-release.md), and [SFTP review](docs/verification/sftp-final-review.md).
+Requires **macOS 15 or later**. The DMG contains a universal app for Apple Silicon and Intel Macs.
 
-## Build and run
+1. Download `Commander4Mac-1.0.dmg` from [Releases](https://github.com/AlanHuang99/Commander4Mac/releases/latest).
+2. Open the DMG and drag **Commander4Mac** onto **Applications**.
+3. Eject the disk image, then open **Commander4Mac** from Applications.
+4. In **System Settings → Privacy & Security → Full Disk Access**, add `/Applications/Commander4Mac.app` and enable it. Restart the app if macOS requests it.
+5. Allow **Local Network** access when connecting to a file server on your network.
 
-Requirements: macOS 15 or later, Xcode with Swift 6, XcodeGen, and an available signing identity. Tested here with Xcode 27.0 on macOS 27.0.1, Apple M4. The checked-in signing team is this development Mac's team; change `project.yml` when building on another machine.
+Release automation signs with Developer ID, notarizes and staples both the app and DMG, then validates the packaged app before publishing. Each release includes a SHA-256 checksum. Full Disk Access is a macOS permission that you grant locally; it is separate from the app's setup acknowledgement.
 
-```sh
-./script/build_and_run.sh
-./script/build_and_run.sh --verify
-```
+For later versions, download the latest DMG and replace the app in Applications after transfers finish.
 
-The script generates the Xcode project, builds and signs Debug, installs only the development identity at its stable path, and launches that installed app. It refuses relaunch when a matching live process reports active operations. Codex's Run action uses the same script. Release and UI-test hosts have separate bundle identifiers.
+## Connect to a server
 
-Enable that exact installed development app in **System Settings → Privacy & Security → Full Disk Access**, then restart if macOS requests it. Acknowledging the setup screen is separate from granting permission. Actual protected-location browsing has been verified in the installed app. Individual file permissions still apply.
+Press **⌘K**, choose a protocol, enter the endpoint and open it in either pane.
 
-## Verify
+| Protocol | Connection details |
+| --- | --- |
+| SFTP | Password or OpenSSH Ed25519 key; verify the server's host fingerprint before trusting it. |
+| SMB | Server and share, optional domain, password or Guest access. No system mount is required. |
+| WebDAV | HTTPS endpoint and base collection, Basic/Digest or Anonymous authentication. Use the final endpoint URL because redirects are refused. |
 
-```sh
-./script/test.sh
-./script/test.sh LocalOperationExecutorTests
-./script/test_sftp.sh
-./script/test_smb.sh
-./script/test_webdav.sh
-COMMANDER_TEST_KEYCHAIN=1 ./script/test.sh KeychainIntegrationTests
-./script/test_cross_volume.sh
-COMMANDER_PERFORMANCE=1 ./script/test.sh LocalPerformanceTests
-./script/test.sh --ui
-```
+Remote copies preserve contents and directory structure. They currently do not preserve remote permissions, timestamps, ACLs, extended attributes or resource forks. Existing destination trees are not merged or replaced. Remote move/Trash, server-to-server transfers, symlinks and packages are not supported. See the [network acceptance record](docs/verification/network-folders-release.md) for tested coverage and limits.
 
-SMB/WebDAV fixture scripts use an isolated `.build/network-fixture-venv` with Impacket 0.13.1, WsgiDAV 4.3.4, and Cheroot 11.1.2 from PyPI. Fixtures bind only to loopback and use disposable credentials/data.
+If a local server connection fails despite an enabled Local Network switch, confirm that the permission belongs to the installed app. Toggle that app's existing switch off and on, restart it and retry. See [troubleshooting](docs/DEVELOPMENT.md#local-network-troubleshooting).
 
-Core tests default to Debug with dependency assertions enabled and run real XCTest assertions directly after `build-for-testing`, avoiding this Mac's stalled UI automation service. Cross-volume integration creates and detaches its own disposable APFS image. Performance tests create their own 10,000-entry fixture. UI execution has a 180-second deadline and never treats a timeout as a pass. Logs are under `.build/logs`.
-
-## Keyboard
+## Keyboard shortcuts
 
 | Action | Shortcut |
-|---|---|
-| Open selected / rename / Quick Look | Command-O / Return / Space |
+| --- | --- |
 | Switch pane | Tab |
-| Copy / move to other pane / new folder | F5 / F6 / F7 |
-| New folder | Shift-Command-N |
-| Copy file URLs / paste copy / paste move | Command-C / Command-V / Option-Command-V |
-| Trash | Command-Delete |
-| Path / filter | Command-L / Command-F |
-| New tab / close tab / new window | Command-T / Command-W / Command-N |
-| Parent / back / forward | Command-Up / Command-[ / Command-] |
-| Connect to server | Command-K |
-| Stage selected items | Shift-Command-S |
+| Open / Rename / Quick Look | ⌘O / Return / Space |
+| Copy / Move to other pane / New folder | F5 / F6 / F7 |
+| New folder | ⇧⌘N |
+| Copy file URLs / Paste copy / Paste move | ⌘C / ⌘V / ⌥⌘V |
+| Move to Trash | ⌘Delete |
+| Edit path / Filter | ⌘L / ⌘F |
+| New tab / Close tab / New window | ⌘T / ⌘W / ⌘N |
+| Parent / Back / Forward | ⌘↑ / ⌘[ / ⌘] |
+| Connect to server | ⌘K |
+| Add selection to shelf | ⇧⌘S |
 
-Text fields keep standard editing behavior. Hardware function-key settings can affect F5 through F7; all operations also have menu or button actions. Dropping on the shelf is intended to collect references only. File-list drops advertise copy by default and move with Command when the source permits it.
+Text fields retain standard editing shortcuts. Depending on your keyboard settings, function keys may require Fn. Menu and button alternatives are available.
 
-## Architecture and evidence
+## Build and contribute
 
-`CommanderCore` owns provider listings, pane/tab state, bookmarks, persistence, transfer planning, a serial mutation gate, execution, and journals. The app supplies SwiftUI scenes, reusable AppKit table/collection views, menus, previews, and system integration. SFTP sessions are actor-owned with strict host-key validation. The [Citadel 0.12.1 snapshot](Vendor/Citadel/COMMANDER_PATCHES.md) supplies bounded READDIR, no-follow LSTAT, and packet limits. SMB serializes libsmb2 on bounded workers; WebDAV uses ephemeral URLSession authentication and bounded private disk spools. Network file channels use 64 KiB blocks. AMSMB2/libsmb2 revisions are pinned; see ThirdPartyNotices.txt. The production workflow bundles LGPL corresponding source, license notices and tested rebuild/replacement instructions; see the dependency licensing review. Credentials are kept in Keychain or memory. No privileged helper, recursive folder-size scanning, or eager thumbnails are used.
+Use Xcode with Swift 6 and [XcodeGen](https://github.com/yonaskolb/XcodeGen). For a build without a Developer ID certificate:
 
-- [Approved design](docs/superpowers/specs/2026-10-16-commander4mac-design.md)
-- [Implementation plan](docs/superpowers/plans/2026-10-16-local-file-manager.md)
-- [Acceptance record](docs/verification/local-release.md)
-- [SFTP plan](docs/superpowers/plans/2026-10-16-sftp-connections.md)
-- [Network and folder acceptance](docs/verification/network-folders-release.md)
-- [Network final review and decisions](docs/verification/network-folders-final-review.md)
-- [SFTP acceptance](docs/verification/sftp-release.md)
-- [Performance measurements](docs/verification/local-performance.md)
+```sh
+brew install xcodegen
+xcodegen generate
+xcodebuild -project Commander4Mac.xcodeproj -scheme Commander4Mac \
+  -configuration Debug -destination 'platform=macOS' \
+  -derivedDataPath .build/xcode CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= build
+```
 
-## Icon and installer
+Install the development app at a stable Applications path before enabling Full Disk Access. The development identity is separate from the production app. See [development and testing](docs/DEVELOPMENT.md), [contributing](CONTRIBUTING.md), and [release automation](docs/RELEASING.md).
 
-The selected blue/teal folded-pane icon is included in the app, with its PNG source, ten-size iconset, and `.icns` export. See [icon design and format guide](Design/AppIcon/README.md).
+CI runs native core tests on Apple Silicon and Intel, integration checks against owned loopback servers, release validation regressions and unsigned universal builds. Manual UI automation and clean-machine onboarding are separate from CI; see [verification records](docs/verification).
 
-A signed local drag-to-Applications DMG can be built with `./script/build_dmg.sh`. It includes Retina background artwork, the Applications shortcut, and first-launch installation guidance before Full Disk Access setup. See [installer design and build instructions](Packaging/README.md). Production distribution uses the separate release and notarization workflow documented there.
+## License and acknowledgements
 
-See [reliability, icon and installer acceptance](docs/verification/reliability-icon-installer.md) for the latest test and installed-app evidence.
+Commander4Mac's original code is licensed under [GNU GPL v3](LICENSE). Bundled dependencies retain their own licenses, including MIT, Apache 2.0 and LGPL 2.1 or later. See [third-party notices](Resources/ThirdPartyNotices.txt) and the [dependency review](docs/verification/dependency-licensing.md).
+
+The app includes corresponding LGPL source, exact revisions, licenses, and rebuild/replacement instructions under **Commander4Mac → Open Source Components…**. The source kit is also available in [Resources/OpenSource](Resources/OpenSource).
 
 This product includes software developed by Niels Provos.
-
-See [release and notarization instructions](Packaging/DISTRIBUTION.md) and the [dependency license review](docs/verification/dependency-licensing.md).
-
-- [Commander4Mac 1.0 notarized distribution acceptance](docs/verification/distribution-release.md)

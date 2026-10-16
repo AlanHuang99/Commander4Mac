@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest an improvement to a file management workflow.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What are you trying to accomplish?
+      description: Describe the current workflow, what gets in the way and the behavior you would like.
+    validations:
+      required: true

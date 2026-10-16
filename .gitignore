@@ -5,3 +5,12 @@ xcuserdata/
 *.xcuserstate
 
 __pycache__/
+
+# Distribution credentials belong in Keychain or GitHub encrypted secrets.
+*.p8
+*.p12
+*.pfx
+*.keychain-db
+.env
+.env.*
+!.env.example

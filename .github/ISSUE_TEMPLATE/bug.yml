@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible problem with Commander4Mac.
+labels: [bug]
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: App and macOS versions
+      placeholder: Commander4Mac 1.0, macOS 15.x, Apple Silicon or Intel
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Where does it happen?
+      options: [Local files, SFTP, SMB, WebDAV, Interface or installation]
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps, expected behavior and actual behavior
+      description: Use disposable data. Remove passwords, keys, private server names and paths.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+      description: Redact private information before attaching files.

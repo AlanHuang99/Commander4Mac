@@ -1,0 +1,23 @@
+# Verified public Citadel test fixtures/parser delimiters/example strings and generated upstream license/source metadata.
+# Exact historical fingerprints only. Newly introduced secrets remain detectable.
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Sources/Citadel/OpenSSHKey.swift:private-key:132
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Sources/Citadel/OpenSSHKey.swift:private-key:311
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Sources/CitadelServerExample/HostKeyFile.swift:generic-api-key:38
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Sources/Citadel/SSHKeyTypeDetection.swift:private-key:143
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Sources/Citadel/SSHKeyTypeDetection.swift:private-key:163
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Sources/CitadelServerExample/Server.swift:generic-api-key:9
+97bca8415f9fc092c05f5b99a761ab308824127b:Resources/ThirdPartyNotices.txt:generic-api-key:1107
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:29
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:78
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:97
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:115
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:186
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:217
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:230
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:285
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:300
+2d09bf2c9b00563d0cb1be912168e72dcba30270:Vendor/Citadel/Tests/CitadelTests/KeyTests.swift:private-key:316
+97bca8415f9fc092c05f5b99a761ab308824127b:Resources/OpenSource/SourceManifest.json:generic-api-key:44
+97bca8415f9fc092c05f5b99a761ab308824127b:Resources/ThirdPartyNotices.txt:generic-api-key:14168
+97bca8415f9fc092c05f5b99a761ab308824127b:Resources/OpenSource/ThirdPartyNotices.txt:generic-api-key:1107
+97bca8415f9fc092c05f5b99a761ab308824127b:Resources/OpenSource/ThirdPartyNotices.txt:generic-api-key:14168

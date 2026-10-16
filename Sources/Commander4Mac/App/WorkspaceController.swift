@@ -34,7 +34,10 @@ final class WorkspaceController {
         window?.performClose(nil)
     }
     func openSelection() { for entry in workspace.activeTab.selectedEntries { activate(entry, pane: workspace.activePane) } }
-    func previewSelection() { quickLook.present(CommandRouter.previewItems(in: workspace)) }
+    func previewSelection() {
+        guard workspace.activeTab.location.isLocal else { errorMessage = "Download this file to a local pane to preview it."; return }
+        quickLook.present(CommandRouter.previewItems(in: workspace))
+    }
     func chooseFolder() {
         let panel = NSOpenPanel(); panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.allowsMultipleSelection = false
         panel.directoryURL = workspace.activeTab.location.isLocal ? workspace.activeTab.location.url : FileManager.default.homeDirectoryForCurrentUser
@@ -179,6 +182,19 @@ final class WorkspaceController {
         Task {
             do {
                 services.beginFileAction(); defer { services.endFileAction() }
+                if !entry.location.isLocal {
+                    let target = try entry.location.parent.appending(try FileNameRules.validateComponent(name))
+                    await services.operationGate.acquire()
+                    do {
+                        guard try await services.remote.metadata(target) == nil else { throw FileOperationError.message("An item already has that name on the server.") }
+                        try await services.remote.rename(entry.location, to: target)
+                        await services.operationGate.release()
+                    } catch { await services.operationGate.release(); throw error }
+                    undoManager?.removeAllActions(withTarget: self)
+                    await refresh(pane)
+                    if workspace.pane(pane).activeTab.location == target.parent { workspace.pane(pane).activeTab.selection = [EntryID(target.url)] }
+                    return
+                }
                 let mutation = try await services.fileActions.rename(entry.location, to: name)
                 registerUndo(mutation, name: "Rename")
                 await refresh(pane)
@@ -199,6 +215,16 @@ final class WorkspaceController {
         Task {
             do {
                 services.beginFileAction(); defer { services.endFileAction() }
+                if !parent.isLocal {
+                    let target = try parent.appending(try FileNameRules.validateComponent(name))
+                    await services.operationGate.acquire()
+                    do { try await services.remote.createDirectory(target); await services.operationGate.release() }
+                    catch { await services.operationGate.release(); throw error }
+                    undoManager?.removeAllActions(withTarget: self)
+                    await refresh(pane)
+                    if workspace.pane(pane).activeTab.location == parent { workspace.pane(pane).activeTab.selection = [EntryID(target.url)] }
+                    return
+                }
                 let mutation = try await services.fileActions.createDirectory(named: name, in: parent)
                 registerUndo(mutation, name: "New Folder")
                 await refresh(pane)

@@ -1,9 +1,28 @@
 import Foundation
 
 public protocol TransferExecuting: Sendable {
+    func executeRequest(_ request: TransferRequest, cancellation: OperationCancellation,
+                        resolveConflict: @escaping @Sendable (TransferConflict) async -> ConflictResolution,
+                        emit: @escaping @Sendable (OperationEvent) -> Void) async -> OperationResult
     func execute(_ plan: TransferPlan, cancellation: OperationCancellation,
                  resolveConflict: @escaping @Sendable (TransferConflict) async -> ConflictResolution,
                  emit: @escaping @Sendable (OperationEvent) -> Void) async -> OperationResult
+}
+extension TransferExecuting {
+    public func executeRequest(_ request: TransferRequest, cancellation: OperationCancellation,
+                               resolveConflict: @escaping @Sendable (TransferConflict) async -> ConflictResolution,
+                               emit: @escaping @Sendable (OperationEvent) -> Void) async -> OperationResult {
+        do {
+            try cancellation.check()
+            let plan = try await BlockingFileWorker.run { try LocalTransferPlanner().plan(request) }
+            return await execute(plan, cancellation: cancellation, resolveConflict: resolveConflict, emit: emit)
+        } catch {
+            let state: JobState = cancellation.isRequested ? .canceled : .failed
+            return .init(jobID: request.id, outcomes: request.sources.map {
+                .init(source: $0, state: state == .canceled ? .canceled : .failed, detail: error.localizedDescription)
+            }, state: state)
+        }
+    }
 }
 extension LocalOperationExecutor: TransferExecuting {}
 
@@ -61,8 +80,7 @@ public actor TransferQueue {
             let result: OperationResult
             do {
                 try token.check()
-                let plan = try await BlockingFileWorker.run { try LocalTransferPlanner().plan(initial.request) }
-                result = await executor.execute(plan, cancellation: token, resolveConflict: { [weak self] conflict in
+                result = await executor.executeRequest(initial.request, cancellation: token, resolveConflict: { [weak self] conflict in
                     await self?.ask(conflict, cancellation: token) ?? .init(.cancel)
                 }, emit: { [weak self] event in Task { await self?.handle(event, jobID: id) } })
             } catch {

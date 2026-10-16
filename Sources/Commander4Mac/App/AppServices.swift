@@ -87,7 +87,7 @@ final class AppServices {
         let gate = OperationGate(); operationGate = gate
         fileActions = LocalFileActions(gate: gate)
         let operationJournal = OperationJournal(directory: directory.appendingPathComponent("Operations")); journal = operationJournal
-        transferQueue = TransferQueue(executor: LocalOperationExecutor(journal: operationJournal), gate: gate)
+        transferQueue = TransferQueue(executor: RemoteTransferExecutor(remote: remote, journal: operationJournal), gate: gate)
         marker = ActiveOperationMarker(directory: directory)
          pendingWindows = initialPreferences.restoreSession ? loaded.state.windows : []; startupDiagnostic = loaded.diagnostic
         observationTask = Task { [weak self, transferQueue, operationJournal] in

@@ -49,6 +49,11 @@ public struct TransferConflict: Identifiable, Sendable {
     public let source: FileLocation
     public let destination: URL
     public let isDirectory: Bool
+    public let supportsReplacement: Bool
+    public init(id: UUID, jobID: UUID, source: FileLocation, destination: URL, isDirectory: Bool, supportsReplacement: Bool = true) {
+        self.id = id; self.jobID = jobID; self.source = source; self.destination = destination
+        self.isDirectory = isDirectory; self.supportsReplacement = supportsReplacement
+    }
 }
 public enum FileOperationError: LocalizedError, Sendable {
     case message(String)

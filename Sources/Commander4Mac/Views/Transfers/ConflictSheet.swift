@@ -20,7 +20,7 @@ struct ConflictSheet: View {
                 Spacer()
                 Button("Skip") { resolve(.init(.skip, applyToAll: applyToAll)) }
                 Button("Keep Both") { resolve(.init(.keepBoth, applyToAll: applyToAll)) }.keyboardShortcut(.defaultAction)
-                Button("Replace", role: .destructive) { resolve(.init(.replace, applyToAll: applyToAll)) }
+                if conflict.supportsReplacement { Button("Replace", role: .destructive) { resolve(.init(.replace, applyToAll: applyToAll)) } }
             }
         }.padding(24).frame(width: 560).interactiveDismissDisabled()
     }

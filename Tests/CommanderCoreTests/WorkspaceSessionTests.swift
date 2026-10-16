@@ -3,6 +3,38 @@ import CommanderCore
 
 @MainActor
 final class WorkspaceSessionTests: XCTestCase {
+    func testLockedHistoryBackOpensOrdinaryTabAndPreservesLockedHistory() {
+        let workspace = WorkspaceSession(left: home, right: other)
+        _ = workspace.open(other, destination: .left)
+        let locked = workspace.left.activeTab
+        locked.pin = .locked(home: other)
+        workspace.activePane = .right
+        let target = workspace.navigateHistory(in: .left, forward: false)
+        XCTAssertEqual(locked.location, other)
+        XCTAssertEqual(locked.historyIndex, 1)
+        XCTAssertEqual(workspace.left.tabs.count, 2)
+        XCTAssertEqual(workspace.left.activeTab.location, home)
+        XCTAssertFalse(workspace.left.activeTab.pin.isPinned)
+        XCTAssertEqual(target?.tabID, workspace.left.activeTab.id)
+        XCTAssertEqual(workspace.activePane, .left)
+        XCTAssertEqual(workspace.right.tabs.count, 1)
+        XCTAssertEqual(workspace.right.activeTab.location, other)
+        XCTAssertNotNil(workspace.navigateHistory(in: .left, forward: true))
+        XCTAssertEqual(workspace.left.activeTab.location, other)
+    }
+    func testLockedHistoryForwardOpensOrdinaryTabAndPreservesLockedHistory() {
+        let workspace = WorkspaceSession(left: home, right: other)
+        _ = workspace.open(other, destination: .left)
+        _ = workspace.navigateHistory(in: .left, forward: false)
+        let locked = workspace.left.activeTab
+        locked.pin = .locked(home: home)
+        let target = workspace.navigateHistory(in: .left, forward: true)
+        XCTAssertEqual(locked.location, home)
+        XCTAssertEqual(locked.historyIndex, 0)
+        XCTAssertEqual(workspace.left.tabs.count, 2)
+        XCTAssertEqual(workspace.left.activeTab.location, other)
+        XCTAssertEqual(target?.ticket.location, other)
+    }
     let home = FileLocation.local(URL(fileURLWithPath: "/tmp/home"))
     let other = FileLocation.local(URL(fileURLWithPath: "/tmp/other"))
     func testLockedPinOpensNavigationInNewTabWithoutChangingHome() {

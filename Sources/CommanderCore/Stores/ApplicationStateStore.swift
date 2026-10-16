@@ -33,7 +33,7 @@ public struct ApplicationStateStore: Sendable {
 }
 public struct TabSnapshot: Codable, Sendable {
     let id: UUID
-    let reference: LocationReference
+    var reference: LocationReference
     let pin: TabPin
     let options: ViewOptions
     let selection: Set<EntryID>
@@ -41,29 +41,40 @@ public struct TabSnapshot: Codable, Sendable {
     let filter: String
     let history: [FileLocation]
     let historyIndex: Int
+    // Save-only values. They are not serialized and never perform filesystem work.
+    var referenceLocation: FileLocation? = nil
+    var capturedGeneration: UInt64? = nil
+    enum CodingKeys: String, CodingKey { case id, reference, pin, options, selection, scrollAnchor, filter, history, historyIndex }
     @MainActor init(_ tab: TabSession) throws {
         id = tab.id
-        reference = tab.unresolvedReference ?? (try? LocationResolver().reference(for: tab.location)) ??
-            LocationReference(bookmark: Data(), displayURL: tab.location.url, expectedIdentity: .init(device: 0, inode: 0))
+        let displayURL: URL
+        switch tab.location { case .local(let url): displayURL = url }
+        reference = tab.unresolvedReference ?? tab.savedReference ??
+            LocationReference(bookmark: Data(), displayURL: displayURL, expectedIdentity: .init(device: 0, inode: 0))
         pin = tab.pin; options = tab.options; selection = tab.selection; scrollAnchor = tab.scrollAnchor
         filter = tab.filter; history = tab.history; historyIndex = tab.historyIndex
+        referenceLocation = tab.unresolvedReference == nil ? tab.location : nil
+        capturedGeneration = tab.generation
     }
     @MainActor func restore() -> TabSession {
-        let location: FileLocation
-        var unresolved = false
-        switch LocationResolver().resolve(reference) {
-        case .available(let resolved): location = resolved
-        case .unavailable, .needsRelink: location = .local(reference.displayURL); unresolved = true
-        }
-        let tab = TabSession(id: id, location: location, options: options)
+        // Resolve lazily on a bounded worker when the tab is activated.
+        let tab = TabSession(id: id, location: .local(reference.displayURL), options: options)
         tab.pin = pin; tab.filter = filter; tab.selection = selection; tab.scrollAnchor = scrollAnchor
         tab.restoreHistory(history, index: historyIndex)
-        if unresolved { tab.unresolvedReference = reference }
+        tab.unresolvedReference = reference
         return tab
+    }
+    mutating func refreshReference(using resolver: any LocationResolving) {
+        if let referenceLocation, let refreshed = try? resolver.reference(for: referenceLocation) { reference = refreshed }
+    }
+    @MainActor func applyReference(to tab: TabSession) {
+        guard referenceLocation != nil, tab.generation == capturedGeneration,
+              tab.unresolvedReference == nil, !reference.bookmark.isEmpty else { return }
+        tab.savedReference = reference
     }
 }
 public struct PaneSnapshot: Codable, Sendable {
-    let tabs: [TabSnapshot]
+    var tabs: [TabSnapshot]
     let activeTabID: UUID
     @MainActor init(_ pane: PaneSession) throws { tabs = try pane.tabs.map(TabSnapshot.init); activeTabID = pane.activeTabID }
     @MainActor func restore() -> PaneSession {
@@ -76,8 +87,8 @@ public struct PaneSnapshot: Codable, Sendable {
 }
 public struct WorkspaceSnapshot: Codable, Sendable {
     let id: UUID
-    let left: PaneSnapshot
-    let right: PaneSnapshot
+    var left: PaneSnapshot
+    var right: PaneSnapshot
     let activePane: PaneID
     var splitRatio: Double? = nil
     @MainActor public init(_ workspace: WorkspaceSession) throws {
@@ -87,5 +98,44 @@ public struct WorkspaceSnapshot: Codable, Sendable {
         let workspace = WorkspaceSession(id: id)
         workspace.left = left.restore(); workspace.right = right.restore(); workspace.activePane = activePane; workspace.splitRatio = min(0.8, max(0.2, splitRatio ?? 0.5))
         return workspace
+    }
+    mutating func refreshReferences(using resolver: any LocationResolving) {
+        for index in left.tabs.indices { left.tabs[index].refreshReference(using: resolver) }
+        for index in right.tabs.indices { right.tabs[index].refreshReference(using: resolver) }
+    }
+    @MainActor public func applyReferences(to workspace: WorkspaceSession) {
+        guard id == workspace.id else { return }
+        for (saved, pane) in [(left, workspace.left), (right, workspace.right)] {
+            for snapshot in saved.tabs {
+                if let tab = pane.tabs.first(where: { $0.id == snapshot.id }) { snapshot.applyReference(to: tab) }
+            }
+        }
+    }
+}
+
+/// Serializes background reference creation and writes, including superseded save requests.
+public actor SessionPersistence {
+    private let store: ApplicationStateStore
+    private let resolver: any LocationResolving
+    private let gate = OperationGate()
+    private var lastSavedRevision: UInt64 = 0
+    public init(store: ApplicationStateStore, resolver: any LocationResolving = LocationResolver()) {
+        self.store = store; self.resolver = resolver
+    }
+    public func save(_ state: SavedApplicationState, revision: UInt64) async throws -> SavedApplicationState? {
+        await gate.acquire()
+        guard revision > lastSavedRevision else { await gate.release(); return nil }
+        do {
+            let store = store; let resolver = resolver
+            let saved = try await BlockingFileWorker.run {
+                var state = state
+                for index in state.windows.indices { state.windows[index].refreshReferences(using: resolver) }
+                try store.save(state)
+                return state
+            }
+            lastSavedRevision = revision
+            await gate.release()
+            return saved
+        } catch { await gate.release(); throw error }
     }
 }

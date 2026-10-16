@@ -7,6 +7,7 @@ import CommanderCore
 final class AppServices {
     static let shared = AppServices()
     let stateStore: ApplicationStateStore
+    private let persistence: SessionPersistence
     let preferencesStore: PreferencesStore
     var preferences: Preferences {
         didSet {
@@ -25,7 +26,8 @@ final class AppServices {
     var jobs: [JobSnapshot] = []
     var recoveryDiagnostic: String?
     var recoveryRecords: [JournalRecord] = []
-    var conflictPresenter: UUID?
+    private let conflictRouting = ConflictPresentationRouter()
+    var conflictPresenter: UUID? { conflictRouting.presenter }
     private var shelfJobs: [UUID: Set<UUID>] = [:]
     private var jobOwners: [UUID: UUID] = [:]
     private static let operationsLog = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Commander4Mac", category: "Operations")
@@ -66,6 +68,8 @@ final class AppServices {
     private var pendingWindows: [WorkspaceSnapshot]
     private var controllers: [UUID: WeakController] = [:]
     private var saveTask: Task<Void, Never>?
+    private var persistenceTask: Task<Void, Never>?
+    private var saveRevision: UInt64 = 0
     private var restoredAdditionalWindows = false
     init() {
         let directory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
@@ -75,6 +79,7 @@ final class AppServices {
         let initialPreferences = settingsStore.load()
         preferences = initialPreferences
         stateStore = ApplicationStateStore(directory: directory)
+        persistence = SessionPersistence(store: stateStore)
         let loaded = stateStore.loadRecovering()
         favorites = FavoriteStore(items: loaded.state.favorites)
         shelf = ShelfStore(items: loaded.state.shelf)
@@ -95,9 +100,8 @@ final class AppServices {
                     Self.operationsLog.info("job=\(job.id.uuidString, privacy: .public) state=\(job.state.rawValue, privacy: .public)")
                 }
                 if let conflict = self.pendingConflict {
-                    let owner = self.jobOwners[conflict.jobID]
-                    self.conflictPresenter = owner.flatMap { self.controllers[$0]?.value == nil ? nil : $0 } ?? self.controllers.keys.first
-                } else { self.conflictPresenter = nil }
+                    self.conflictRouting.setPending(owner: self.jobOwners[conflict.jobID])
+                } else { self.conflictRouting.clearPending() }
                 for job in snapshots where job.state.isTerminal && !self.finishedJobs.contains(job.id) {
                     self.finishedJobs.insert(job.id)
                     if let ids = self.shelfJobs.removeValue(forKey: job.id) {
@@ -137,13 +141,14 @@ final class AppServices {
     }
     func register(_ controller: WorkspaceController) {
         controllers[controller.workspace.id] = WeakController(controller)
+        conflictRouting.register(controller.workspace.id)
         activeController = controller
         if !incomingFolders.isEmpty { routeIncoming(to: controller) }
     }
     func unregister(_ controller: WorkspaceController) {
         guard !isTerminating else { return }
         controllers.removeValue(forKey: controller.workspace.id)
-        if conflictPresenter == controller.workspace.id { conflictPresenter = controllers.keys.first }
+        conflictRouting.unregister(controller.workspace.id)
         saveNow()
     }
     func saveSoon() {
@@ -157,9 +162,24 @@ final class AppServices {
         saveTask?.cancel()
         do {
             let windows = try controllers.values.compactMap(\.value).map { try WorkspaceSnapshot($0.workspace) }
-            try stateStore.save(.init(windows: windows + pendingWindows, favorites: favorites.items, shelf: shelf.items))
+            let captured = SavedApplicationState(windows: windows + pendingWindows, favorites: favorites.items, shelf: shelf.items)
+            saveRevision &+= 1
+            let revision = saveRevision; let persistence = persistence
+            let previous = persistenceTask
+            persistenceTask = Task { [weak self] in
+                // Preserve capture order even if tasks are scheduled out of order.
+                await previous?.value
+                do {
+                    if let saved = try await persistence.save(captured, revision: revision), let self {
+                        for window in saved.windows {
+                            for controller in self.controllers.values.compactMap(\.value) { window.applyReferences(to: controller.workspace) }
+                        }
+                    }
+                } catch { self?.startupDiagnostic = "Could not save the workspace: \(error.localizedDescription)" }
+            }
         } catch { startupDiagnostic = "Could not save the workspace: \(error.localizedDescription)" }
     }
+    func flushState() async { saveNow(); await persistenceTask?.value }
 }
 @MainActor private final class WeakController {
     weak var value: WorkspaceController?

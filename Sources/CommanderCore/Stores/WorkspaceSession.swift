@@ -32,4 +32,19 @@ public final class WorkspaceSession: Identifiable {
         pane.activeTabID = tabID; activePane = paneID
         return NavigationTarget(paneID: paneID, tabID: tabID, ticket: tab.requestNavigation(to: home))
     }
+    public func navigateHistory(in paneID: PaneID, forward: Bool) -> NavigationTarget? {
+        let pane = pane(paneID)
+        let current = pane.activeTab
+        let index = current.historyIndex + (forward ? 1 : -1)
+        guard current.history.indices.contains(index) else { return nil }
+        activePane = paneID
+        if current.pin.isLocked && current.history[index] != current.location {
+            let tab = TabSession(location: current.history[index], options: current.options)
+            tab.restoreHistory(current.history, index: index)
+            pane.tabs.append(tab); pane.activeTabID = tab.id
+            return .init(paneID: paneID, tabID: tab.id, ticket: tab.requestNavigation(to: tab.location))
+        }
+        guard let ticket = forward ? current.goForward() : current.goBack() else { return nil }
+        return .init(paneID: paneID, tabID: current.id, ticket: ticket)
+    }
 }

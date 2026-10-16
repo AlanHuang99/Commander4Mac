@@ -1,7 +1,11 @@
 import Foundation
 import Darwin
 
-public struct LocationResolver: Sendable {
+public protocol LocationResolving: Sendable {
+    func reference(for location: FileLocation) throws -> LocationReference
+    func resolve(_ reference: LocationReference) -> ResolvedLocation
+}
+public struct LocationResolver: LocationResolving {
     public init() {}
     public func reference(for location: FileLocation) throws -> LocationReference {
         let identity = try Self.identity(at: location.url)

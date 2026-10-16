@@ -10,6 +10,7 @@ public final class TabSession: Identifiable {
     public var pin: TabPin = .none
     public var selection: Set<EntryID> = []
     public var unresolvedReference: LocationReference?
+    public var savedReference: LocationReference?
     public var scrollAnchor: EntryID?
     public var filter = "" { didSet { rebuildVisibleEntries() } }
     public var options: ViewOptions {
@@ -45,7 +46,7 @@ public final class TabSession: Identifiable {
         return begin(location)
     }
     private func begin(_ location: FileLocation) -> NavigationTicket {
-        if self.location != location { snapshot = nil; visibleEntries = []; entriesRevision &+= 1; selection = []; filter = ""; scrollAnchor = nil }
+        if self.location != location { snapshot = nil; visibleEntries = []; entriesRevision &+= 1; selection = []; filter = ""; scrollAnchor = nil; savedReference = nil; unresolvedReference = nil }
         loadStartedAt = ProcessInfo.processInfo.systemUptime
         self.location = location; generation &+= 1; isLoading = true; failure = nil
         return NavigationTicket(tabID: id, generation: generation, location: location)

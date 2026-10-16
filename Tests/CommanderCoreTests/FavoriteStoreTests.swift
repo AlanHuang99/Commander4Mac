@@ -3,11 +3,11 @@ import CommanderCore
 
 @MainActor
 final class FavoriteStoreTests: XCTestCase {
-    func testFavoriteDestinationReorderRenameAndRemoval() throws {
+    func testFavoriteDestinationReorderRenameAndRemoval() async throws {
         let fixture = try FixtureDirectory()
         let store = FavoriteStore()
-        try store.add(name: "First", location: .local(fixture.url), destination: .left)
-        try store.add(name: "Second", location: .local(fixture.url), destination: nil)
+        try await store.add(name: "First", location: .local(fixture.url), destination: .left)
+        try await store.add(name: "Second", location: .local(fixture.url), destination: nil)
         let id = store.items[1].id
         store.rename(id: id, to: "Renamed")
         store.move(id: id, to: 0)

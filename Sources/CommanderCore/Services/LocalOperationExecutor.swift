@@ -40,6 +40,7 @@ public struct LocalOperationExecutor: Sendable {
             var target = try await chooseTarget(item, destination: destination, jobID: plan.request.id, policy: policy, cancellation: cancellation)
             if target.skip { record.phase = .complete; try await write(record); return outcome(item, destination, .skipped) }
             destination = target.url; record.destination = destination
+            try await verifyDestination(plan)
             // An exclusive same-volume rename preserves all metadata and never overwrites.
             let atomicMove = plan.request.kind == .move && target.existing == nil
                 ? try await supportsAtomicMove(item.source.url, to: destination) : false
@@ -47,6 +48,7 @@ public struct LocalOperationExecutor: Sendable {
                 do {
                     try cancellation.check(); try await verifySource(item)
                     record.phase = .committing; try await write(record)
+                    try await verifyDestination(plan)
                     try await rename(item.source.url, to: destination)
                     committed = true; record.phase = .complete; try await write(record)
                     return outcome(item, destination, .completed)
@@ -65,6 +67,7 @@ public struct LocalOperationExecutor: Sendable {
             let temporary = container.appendingPathComponent("payload")
             record.staging = container; record.phase = .copying
             try await write(record)
+            try await verifyDestination(plan)
             let containerIdentity = try await BlockingFileWorker.run {
                 guard mkdir(container.path, 0o700) == 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
                 return try ItemVersion.read(at: container).identity
@@ -75,6 +78,8 @@ public struct LocalOperationExecutor: Sendable {
             guard try await manifest(item.source.url, cancellation: cancellation) == sourceManifest else {
                 throw FileOperationError.message("The source changed during copying. The source and existing destination have been retained.")
             }
+            // Relative paths let the completed staging tree be checked after its rename.
+            let completedManifest = plan.request.kind == .move ? try await manifest(temporary, cancellation: cancellation) : nil
             record.phase = .prepared; try await write(record)
             var finalized = false
             for _ in 0..<20 {
@@ -118,6 +123,11 @@ public struct LocalOperationExecutor: Sendable {
                 guard try await manifest(item.source.url, cancellation: cancellation) == sourceManifest else {
                     throw FileOperationError.message("The source changed before removal. The completed destination and source have been retained.")
                 }
+                try await verifyDestination(plan)
+                guard try await manifest(destination, cancellation: cancellation) == completedManifest else {
+                    throw FileOperationError.message("The completed destination changed before source removal. The source has been retained.")
+                }
+                try cancellation.check()
                 try await removeSource(item.source.url, expecting: item.sourceVersion)
             }
             record.phase = .complete; record.staging = nil; try await write(record)
@@ -197,12 +207,16 @@ public struct LocalOperationExecutor: Sendable {
     private func manifest(_ root: URL, cancellation: OperationCancellation) async throws -> [String: ItemVersion] {
         try await BlockingFileWorker.run {
             var result: [String: ItemVersion] = [:]
-            var pending = [root]
-            while let url = pending.popLast() {
+            var pending = [(root, "")]
+            while let (url, relativePath) = pending.popLast() {
                 try cancellation.check()
                 let version = try ItemVersion.read(at: url)
-                result[url.path] = version
-                if version.isDirectory { pending.append(contentsOf: try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) }
+                result[relativePath] = version
+                if version.isDirectory {
+                    for child in try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil) {
+                        pending.append((child, relativePath + "/" + child.lastPathComponent))
+                    }
+                }
             }
             return result
         }

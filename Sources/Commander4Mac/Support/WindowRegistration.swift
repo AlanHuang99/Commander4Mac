@@ -11,12 +11,16 @@ struct WindowRegistration: NSViewRepresentable {
         weak var controller: WorkspaceController?
         private var observer: NotificationToken?
         private var closeDelegate: FileWindowCloseDelegate?
+        private var closeKeyMonitor: Any?
         private weak var delegateWindow: NSWindow?
         private func detachDelegate() {
             if let window = delegateWindow, let proxy = closeDelegate, window.delegate === proxy { window.delegate = proxy.forwardedDelegate }
             closeDelegate = nil; delegateWindow = nil
         }
-        isolated deinit { detachDelegate() }
+        isolated deinit {
+            detachDelegate()
+            if let closeKeyMonitor { NSEvent.removeMonitor(closeKeyMonitor) }
+        }
         func installCloseDelegate() {
             guard let window, let controller else { return }
             controller.window = window
@@ -27,8 +31,18 @@ struct WindowRegistration: NSViewRepresentable {
         }
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow(); detachDelegate(); observer = nil
+            if let closeKeyMonitor { NSEvent.removeMonitor(closeKeyMonitor); self.closeKeyMonitor = nil }
             guard let window else { return }
             installCloseDelegate()
+            // SwiftUI can reinstall its window delegate after a tab updates. Route the
+            // tab shortcut before AppKit dispatches the built-in window Close command.
+            closeKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                guard let self, event.window === self.window,
+                      event.modifierFlags.intersection([.command, .shift, .option, .control]) == .command,
+                      event.charactersIgnoringModifiers?.lowercased() == "w", let controller = self.controller else { return event }
+                controller.closeTab()
+                return nil
+            }
             if window.isKeyWindow, let controller { controller.services.activate(controller) }
             observer = NotificationToken(NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated {

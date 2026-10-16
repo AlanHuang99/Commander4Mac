@@ -4,7 +4,7 @@ The signed local development app is installed and running at `/Applications/Comm
 
 ## Automated evidence
 
-The most recent full core run executed 66 XCTest tests: 64 passed, two environment-gated integration/performance tests skipped, zero failures. The skipped tests were run separately: real cross-volume APFS integration passed 1/1, and the opt-in 10,000-entry performance test passed 1/1. UI test bundles compile. `./script/test.sh --ui` built its runner and then stalled before any assertion result; that attempt was terminated, and the wrapper now bounds future attempts to 180 seconds. UI tests are not reported as passing.
+The most recent full core run executed 76 XCTest tests: 74 passed, two environment-gated integration/performance tests skipped, zero failures. The skipped tests were run separately: real cross-volume APFS integration passed 1/1, and the opt-in 10,000-entry performance test passed 1/1. UI test bundles compile. `./script/test.sh --ui` built its runner and then stalled before any assertion result; that attempt was terminated, and the wrapper now bounds future attempts to 180 seconds. UI tests are not reported as passing.
 
 Core coverage includes navigation generations, pane/window independence, both pin behaviors, bookmark identity checks, corrupt state preservation, preferences migration, independent sizing, literal filename/clipboard parsing, safe preflight, source and destination changes, ENOSPC, disconnection, journal failure, cancellation, conflict races, recursive source manifests, and partial move outcomes. Metadata assertions cover POSIX mode, timestamp, explicit ACL, xattr/resource fork, symlink, and package behavior. Rename/new-folder undo rejects replaced files and nonempty folders. Trash failure has no permanent-delete fallback.
 
@@ -17,7 +17,7 @@ All filesystem mutations below used disposable fixtures under the worktree's ign
 - Real Home and Downloads listings; independent filters; path navigation; independent tabs and histories.
 - Locked pin retained its folder and created a new ordinary tab on navigation. Navigable pin kept its saved title/home while browsing and returned home on an active-tab click.
 - A fixture favorite with a persisted Left override opened in the left pane while the right pane was active. Favorite and location rows now activate across their full width. The fixture favorite was removed afterward.
-- Independent new window opened with Home/Downloads; navigation there did not replace the original window. Closing Settings now closes Settings rather than routing Command-W to a file tab. A two-tab Command-W regression was reproduced and fixed through a per-window delegate bridge; the same native window remained open with one tab.
+- Independent new window opened with Home/Downloads; navigation there did not replace the original window. Closing Settings now closes Settings rather than routing Command-W to a file tab. A two-tab Command-W regression was reproduced. A delegate bridge initially passed, but repeated native QA exposed an intermittent bypass. A view-owned window-scoped local key monitor now routes exact Command-W before the standard Close command; the same native window remained open with one tab, and Settings kept its own close behavior.
 - Shelf staged two files from different folders without moving them. Copy to Right completed both and kept originals; a subsequent multi-source move completed both and removed only the fixture sources. All destination contents matched.
 - A 10,000-file copy and a second Keep Both copy each produced 10,000 entries. Keyboard pane switching remained responsive and did not change the captured destination.
 - Native inline rename, Command-Z rename undo, F7 new folder with selection, Command-C/Tab/Command-V with Keep Both, and Command-Delete to macOS Trash.
@@ -39,4 +39,6 @@ Debug uses `com.alanhuang.Commander4Mac.dev` and the canonical installed path ab
 
 ## Decisions and review
 
-Implementation ran inline in a managed worktree, with task commits and a required independent whole-branch review. Detailed decisions and review outcomes are recorded alongside this document after that review.
+Implementation ran inline in a managed worktree, with task commits and a required independent whole-branch review. The independent review found two Critical move-safety defects and three Important behavior/responsiveness defects. All five were corrected in one regression-tested fix pass. The full suite is green; no second review was dispatched. See [final review](final-review.md) and [decisions](decisions.md) for evidence, narrower rulings, and the deferred cloud-placeholder indicator.
+
+Final installed-app checks also verified asynchronous favorite creation/opening, locked-pin history routing, pending-conflict presentation after the last window closed during a real 10,000-file copy, normal quit with asynchronous session flush, and bookmarked Home/Downloads restoration. Keep Both preserved the existing conflict fixture and wrote matching source contents. The final build again listed the protected Mail folder without opening any message contents.

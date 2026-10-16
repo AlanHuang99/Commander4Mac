@@ -1,0 +1,18 @@
+# Final review and correction pass
+
+An independent reviewer examined the complete implementation range `e9afead..215c04e` against the approved design, plan, failure modes, and recorded decisions. The reviewer compiled an isolated Swift 6 harness and reproduced the first three findings. The source tree was unchanged during review.
+
+| Finding | Grade retained | Correction and evidence |
+|---|---|---|
+| A finalized move destination could disappear before source deletion | Critical | Capture a relative staged completion manifest, verify the captured destination parent and finalized tree before source removal. Tests first reproduced lost root, missing/replaced child, and replaced parent; all now retain the source and report partial. |
+| A conflict decision could outlive the captured destination directory | Critical | Revalidate after the decision and immediately before atomic rename. The regression replaced the destination folder during Keep Both; the source now remains and the replacement folder stays empty. |
+| History could navigate a locked tab away from home | Important | Workspace history applies the pin policy, opening an ordinary tab with its own history index. Back and Forward regressions pass. Native Back also retained the locked tab and opened the historical folder separately. |
+| A waiting conflict could lack a presenter after all windows closed | Important | A presentation router derives its target from both pending conflict and registered windows. Tests cover reopening and owner/fallback changes. Native acceptance closed the last window during a 10,000-file copy, reopened at the next conflict, and completed through Keep Both. |
+| Bookmark creation/resolution ran on the main actor | Important | Snapshot capture and restoration are pure state operations. A serial persistence service creates references and writes on bounded workers; active restored tabs resolve lazily on a worker. Favorites use the same worker boundary. Tests pause an injected resolver while the main actor captures/restores state, retain valid references on refresh failure, and reject stale writes. Normal quit awaits the last save and relaunch restores both panes. |
+| Known cloud placeholders have no rendered availability indicator | Minor, deferred | Placeholder metadata remains available without eager content downloads. A compact visible and accessible status is follow-up polish. |
+
+The new APIs initially failed compilation in the regression-first steps. The transfer regressions executed against the old implementation and reproduced the unsafe completed outcomes and removed sources. After the corrections, the final full core suite executed **76 tests: 74 passed, 2 optional tests skipped, 0 failures**. The skipped tests separately passed: real cross-volume APFS integration 1/1 and the 10,000-entry performance benchmark 1/1. UI bundles compile, but the UI test runner remains unavailable on this Mac and is not counted as passing.
+
+Repeated native verification also exposed an intermittent Command-W delegate bypass. The already-existing UI regression describes the failure, and the native check reproduced it: closing one of two tabs closed its window. A window-scoped local key monitor now handles exact Command-W before AppKit's standard Close dispatch. Native verification retained the same window with one tab, and Settings still closed independently. The forwarded window delegate continues to support explicit window closing.
+
+This was one correction pass with regression tests and a green full suite, without a second independent review. Deferred domains and costs are recorded exhaustively in [decisions.md](decisions.md). Source and installed-app acceptance remain distinct from notarized distribution readiness.

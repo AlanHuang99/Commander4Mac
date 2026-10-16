@@ -2,6 +2,52 @@ import XCTest
 import CommanderCore
 
 final class LocalOperationExecutorTests: XCTestCase, @unchecked Sendable {
+    func testMoveRetainsSourceWhenFinalDestinationDisappears() async throws {
+        let f = try FixtureDirectory(); let source = try f.file("move.txt"); let dest = try f.directory("dest")
+        let result = try await execute(.move, source: source, destination: dest,
+            backend: FinalDestinationMutatingBackend(change: .removeRoot))
+        XCTAssertEqual(result.outcomes.first?.state, .partial)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: source.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: dest.appendingPathComponent("move.txt").path))
+    }
+    func testMoveRetainsTreeWhenFinalDestinationChildDisappearsOrIsReplaced() async throws {
+        for change in [FinalDestinationMutatingBackend.Change.removeChild, .replaceChild] {
+            let f = try FixtureDirectory(); let source = try f.directory("tree"); let dest = try f.directory("dest")
+            try Data("original child".utf8).write(to: source.appendingPathComponent("child"))
+            let result = try await execute(.move, source: source, destination: dest,
+                backend: FinalDestinationMutatingBackend(change: change))
+            XCTAssertEqual(result.outcomes.first?.state, .partial)
+            XCTAssertEqual(try String(contentsOf: source.appendingPathComponent("child"), encoding: .utf8), "original child")
+            if change == .replaceChild {
+                XCTAssertEqual(try String(contentsOf: dest.appendingPathComponent("tree/child"), encoding: .utf8), "external replacement")
+            }
+        }
+    }
+    func testMoveRetainsSourceWhenFinalDestinationParentIsReplaced() async throws {
+        let f = try FixtureDirectory(); let source = try f.file("move.txt"); let dest = try f.directory("dest")
+        let result = try await execute(.move, source: source, destination: dest,
+            backend: FinalDestinationMutatingBackend(change: .replaceParent))
+        XCTAssertEqual(result.outcomes.first?.state, .partial)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: source.path))
+    }
+    func testAtomicMoveRejectsDestinationReplacementDuringConflictDecision() async throws {
+        let f = try FixtureDirectory(); let source = try f.file("move.txt"); let dest = try f.directory("dest")
+        try Data("existing".utf8).write(to: dest.appendingPathComponent("move.txt"))
+        let plan = try LocalTransferPlanner().plan(.init(kind: .move, sources: [.local(source)], destinationDirectory: .local(dest)))
+        let detached = f.url.appendingPathComponent("old-dest")
+        let executor = LocalOperationExecutor(journal: .init(directory: f.url.appendingPathComponent("journal")))
+        let result = await executor.execute(plan, cancellation: .init(), resolveConflict: { _ in
+            do {
+                try FileManager.default.moveItem(at: dest, to: detached)
+                try FileManager.default.createDirectory(at: dest, withIntermediateDirectories: false)
+            } catch { XCTFail("Fixture setup failed: \(error)") }
+            return .init(.keepBoth)
+        }, emit: { _ in })
+        XCTAssertEqual(result.state, .failed)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: source.path))
+        XCTAssertTrue(try FileManager.default.contentsOfDirectory(atPath: dest.path).isEmpty)
+        XCTAssertEqual(try String(contentsOf: detached.appendingPathComponent("move.txt"), encoding: .utf8), "existing")
+    }
     private func execute(_ kind: TransferKind = .copy, source: URL, destination: URL, decision: ConflictDecision = .skip,
                          backend: any FileOperationBackend = SystemFileOperationBackend(),
                          copier: any FileCopying = LocalCopyEngine(), cancellation: OperationCancellation = .init()) async throws -> OperationResult {
@@ -132,6 +178,31 @@ final class LocalOperationExecutorTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(result.state, .canceled)
         XCTAssertTrue(FileManager.default.fileExists(atPath: source.path))
         XCTAssertFalse(FileManager.default.fileExists(atPath: dest.appendingPathComponent("large.bin").path))
+    }
+}
+
+private struct FinalDestinationMutatingBackend: FileOperationBackend {
+    enum Change { case removeRoot, removeChild, replaceChild, replaceParent }
+    let change: Change
+    private let system = SystemFileOperationBackend()
+    func version(at url: URL) throws -> ItemVersion { try system.version(at: url) }
+    func supportsAtomicMove(from source: URL, to destination: URL) -> Bool { false }
+    func renameExclusive(from source: URL, to destination: URL) throws {
+        try system.renameExclusive(from: source, to: destination)
+        try mutate(destination)
+    }
+    func swap(_ first: URL, _ second: URL) throws { try system.swap(first, second); try mutate(second) }
+    func removeSource(at url: URL, expecting version: ItemVersion) throws { try system.removeSource(at: url, expecting: version) }
+    private func mutate(_ destination: URL) throws {
+        switch change {
+        case .removeRoot: try FileManager.default.removeItem(at: destination)
+        case .removeChild: try FileManager.default.removeItem(at: destination.appendingPathComponent("child"))
+        case .replaceChild: try Data("external replacement".utf8).write(to: destination.appendingPathComponent("child"), options: .atomic)
+        case .replaceParent:
+            let parent = destination.deletingLastPathComponent()
+            try FileManager.default.moveItem(at: parent, to: parent.appendingPathExtension("detached"))
+            try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: false)
+        }
     }
 }
 

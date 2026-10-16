@@ -5,8 +5,8 @@ import Observation
 public final class FavoriteStore {
     public var items: [Favorite]
     public init(items: [Favorite] = []) { self.items = items }
-    public func add(name: String, location: FileLocation, destination: OpenDestination? = nil) throws {
-        let reference = try LocationResolver().reference(for: location)
+    public func add(name: String, location: FileLocation, destination: OpenDestination? = nil) async throws {
+        let reference = try await BlockingFileWorker.run { try LocationResolver().reference(for: location) }
         items.append(.init(id: UUID(), name: name, reference: reference, destination: destination))
     }
     public func rename(id: UUID, to name: String) {

@@ -17,7 +17,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         let services = AppServices.shared
-        guard services.activeJobCount > 0 else { return .terminateNow }
+        guard services.activeJobCount > 0 else {
+            Task { await services.flushState(); sender.reply(toApplicationShouldTerminate: true) }
+            return .terminateLater
+        }
         let alert = NSAlert()
         alert.messageText = "File operations are still running"
         alert.informativeText = "Canceling waits until filesystem work has stopped safely before quitting. Completed items are kept."
@@ -27,13 +30,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task {
             for job in services.jobs where !job.state.isTerminal { await services.transferQueue.cancel(jobID: job.id) }
             while services.activeJobCount > 0 { try? await Task.sleep(for: .milliseconds(100)) }
+            await services.flushState()
             sender.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater
     }
     func applicationWillTerminate(_ notification: Notification) {
         AppServices.shared.isTerminating = true
-        AppServices.shared.saveNow()
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 }

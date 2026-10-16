@@ -64,9 +64,14 @@ final class WorkspaceController {
     func refresh(_ paneID: PaneID) async {
         let tab = workspace.pane(paneID).activeTab
         if let reference = tab.unresolvedReference {
-            switch LocationResolver().resolve(reference) {
-            case .available(let location): tab.unresolvedReference = nil; _ = tab.requestNavigation(to: location)
-            case .unavailable, .needsRelink:
+            let generation = tab.generation
+            let resolution = try? await BlockingFileWorker.run { LocationResolver().resolve(reference) }
+            guard tab.generation == generation, workspace.pane(paneID).tabs.contains(where: { $0 === tab }) else { return }
+            switch resolution {
+            case .available(let location):
+                tab.unresolvedReference = nil; _ = tab.requestNavigation(to: location)
+                tab.savedReference = .init(bookmark: reference.bookmark, displayURL: location.url, expectedIdentity: reference.expectedIdentity)
+            case .unavailable, .needsRelink, .none:
                 let ticket = tab.requestNavigation(to: .local(reference.displayURL))
                 tab.unresolvedReference = reference
                 _ = tab.fail(CocoaError(.fileReadNoSuchFile), for: ticket)
@@ -84,16 +89,23 @@ final class WorkspaceController {
         Task { await loader.load(target: target, options: .init(includeHidden: tab.options.includeHidden)); services.saveSoon() }
     }
     func addFavorite() {
-        do { try services.favorites.add(name: workspace.activeTab.location.title, location: workspace.activeTab.location); services.saveSoon() }
-        catch { errorMessage = error.localizedDescription }
+        let location = workspace.activeTab.location
+        Task {
+            do { try await services.favorites.add(name: location.title, location: location); services.saveSoon() }
+            catch { errorMessage = error.localizedDescription }
+        }
     }
     func openFavorite(_ favorite: Favorite, destination: OpenDestination? = nil, newTab: Bool = false) {
-        switch LocationResolver().resolve(favorite.reference) {
-        case .available(let location):
-            let route = destination ?? favorite.destination ?? services.preferences.defaultDestination
-            let pane: PaneID? = route == .current ? nil : (route == .left ? .left : .right)
-            open(location, in: pane, newTab: newTab)
-        case .unavailable(let message), .needsRelink(let message): errorMessage = message
+        let route = destination ?? favorite.destination ?? services.preferences.defaultDestination
+        let pane: PaneID = route == .current ? workspace.activePane : (route == .left ? .left : .right)
+        Task {
+            do {
+                let resolution = try await BlockingFileWorker.run { LocationResolver().resolve(favorite.reference) }
+                switch resolution {
+                case .available(let location): open(location, in: pane, newTab: newTab)
+                case .unavailable(let message), .needsRelink(let message): errorMessage = message
+                }
+            } catch { errorMessage = error.localizedDescription }
         }
     }
     func relinkFavorite(_ favorite: Favorite) {
@@ -147,10 +159,10 @@ final class WorkspaceController {
         }
     }
     func history(_ paneID: PaneID, forward: Bool) {
+        guard let target = workspace.navigateHistory(in: paneID, forward: forward) else { return }
         let tab = workspace.pane(paneID).activeTab
-        guard let ticket = forward ? tab.goForward() : tab.goBack() else { return }
         focus(.files)
-        Task { await loader.load(target: .init(paneID: paneID, tabID: tab.id, ticket: ticket), options: .init(includeHidden: tab.options.includeHidden)) }
+        Task { await loader.load(target: target, options: .init(includeHidden: tab.options.includeHidden)); services.saveSoon() }
     }
     func rename(_ entry: FileEntry, to name: String, pane: PaneID) {
         guard name != entry.name else { return }

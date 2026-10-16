@@ -14,7 +14,7 @@ public enum PathNavigation {
         if input.hasPrefix("file://"), let url = URL(string: input), url.isFileURL, url.host == nil || url.host == "localhost" || url.host == "" { return .local(url) }
         guard !input.contains("://") else { throw FileOperationError.message("Use Connect to open a remote server.") }
         if let id = current.profileID, let path = current.remotePath {
-            return .sftp(profileID: id, path: try RemotePath(input.hasPrefix("/") ? input : path.rawValue + "/" + input))
+            return .remote(kind: current.connectionProtocol!, profileID: id, path: try RemotePath(input.hasPrefix("/") ? input : path.rawValue + "/" + input))
         }
         let expanded = (input as NSString).expandingTildeInPath
         return .local(expanded.hasPrefix("/") ? URL(fileURLWithPath: expanded) : current.url.appendingPathComponent(expanded))

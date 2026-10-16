@@ -27,7 +27,12 @@ public struct RemotePath: Hashable, Codable, Sendable, RawRepresentable {
         return try RemotePath((rawValue == "/" ? "" : rawValue) + "/" + name)
     }
 }
-public enum SFTPAuthentication: String, Codable, Sendable { case password, ed25519Key }
+public enum ConnectionProtocol: String, Codable, Sendable, CaseIterable {
+    case sftp, smb, webdav
+    public var title: String { switch self { case .sftp: "SFTP"; case .smb: "SMB"; case .webdav: "WebDAV" } }
+    public var defaultPort: Int { switch self { case .sftp: 22; case .smb: 445; case .webdav: 443 } }
+}
+public enum SFTPAuthentication: String, Codable, Sendable { case password, ed25519Key, guest }
 public struct ConnectionProfile: Identifiable, Codable, Sendable, Equatable {
     public var id: UUID
     public var name: String
@@ -39,23 +44,56 @@ public struct ConnectionProfile: Identifiable, Codable, Sendable, Equatable {
     public var keyReference: LocationReference?
     public var serverKey: String?
     public var destination: OpenDestination?
+    public var protocolKind: ConnectionProtocol = .sftp
+    public var share = ""
+    public var domain = ""
+    public var basePath = "/"
+    public var secure = true
+    public var isLoopback: Bool { ["127.0.0.1", "::1"].contains(host.lowercased()) }
+    enum CodingKeys: String, CodingKey { case id, name, host, port, username, initialPath, authentication, keyReference, serverKey, destination, protocolKind, share, domain, basePath, secure }
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id); name = try c.decode(String.self, forKey: .name)
+        host = try c.decode(String.self, forKey: .host); port = try c.decode(Int.self, forKey: .port)
+        username = try c.decode(String.self, forKey: .username); initialPath = try c.decode(String.self, forKey: .initialPath)
+        authentication = try c.decode(SFTPAuthentication.self, forKey: .authentication)
+        keyReference = try c.decodeIfPresent(LocationReference.self, forKey: .keyReference)
+        serverKey = try c.decodeIfPresent(String.self, forKey: .serverKey); destination = try c.decodeIfPresent(OpenDestination.self, forKey: .destination)
+        protocolKind = try c.decodeIfPresent(ConnectionProtocol.self, forKey: .protocolKind) ?? .sftp
+        share = try c.decodeIfPresent(String.self, forKey: .share) ?? ""; domain = try c.decodeIfPresent(String.self, forKey: .domain) ?? ""
+        basePath = try c.decodeIfPresent(String.self, forKey: .basePath) ?? "/"; secure = try c.decodeIfPresent(Bool.self, forKey: .secure) ?? true
+    }
     public init(id: UUID = UUID(), name: String = "", host: String = "", port: Int = 22, username: String = "",
                 initialPath: String = "/", authentication: SFTPAuthentication = .password) {
         self.id = id; self.name = name; self.host = host; self.port = port; self.username = username
         self.initialPath = initialPath; self.authentication = authentication
     }
-    public var credentialScope: String { "\(host.lowercased())\u{0}\(port)\u{0}\(username)\u{0}\(authentication.rawValue)\u{0}\(keyReference.map { String($0.expectedIdentity.device) + ":" + String($0.expectedIdentity.inode) } ?? "")" }
+    public var credentialScope: String {
+        let legacy = "\(host.lowercased())\u{0}\(port)\u{0}\(username)\u{0}\(authentication.rawValue)\u{0}\(keyReference.map { String($0.expectedIdentity.device) + ":" + String($0.expectedIdentity.inode) } ?? "")"
+        switch protocolKind {
+        case .sftp: return legacy
+        case .smb: return "smb\u{0}\(domain)\u{0}\(share)\u{0}" + legacy
+        case .webdav: return "webdav\u{0}\(secure)\u{0}\(basePath)\u{0}" + legacy
+        }
+    }
     public func hasSameCredentialScope(as other: ConnectionProfile) -> Bool { credentialScope.utf8.elementsEqual(other.credentialScope.utf8) }
     public func validated() throws -> Self {
         var copy = self; copy.host = host.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !copy.host.isEmpty, !copy.host.contains(where: { $0.isWhitespace || $0.isNewline || $0 == "/" || $0 == "@" || $0 == "\0" }),
-              !copy.host.contains("://"), (1...65535).contains(port), !username.isEmpty,
+              !copy.host.contains("://"), (1...65535).contains(port), (authentication == .guest || !username.isEmpty),
               !username.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else {
             throw FileOperationError.message("Enter a server hostname, port 1–65535, and username. Keep credentials out of the hostname.")
         }
         copy.initialPath = try RemotePath(initialPath).rawValue
         copy.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         if copy.name.isEmpty { copy.name = copy.host }
+        guard !domain.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }), !domain.contains("\\"), !domain.contains("/") else { throw FileOperationError.message("Enter a domain without path separators or control characters.") }
+        if protocolKind == .smb { copy.share = try FileNameRules.validateComponent(share) }
+        if protocolKind == .webdav {
+            copy.basePath = try RemotePath(basePath).rawValue
+            guard secure || copy.isLoopback else { throw FileOperationError.message("WebDAV requires HTTPS. HTTP is allowed only for numeric loopback servers.") }
+        }
+        guard (authentication != .ed25519Key || protocolKind == .sftp), (authentication != .guest || protocolKind != .sftp) else { throw FileOperationError.message("Choose an authentication method supported by this protocol.") }
         if authentication == .ed25519Key && keyReference == nil { throw FileOperationError.message("Choose an OpenSSH Ed25519 private key.") }
         return copy
     }

@@ -13,14 +13,14 @@ public struct ConnectionOpenRequest: Sendable {
         self.profile = try profile.validated()
         let route = destination ?? profile.destination ?? defaultDestination
         paneID = route == .current ? activePane : (route == .left ? .left : .right)
-        location = .sftp(profileID: profile.id, path: try RemotePath(profile.initialPath))
+        location = .remote(kind: profile.protocolKind, profileID: profile.id, path: try RemotePath(profile.initialPath))
     }
 }
 public enum ConnectionProfileChange {
     public static func prepare(_ candidate: ConnectionProfile, previous: ConnectionProfile?) throws -> ConnectionProfile {
         var result = try candidate.validated()
         if let previous {
-            if previous.host.lowercased() != result.host.lowercased() || previous.port != result.port { result.serverKey = nil }
+            if previous.protocolKind != result.protocolKind || previous.host.lowercased() != result.host.lowercased() || previous.port != result.port { result.serverKey = nil }
             let replacedTrust = previous.serverKey.map { HostKeyVerification.normalized($0) } != nil &&
                 previous.serverKey.map { HostKeyVerification.normalized($0) } != result.serverKey.map { HostKeyVerification.normalized($0) }
             if !previous.hasSameCredentialScope(as: result) || replacedTrust { result.id = UUID() }

@@ -78,6 +78,7 @@ public actor SFTPConnectionManager: RemoteFileAccess {
         do {
             let auth: SSHAuthenticationMethod
             switch profile.authentication {
+            case .guest: throw FileOperationError.message("Guest authentication is unavailable for SFTP.")
             case .password: auth = .passwordBased(username: profile.username, password: secret)
             case .ed25519Key:
                 guard let reference = profile.keyReference else { throw FileOperationError.message("Choose a private key.") }

@@ -36,6 +36,7 @@
 		284B893876C799425ADE48DF /* CommanderCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		29616E564A2D72ECFF174116 /* ConnectionProfileCommit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A16316BE7E596BECD0C16F /* ConnectionProfileCommit.swift */; };
 		3305A436BB586ED17F8FBB2A /* CommandRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0821AF46A0D62BDD5C76B479 /* CommandRoutingTests.swift */; };
+		33879676C8714B41CA0CB646 /* NetworkProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE08FE987C1D09084D5E9AD5 /* NetworkProfileTests.swift */; };
 		353E0C7B3C89D2549B2F18CF /* QuickLookController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE7B833FA5E1B3E561C0552 /* QuickLookController.swift */; };
 		36BD1A98D32EE7492A97E2DD /* CommanderCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; };
 		39BA4F289AB48D9766250CB3 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E7A6C85B6DD56E5ACF62745 /* ActivityView.swift */; };
@@ -280,6 +281,7 @@
 		DBAE09C3122833AF7AE7ABAA /* FilePasteboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePasteboard.swift; sourceTree = "<group>"; };
 		DC65A623852E31652E902D9F /* ApplicationStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationStateStore.swift; sourceTree = "<group>"; };
 		DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTableView.swift; sourceTree = "<group>"; };
+		DE08FE987C1D09084D5E9AD5 /* NetworkProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkProfileTests.swift; sourceTree = "<group>"; };
 		DE4EE2ADC87D82A96BBBA25A /* SFTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFTPTransport.swift; sourceTree = "<group>"; };
 		E035804223C3F357F6CD1817 /* RemoteLocationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteLocationTests.swift; sourceTree = "<group>"; };
 		E0CA277B33E546F9B4EE7F5F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -498,6 +500,7 @@
 				247D989E506298E7253F787C /* LocalPerformanceTests.swift */,
 				A7B56433FB2B30BA76AC6B38 /* LocalTransferPlannerTests.swift */,
 				8A025CF0CC560BB2375AB9B3 /* MetadataPreservationTests.swift */,
+				DE08FE987C1D09084D5E9AD5 /* NetworkProfileTests.swift */,
 				F7EFD7CA47259DE8BF69EC4F /* PreferencesStoreTests.swift */,
 				65881F4DB7D25A189205336C /* ProviderRouterTests.swift */,
 				E035804223C3F357F6CD1817 /* RemoteLocationTests.swift */,
@@ -828,6 +831,7 @@
 				06DE276EC862401EA6D92275 /* LocalPerformanceTests.swift in Sources */,
 				A8A119013F20C627C1E53854 /* LocalTransferPlannerTests.swift in Sources */,
 				99F2028F933983C6CDD810DE /* MetadataPreservationTests.swift in Sources */,
+				33879676C8714B41CA0CB646 /* NetworkProfileTests.swift in Sources */,
 				0923CF1A40F44184527AF318 /* PreferencesStoreTests.swift in Sources */,
 				7401DC036054E57B95B94DE3 /* ProviderRouterTests.swift in Sources */,
 				C17C5929028F89CFD315FC4D /* RemoteLocationTests.swift in Sources */,

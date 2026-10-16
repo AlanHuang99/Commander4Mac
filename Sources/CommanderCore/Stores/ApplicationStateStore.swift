@@ -49,7 +49,7 @@ public struct TabSnapshot: Codable, Sendable {
     @MainActor init(_ tab: TabSession) throws {
         id = tab.id
         let displayURL: URL
-        switch tab.location { case .local(let url): displayURL = url; case .sftp: displayURL = tab.location.url; remoteLocation = tab.location }
+        switch tab.location { case .local(let url): displayURL = url; case .sftp, .smb, .webdav: displayURL = tab.location.url; remoteLocation = tab.location }
         reference = tab.unresolvedReference ?? tab.savedReference ??
             LocationReference(bookmark: Data(), displayURL: displayURL, expectedIdentity: .init(device: 0, inode: 0))
         pin = tab.pin; options = tab.options; selection = tab.selection; scrollAnchor = tab.scrollAnchor

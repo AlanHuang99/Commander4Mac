@@ -3,22 +3,30 @@ import Foundation
 public enum FileLocation: Hashable, Codable, Sendable {
     case local(URL)
     case sftp(profileID: UUID, path: RemotePath)
+    case smb(profileID: UUID, path: RemotePath)
+    case webdav(profileID: UUID, path: RemotePath)
+    public var connectionProtocol: ConnectionProtocol? {
+        switch self { case .local: nil; case .sftp: .sftp; case .smb: .smb; case .webdav: .webdav }
+    }
+    public static func remote(kind: ConnectionProtocol, profileID: UUID, path: RemotePath) -> Self {
+        switch kind { case .sftp: .sftp(profileID: profileID, path: path); case .smb: .smb(profileID: profileID, path: path); case .webdav: .webdav(profileID: profileID, path: path) }
+    }
     public var isLocal: Bool {
         guard case .local(let url) = self, url.isFileURL else { return false }
         return url.host == nil || url.host == "" || url.host == "localhost"
     }
-    public var profileID: UUID? { if case .sftp(let id, _) = self { id } else { nil } }
-    public var remotePath: RemotePath? { if case .sftp(_, let path) = self { path } else { nil } }
+    public var profileID: UUID? { switch self { case .local: nil; case .sftp(let id, _), .smb(let id, _), .webdav(let id, _): id } }
+    public var remotePath: RemotePath? { switch self { case .local: nil; case .sftp(_, let path), .smb(_, let path), .webdav(_, let path): path } }
     public func requireLocal() throws { guard isLocal else { throw FileOperationError.message("This action requires a local location.") } }
     public var url: URL {
         switch self {
         case .local(let url): return url.standardizedFileURL
-        case .sftp(let id, let path):
-            var c = URLComponents(); c.scheme = "commander-sftp"; c.host = id.uuidString.lowercased(); c.path = path.rawValue
+        case .sftp(let id, let path), .smb(let id, let path), .webdav(let id, let path):
+            var c = URLComponents(); c.scheme = "commander-" + connectionProtocol!.rawValue; c.host = id.uuidString.lowercased(); c.path = path.rawValue
             return c.url!
         }
     }
-    public var providerID: String { profileID.map { "sftp:" + $0.uuidString } ?? "local" }
+    public var providerID: String { profileID.map { connectionProtocol!.rawValue + ":" + $0.uuidString } ?? "local" }
     public static func == (lhs: FileLocation, rhs: FileLocation) -> Bool {
         guard lhs.providerID == rhs.providerID, lhs.isLocal == rhs.isLocal else { return false }
         if let left = lhs.remotePath, let right = rhs.remotePath { return left == right }
@@ -30,12 +38,12 @@ public enum FileLocation: Hashable, Codable, Sendable {
     }
     public var title: String { url.lastPathComponent.isEmpty ? url.path : url.lastPathComponent }
     public var parent: FileLocation {
-        switch self { case .local: .local(url.deletingLastPathComponent()); case .sftp(let id, let path): .sftp(profileID: id, path: path.parent) }
+        switch self { case .local: .local(url.deletingLastPathComponent()); default: .remote(kind: connectionProtocol!, profileID: profileID!, path: remotePath!.parent) }
     }
     public func appending(_ name: String) throws -> FileLocation {
         switch self {
         case .local: return .local(url.appendingPathComponent(try FileNameRules.validateComponent(name)))
-        case .sftp(let id, let path): return .sftp(profileID: id, path: try path.appending(name))
+        default: return .remote(kind: connectionProtocol!, profileID: profileID!, path: try remotePath!.appending(name))
         }
     }
 }

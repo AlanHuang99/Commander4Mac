@@ -18,7 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         let services = AppServices.shared
         guard services.activeJobCount > 0 else {
-            Task { await services.flushState(); sender.reply(toApplicationShouldTerminate: true) }
+            Task { await services.flushState(); await services.remote.disconnectAll(); sender.reply(toApplicationShouldTerminate: true) }
             return .terminateLater
         }
         let alert = NSAlert()
@@ -31,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             for job in services.jobs where !job.state.isTerminal { await services.transferQueue.cancel(jobID: job.id) }
             while services.activeJobCount > 0 { try? await Task.sleep(for: .milliseconds(100)) }
             await services.flushState()
+            await services.remote.disconnectAll()
             sender.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater

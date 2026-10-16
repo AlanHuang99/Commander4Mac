@@ -68,6 +68,7 @@ public actor SFTPConnectionManager: RemoteFileAccess {
     private func connectTransport(_ rawProfile: ConnectionProfile, secret: String, attempt: UUID) async throws {
         try Task.checkCancellation()
         let profile = try rawProfile.validated()
+        guard profile.protocolKind == .sftp else { throw FileOperationError.message("This provider requires an SFTP profile.") }
         try identities.bind(profile)
         if let existing = sessions[profile.id], existing.profile.hasSameCredentialScope(as: profile) && existing.client.isConnected { setState(.connected, id: profile.id); return }
         await disconnect(profile.id)

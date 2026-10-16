@@ -27,6 +27,7 @@
 		0F0B50459B26862F3E6A0D23 /* BlockingFileWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4889C45C31B19170BF226A /* BlockingFileWorker.swift */; };
 		13899835E660FE71F05BE0FF /* FileNameRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C40797949EFF30487FC1ACE /* FileNameRules.swift */; };
 		14BBAF481511B47BF320A496 /* FileLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655885F9AC419AB3578D778 /* FileLocation.swift */; };
+		19A37553BF36B4119C2849FF /* RemoteConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48150E3D1860A90482B0270D /* RemoteConnectionManager.swift */; };
 		1B079940C47AD9ADA6DECD5F /* TabStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D90429CBC11E359ECF695F /* TabStripView.swift */; };
 		1E8C9BD522A31F18AAF88BC8 /* OperationCancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E44A7A7437A069F6220F435 /* OperationCancellation.swift */; };
 		21C2DFF65741F3E823154FA8 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4692A579CAE6CC7633842217 /* SidebarView.swift */; };
@@ -92,6 +93,7 @@
 		A232ADE4B13798AC2C048C4B /* ActiveOperationMarkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1114B030AA3D1C2873A4E696 /* ActiveOperationMarkerTests.swift */; };
 		A3077F82E274695CD284D37F /* Module.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73667F5A96BCAEDB82685389 /* Module.swift */; };
 		A37E32425DE62FE1F1924A17 /* RemoteTransferExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B209BFF4D5897F2C5DFC308A /* RemoteTransferExecutor.swift */; };
+		A7304FD0F152C388782968B6 /* NetworkConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EA6E49CA0853326B71E203 /* NetworkConnectionTests.swift */; };
 		A8A119013F20C627C1E53854 /* LocalTransferPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B56433FB2B30BA76AC6B38 /* LocalTransferPlannerTests.swift */; };
 		A93215DE8B2A919DE85ACB11 /* ConnectionFixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55D337B50FD0555BC4CFA309 /* ConnectionFixTests.swift */; };
 		A963D2C065F2411E62539F7E /* ProviderRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48679DE71936313CF95F1DFC /* ProviderRouter.swift */; };
@@ -220,6 +222,7 @@
 		463511A9C36B8B32380BD440 /* FileActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileActionTests.swift; sourceTree = "<group>"; };
 		4692A579CAE6CC7633842217 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		477C02739ACFF162E896A5A5 /* FavoriteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteStore.swift; sourceTree = "<group>"; };
+		48150E3D1860A90482B0270D /* RemoteConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteConnectionManager.swift; sourceTree = "<group>"; };
 		48679DE71936313CF95F1DFC /* ProviderRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderRouter.swift; sourceTree = "<group>"; };
 		49A16316BE7E596BECD0C16F /* ConnectionProfileCommit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionProfileCommit.swift; sourceTree = "<group>"; };
 		49A8AC653C2A184D9DB1FC77 /* DirectoryLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryLoaderTests.swift; sourceTree = "<group>"; };
@@ -228,6 +231,7 @@
 		4D5BC82ACABE5BE7138A77E2 /* ConnectionSubmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSubmission.swift; sourceTree = "<group>"; };
 		4E7A6C85B6DD56E5ACF62745 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		5091F45F13C7D7B1177A886F /* TabSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSession.swift; sourceTree = "<group>"; };
+		51EA6E49CA0853326B71E203 /* NetworkConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectionTests.swift; sourceTree = "<group>"; };
 		51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceController.swift; sourceTree = "<group>"; };
 		55D337B50FD0555BC4CFA309 /* ConnectionFixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionFixTests.swift; sourceTree = "<group>"; };
 		5C1160A69DD895ACD7E8DCAD /* SMBConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMBConnectionManager.swift; sourceTree = "<group>"; };
@@ -513,6 +517,7 @@
 				247D989E506298E7253F787C /* LocalPerformanceTests.swift */,
 				A7B56433FB2B30BA76AC6B38 /* LocalTransferPlannerTests.swift */,
 				8A025CF0CC560BB2375AB9B3 /* MetadataPreservationTests.swift */,
+				51EA6E49CA0853326B71E203 /* NetworkConnectionTests.swift */,
 				DE08FE987C1D09084D5E9AD5 /* NetworkProfileTests.swift */,
 				F7EFD7CA47259DE8BF69EC4F /* PreferencesStoreTests.swift */,
 				65881F4DB7D25A189205336C /* ProviderRouterTests.swift */,
@@ -590,6 +595,7 @@
 				2B0C77CF218B353BED26175C /* CitadelSFTPTransport.swift */,
 				36844EF27E5DD25BC36F9367 /* HostKeyVerification.swift */,
 				601E8BF83FD10F0131818E8E /* LocalKeyMaterial.swift */,
+				48150E3D1860A90482B0270D /* RemoteConnectionManager.swift */,
 				B209BFF4D5897F2C5DFC308A /* RemoteTransferExecutor.swift */,
 				DE4EE2ADC87D82A96BBBA25A /* SFTPTransport.swift */,
 				5C1160A69DD895ACD7E8DCAD /* SMBConnectionManager.swift */,
@@ -829,6 +835,7 @@
 				84DFCE92505DD54BB55C455A /* PaneSession.swift in Sources */,
 				CF20A7C0521695BF46D4474C /* PreferencesStore.swift in Sources */,
 				A963D2C065F2411E62539F7E /* ProviderRouter.swift in Sources */,
+				19A37553BF36B4119C2849FF /* RemoteConnectionManager.swift in Sources */,
 				A37E32425DE62FE1F1924A17 /* RemoteTransferExecutor.swift in Sources */,
 				3EA1EE23E0913B7C10D89711 /* SFTPTransport.swift in Sources */,
 				8BE20E51982083E328E1EA8C /* SMBConnectionManager.swift in Sources */,
@@ -867,6 +874,7 @@
 				06DE276EC862401EA6D92275 /* LocalPerformanceTests.swift in Sources */,
 				A8A119013F20C627C1E53854 /* LocalTransferPlannerTests.swift in Sources */,
 				99F2028F933983C6CDD810DE /* MetadataPreservationTests.swift in Sources */,
+				A7304FD0F152C388782968B6 /* NetworkConnectionTests.swift in Sources */,
 				33879676C8714B41CA0CB646 /* NetworkProfileTests.swift in Sources */,
 				0923CF1A40F44184527AF318 /* PreferencesStoreTests.swift in Sources */,
 				7401DC036054E57B95B94DE3 /* ProviderRouterTests.swift in Sources */,

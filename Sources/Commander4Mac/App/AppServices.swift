@@ -16,7 +16,7 @@ final class AppServices {
             for controller in controllers.values.compactMap(\.value) { controller.workspace.defaultOptions = preferences.view.validated() }
         }
     }
-    let remote = SFTPConnectionManager()
+    let remote = RemoteConnectionManager()
     let connections: ConnectionController
     let favorites: FavoriteStore
     let shelf: ShelfStore

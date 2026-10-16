@@ -33,7 +33,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
             try cancellation.check()
             guard request.kind == .copy, !request.sources.isEmpty,
                   request.sources.allSatisfy({ $0.isLocal != request.destinationDirectory.isLocal }) else {
-                throw FileOperationError.message("SFTP currently supports Copy between a local pane and a remote pane. Remote moves and server-to-server copies are not available.")
+                throw FileOperationError.message("Remote Copy currently supports Copy between a local pane and a remote pane. Remote moves and server-to-server copies are not available.")
             }
             let sources = Array(Set(request.sources)).sorted { $0.url.absoluteString < $1.url.absoluteString }
             var versions: [SourceVersion] = []
@@ -67,7 +67,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
         guard let value = try await remote.metadata(location), value.isRegularFile, let size = value.size, size <= UInt64(Int64.max), value.modified != nil else { throw unsupportedFile() }
         return .remote(value)
     }
-    private func unsupportedFile() -> FileOperationError { .message("SFTP copies currently support regular files with size and modification metadata. Folders, packages, symlinks, and special files are not transferred.") }
+    private func unsupportedFile() -> FileOperationError { .message("Remote copies currently support regular files with size and modification metadata. Folders, packages, symlinks, and special files are not transferred.") }
     private func localParentIdentity(_ location: FileLocation) async throws -> FileIdentity? {
         guard location.isLocal else { return nil }
         return try await BlockingFileWorker.run { try LocationResolver.identity(at: location.url.resolvingSymlinksInPath()) }
@@ -102,7 +102,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
         switch decision.decision {
         case .skip: return nil
         case .cancel: cancellation.cancel(); throw CancellationError()
-        case .replace: throw FileOperationError.message("Safe SFTP replacement is not available. Use Keep Both or Skip. The existing item was retained.")
+        case .replace: throw FileOperationError.message("Safe remote replacement is not available. Use Keep Both or Skip. The existing item was retained.")
         case .keepBoth:
             for number in 1...10_000 {
                 let name = FileNameRules.keepBothCandidate(originalName: source.url.lastPathComponent, ordinal: number)
@@ -225,7 +225,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
             record.phase = .complete; record.staging = nil; try await write(record)
             progress.completedItems += 1; emit(.progress(progress)); lastProgressTime = ProcessInfo.processInfo.systemUptime
             return .init(id: itemID, source: source, destination: destination, state: .completed,
-                         detail: "Contents copied. SFTP copies do not preserve permissions, timestamps, or extended metadata yet.")
+                         detail: "Contents copied. Remote copies do not preserve permissions, timestamps, or extended metadata yet.")
         } catch {
             var retainedLocalStage = false
             if let container, let containerIdentity { do { try await cleanup(container, identity: containerIdentity) } catch { retainedLocalStage = true } }

@@ -1,4 +1,4 @@
-import json,logging,secrets,socket,sys
+import json,logging,secrets,socket,sys,os
 from pathlib import Path
 from impacket.smbserver import SimpleSMBServer
 from impacket import smb3structs
@@ -9,7 +9,7 @@ root=Path(sys.argv[1]); (root/'data').mkdir(exist_ok=True)
 (root/'data'/'hello #中文.txt').write_text('owned SMB fixture')
 with socket.socket() as sock:
     sock.bind(('127.0.0.1',0)); port=sock.getsockname()[1]
-username='commander'; secret=secrets.token_urlsafe(24)
+username='commander'; secret='owned disposable native fixture' if os.environ.get('COMMANDER_SMB_NATIVE') == '1' else secrets.token_urlsafe(24)
 server=SimpleSMBServer(listenAddress='127.0.0.1',listenPort=port)
 server.setSMB2Support(True)
 # Impacket 0.13.1 returns a normal CREATE body for some failed requests.

@@ -8,19 +8,38 @@ final class SMBSession: @unchecked Sendable {
     private let lock = NSLock()
     private let stateLock = NSLock()
     private var aborted = false
+    private var socket: Int32?
     let context: UnsafeMutablePointer<smb2_context>
     init() throws {
         guard let context = smb2_init_context() else { throw FileOperationError.message("Could not create SMB session.") }
         self.context = context; smb2_set_timeout(context, 30)
     }
-    deinit { smb2_destroy_context(context) }
-    func abort() { stateLock.withLock { aborted = true }; let fd = smb2_get_fd(context); if fd >= 0 { _ = shutdown(fd, SHUT_RDWR) } }
-    var connected: Bool { !stateLock.withLock { aborted } && smb2_get_fd(context) >= 0 }
+    deinit { if let socket { Darwin.close(socket) }; smb2_destroy_context(context) }
+    func abort() {
+        stateLock.withLock { aborted = true; if let socket { _ = shutdown(socket, SHUT_RDWR) } }
+    }
+    var connected: Bool { stateLock.withLock { !aborted && socket != nil } }
+    func activateSocket() throws {
+        let descriptor = fcntl(smb2_get_fd(context), F_DUPFD_CLOEXEC, 0)
+        guard descriptor >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+        try stateLock.withLock {
+            guard !aborted else { _ = shutdown(descriptor, SHUT_RDWR); Darwin.close(descriptor); throw CancellationError() }
+            socket = descriptor
+        }
+    }
     func run<T: Sendable>(_ operation: @escaping @Sendable (UnsafeMutablePointer<smb2_context>) throws -> T) async throws -> T {
-        try await withTaskCancellationHandler {
-            try Task.checkCancellation()
-            return try await BlockingFileWorker.run { [self] in try lock.withLock { guard !stateLock.withLock({ aborted }) else { throw CancellationError() }; return try operation(context) } }
-        } onCancel: { self.abort() }
+        do {
+            return try await withTaskCancellationHandler {
+                try Task.checkCancellation()
+                return try await BlockingFileWorker.run { [self] in
+                    try lock.withLock { guard !stateLock.withLock({ aborted }) else { throw CancellationError() }; return try operation(context) }
+                }
+            } onCancel: { self.abort() }
+        } catch {
+            let value = error as NSError
+            if value.domain == NSPOSIXErrorDomain && [ECONNRESET, ENOTCONN, ETIMEDOUT, EPIPE, EIO].contains(Int32(value.code)) { abort() }
+            throw error
+        }
     }
     static func check(_ code: Int32) throws { guard code >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(-code)) } }
     static func error(_ context: UnsafeMutablePointer<smb2_context>) -> NSError {
@@ -58,6 +77,7 @@ public actor SMBConnectionManager: RemoteFileAccess {
                 smb2_set_password(context, secret); smb2_set_domain(context, profile.domain)
                 if profile.authentication != .guest { smb2_set_security_mode(context, UInt16(SMB2_NEGOTIATE_SIGNING_REQUIRED)) }
                 try SMBSession.check(smb2_connect_share(context, profile.host + ":" + String(profile.port), profile.share, profile.authentication == .guest ? "" : profile.username))
+                try session.activateSocket()
             }
             guard attempts[profile.id] == attempt, !Task.isCancelled else { session.abort(); throw CancellationError() }
             pending.removeValue(forKey: profile.id); sessions[profile.id] = session

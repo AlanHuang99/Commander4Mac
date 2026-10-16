@@ -95,7 +95,7 @@ final class WorkspaceController {
                 do {
                     if await services.remote.isConnected(profile.id) { try await establishConnection(request, secret: ""); return }
                     let stored = try await services.connections.secret(for: profile)
-                    guard let credential = stored ?? (profile.authentication == .ed25519Key ? "" : nil) else { manageConnection(profile, request: request); return }
+                    guard let credential = stored ?? (profile.authentication != .password ? "" : nil) else { manageConnection(profile, request: request); return }
                     try await establishConnection(request, secret: credential)
                 } catch is CancellationError { }
                 catch { errorMessage = error.localizedDescription }
@@ -131,7 +131,7 @@ final class WorkspaceController {
         }
         try Task.checkCancellation()
         guard window?.isVisible == true else { return }
-        let verifiedLocation = FileLocation.sftp(profileID: profile.id, path: request.location.remotePath!)
+        let verifiedLocation = FileLocation.remote(kind: profile.protocolKind, profileID: profile.id, path: request.location.remotePath!)
         open(verifiedLocation, in: request.paneID)
     }
     func openPath(_ text: String, in pane: PaneID) {
@@ -197,7 +197,7 @@ final class WorkspaceController {
     func activate(_ entry: FileEntry, pane: PaneID) {
         if !entry.location.isLocal {
             if entry.kind == .directory { open(entry.location, in: pane) }
-            else { errorMessage = entry.kind == .symbolicLink ? "Remote symlinks are not opened in this SFTP milestone. Browse the target path directly." : "Copy this remote file to a local pane to open or preview it." }
+            else { errorMessage = entry.kind == .symbolicLink ? "Remote symlinks are not opened. Browse the target path directly." : "Copy this remote file to a local pane to open or preview it." }
             return
         }
         workspace.activePane = pane
@@ -314,7 +314,7 @@ final class WorkspaceController {
     }
     func acceptDrop(_ request: TransferRequest) { services.enqueue(request, owner: workspace.id); activityVisible = true }
     func stageSelection() {
-        guard workspace.activeTab.location.isLocal else { errorMessage = "The shelf currently holds local file references. Use Copy to Other Pane for SFTP files."; return }
+        guard workspace.activeTab.location.isLocal else { errorMessage = "The shelf currently holds local file references. Use Copy to Other Pane for remote files."; return }
         let locations = workspace.activeTab.selectedEntries.map(\.location)
         guard !locations.isEmpty else { return }
         Task {

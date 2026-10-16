@@ -41,7 +41,7 @@ struct WorkspaceView: View {
             }
             ToolbarItemGroup {
                 Button { controller.manageConnection() } label: { Label("Connect", systemImage: "network") }
-                    .help("Connect to SFTP Server").accessibilityIdentifier("connections.open")
+                    .help("Connect to Server").accessibilityIdentifier("connections.open")
                 Button { controller.shelfVisible.toggle() } label: { Image(systemName: "tray.full") }.help("Toggle Shelf")
                 Button { controller.activityVisible.toggle() } label: {
                     Label("Activity \(controller.services.activeJobCount)", systemImage: "arrow.left.arrow.right")

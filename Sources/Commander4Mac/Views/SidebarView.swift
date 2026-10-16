@@ -68,7 +68,7 @@ struct SidebarView: View {
                             Button("Remove Connection") { Task { do { try await controller.services.connections.remove(profile) } catch { controller.errorMessage = error.localizedDescription } } }
                         }
                 }
-                Button { controller.manageConnection() } label: { Label("New SFTP Connection…", systemImage: "plus").frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }.buttonStyle(.plain)
+                Button { controller.manageConnection() } label: { Label("New Connection…", systemImage: "plus").frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }.buttonStyle(.plain)
                 if let diagnostic = controller.services.connections.diagnostic { Text(diagnostic).font(.caption).foregroundStyle(.secondary) }
             }
             Section("Locations") {

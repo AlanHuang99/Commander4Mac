@@ -80,7 +80,7 @@ struct PaneView: View {
                 Button("Copy to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.copy, from: paneID) }
                     .disabled((!tab.location.isLocal || !workspace.pane(paneID.opposite).activeTab.location.isLocal) &&
                         (tab.location.isLocal == workspace.pane(paneID.opposite).activeTab.location.isLocal || tab.selectedEntries.contains { $0.kind != .file }))
-                    .help("Copy to the other pane. SFTP copies support individual regular files.")
+                    .help("Copy to the other pane. Remote copies support individual regular files.")
                 Button("Move to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.move, from: paneID) }.disabled(!tab.location.isLocal || !workspace.pane(paneID.opposite).activeTab.location.isLocal)
                 Button("Stage") { workspace.activePane = paneID; controller.stageSelection() }.disabled(!tab.location.isLocal)
                 Spacer()
@@ -93,7 +93,7 @@ struct PaneView: View {
                 Spacer()
                 if tab.isLoading { ProgressView().controlSize(.mini) }
                 if let id = tab.location.profileID {
-                    Text(controller.services.connections.profiles.first(where: { $0.id == id })?.name ?? "SFTP")
+                    Text(controller.services.connections.profiles.first(where: { $0.id == id })?.name ?? "Connection")
                         .lineLimit(1).help(controller.services.connections.states[id]?.rawValue ?? "Disconnected")
                 }
                 Text(paneID == .left ? "Left" : "Right").foregroundStyle(.tertiary)

@@ -20,17 +20,26 @@ struct ConnectionEditor: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label("SFTP Connection", systemImage: "network").font(.title2).fontWeight(.semibold)
+            Label("Server Connection", systemImage: "network").font(.title2).fontWeight(.semibold)
             Text("Open a secure file server in either pane.").foregroundStyle(.secondary)
             Form {
+                Picker("Protocol", selection: $profile.protocolKind) {
+                    Text("SFTP").tag(ConnectionProtocol.sftp)
+                    Text("SMB").tag(ConnectionProtocol.smb)
+                }.accessibilityIdentifier("connection.protocol")
                 TextField("Name", text: $profile.name).accessibilityIdentifier("connection.name")
                 TextField("Server", text: $profile.host).accessibilityIdentifier("connection.host")
                 TextField("Port", value: $profile.port, format: .number.grouping(.never)).accessibilityIdentifier("connection.port")
-                TextField("Username", text: $profile.username).accessibilityIdentifier("connection.username")
+                if profile.protocolKind == .smb {
+                    TextField("Share", text: $profile.share).accessibilityIdentifier("connection.share")
+                    TextField("Domain (optional)", text: $profile.domain).accessibilityIdentifier("connection.domain")
+                }
+                TextField("Username", text: $profile.username).disabled(profile.authentication == .guest).accessibilityIdentifier("connection.username")
                 TextField("Start folder", text: $profile.initialPath).accessibilityIdentifier("connection.path")
                 Picker("Authentication", selection: $profile.authentication) {
                     Text("Password").tag(SFTPAuthentication.password)
-                    Text("OpenSSH Ed25519 key").tag(SFTPAuthentication.ed25519Key)
+                    if profile.protocolKind == .sftp { Text("OpenSSH Ed25519 key").tag(SFTPAuthentication.ed25519Key) }
+                    else { Text("Guest").tag(SFTPAuthentication.guest) }
                 }.accessibilityIdentifier("connection.authentication")
                 if profile.authentication == .ed25519Key {
                     HStack {
@@ -42,9 +51,11 @@ struct ConnectionEditor: View {
                         }
                     }
                 }
-                SecureField(profile.authentication == .password ? "Password" : "Key passphrase", text: $secret)
-                    .accessibilityIdentifier("connection.secret")
-                Toggle("Remember credential in Keychain", isOn: $remember)
+                if profile.authentication != .guest {
+                    SecureField(profile.authentication == .password ? "Password" : "Key passphrase", text: $secret)
+                        .accessibilityIdentifier("connection.secret")
+                    Toggle("Remember credential in Keychain", isOn: $remember)
+                }
                 Picker("Open in", selection: Binding(get: { profile.destination?.rawValue ?? "default" }, set: { profile.destination = OpenDestination(rawValue: $0) })) {
                     Text("App default").tag("default")
                     Text("Current pane").tag(OpenDestination.current.rawValue)
@@ -53,7 +64,7 @@ struct ConnectionEditor: View {
                 }
             }.disabled(busy)
             Text("Leave the credential blank to use Keychain. Nothing connects automatically on launch.").font(.caption).foregroundStyle(.secondary)
-            Text("SFTP copies individual files without preserving permissions, timestamps, or extended metadata. Folder transfers, remote moves, and remote Trash are not available yet.").font(.caption).foregroundStyle(.secondary)
+            Text("Remote copies currently support individual files without preserving permissions, timestamps, or extended metadata. Folder transfers, remote moves, and remote Trash are not available yet.").font(.caption).foregroundStyle(.secondary)
             if let error { Text(error).font(.callout).foregroundStyle(.red).textSelection(.enabled).fixedSize(horizontal: false, vertical: true) }
             HStack {
                 Button("Cancel") {
@@ -67,6 +78,11 @@ struct ConnectionEditor: View {
             }
         }.padding(24).frame(width: 510).interactiveDismissDisabled(busy)
             .onDisappear { submission.cancel() }
+            .onChange(of: profile.protocolKind) { _, kind in
+                profile.port = kind.defaultPort; profile.authentication = .password; profile.keyReference = nil; profile.serverKey = nil
+                profile.initialPath = "/"; profile.share = ""; profile.domain = ""; profile.basePath = "/"; profile.secure = true
+                keyPath = ""; secret = ""
+            }
     }
     private func submit(connect: Bool) {
         let pane = controller.workspace.activePane
@@ -91,7 +107,7 @@ struct ConnectionEditor: View {
             var credential = capturedSecret
             if connect, credential.isEmpty {
                 if let stored = try await controller.services.connections.secret(for: saved) { credential = stored }
-                else if saved.authentication != .ed25519Key { throw FileOperationError.message("Enter a password. There is no saved credential for this server and username.") }
+                else if saved.authentication == .password { throw FileOperationError.message("Enter a password. There is no saved credential for this server and username.") }
             }
             return (saved, credential)
         }, perform: { saved, credential in

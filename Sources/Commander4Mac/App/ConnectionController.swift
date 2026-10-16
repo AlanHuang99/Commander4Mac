@@ -8,11 +8,11 @@ import CommanderCore
     var diagnostic: String?
     private let store: ConnectionStore
     private let vault: CredentialVault
-    private let remote: SFTPConnectionManager
+    private let remote: RemoteConnectionManager
     private let edits = OperationGate()
     private var knownIDs: Set<UUID>
     private var observation: Task<Void, Never>?
-    init(remote: SFTPConnectionManager, directory: URL) {
+    init(remote: RemoteConnectionManager, directory: URL) {
         self.remote = remote; store = ConnectionStore(directory: directory)
         vault = CredentialVault(store: KeychainSecretStore(service: (Bundle.main.bundleIdentifier ?? "Commander4Mac") + ".SFTP"))
         let loaded = store.load(); profiles = loaded.profiles; diagnostic = loaded.diagnostic; knownIDs = Set(loaded.profiles.map(\.id))

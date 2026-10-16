@@ -17,11 +17,17 @@ settings:
     ENABLE_APP_SANDBOX: NO
     ENABLE_HARDENED_RUNTIME: YES
     GENERATE_INFOPLIST_FILE: YES
+packages:
+  Citadel:
+    url: https://github.com/orlandos-nl/Citadel.git
+    exactVersion: 0.12.1
 targets:
   CommanderCore:
     type: framework
     platform: macOS
     sources: [Sources/CommanderCore]
+    dependencies:
+      - package: Citadel
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac.core
       DEFINES_MODULE: YES
@@ -29,7 +35,7 @@ targets:
   Commander4Mac:
     type: application
     platform: macOS
-    sources: [Sources/Commander4Mac]
+    sources: [Sources/Commander4Mac, Resources]
     dependencies:
       - target: CommanderCore
         embed: true

@@ -95,3 +95,5 @@ See [reliability, icon and installer acceptance](docs/verification/reliability-i
 This product includes software developed by Niels Provos.
 
 See [release and notarization instructions](Packaging/DISTRIBUTION.md) and the [dependency license review](docs/verification/dependency-licensing.md).
+
+- [Commander4Mac 1.0 notarized distribution acceptance](docs/verification/distribution-release.md)

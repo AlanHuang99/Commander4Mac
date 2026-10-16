@@ -38,7 +38,7 @@ case "$ACTION" in
   echo "$STATUS"
   case "$STATUS" in Accepted|Invalid|Rejected) ;; *) echo 'Submission is not finished. Run this finish action again later.'; exit 2;; esac
   xcrun notarytool log "$ID" --keychain-profile "$PROFILE" "$OUT/notarization/$KIND-log.json"
-  python3 -c 'import json,sys;s=json.load(open(sys.argv[1]));assert s["status"]=="Accepted" and not s.get("issues"),s.get("issues")' "$OUT/notarization/$KIND-log.json"
+  python3 script/verify_notary_log.py "$OUT/notarization/$KIND-log.json"
   if [[ "$KIND" == app ]]; then ARTIFACT="$APP"; else ARTIFACT="$DMG"; fi
   if [[ "$KIND" == app ]]; then
     shasum -a 256 -c "$OUT/notarization/app-upload.sha256"
@@ -62,7 +62,7 @@ case "$ACTION" in
     hdiutil verify "$DMG"
     spctl --assess --type open --context context:primary-signature --verbose=4 "$DMG"
     python3 script/verify_dmg.py "$APP" "$DMG" --notarized
-    shasum -a 256 "$DMG" > "$OUT/Commander4Mac-1.0.dmg.sha256"
+    (cd "$OUT" && shasum -a 256 Commander4Mac-1.0.dmg > Commander4Mac-1.0.dmg.sha256)
   fi;;
  *) echo "Unknown action: $ACTION" >&2; exit 2;;
 esac

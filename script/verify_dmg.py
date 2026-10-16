@@ -6,6 +6,7 @@ import plistlib
 import re
 import subprocess
 import sys
+from release_checks import require
 import tempfile
 
 source, image = map(lambda value: Path(value).resolve(), sys.argv[1:3])
@@ -25,12 +26,12 @@ try:
         "/usr/bin/hdiutil", "attach", "-readonly", "-nobrowse", "-mountpoint", str(mount), "-plist", str(image)
     ])
     volumes = [entry for entry in plistlib.loads(result)["system-entities"] if "mount-point" in entry]
-    assert len(volumes) == 1 and Path(volumes[0]["mount-point"]) == mount
+    require(len(volumes) == 1 and Path(volumes[0]["mount-point"]) == mount, 'Release verification failed: len(volumes) == 1 and Path(volumes[0]["mount-point"]) == mount')
     device = volumes[0]["dev-entry"]
     packaged = mount / source.name
-    assert signature(packaged) == signature(source), "Packaged app differs from the signed source"
-    assert os.readlink(mount / "Applications") == "/Applications"
-    assert (mount / ".DS_Store").is_file(), "Missing Finder window layout"
+    require(signature(packaged) == signature(source), "Packaged app differs from the signed source")
+    require(os.readlink(mount / "Applications") == "/Applications", 'Release verification failed: os.readlink(mount / "Applications") == "/Applications"')
+    require((mount / ".DS_Store").is_file(), "Missing Finder window layout")
     if "--notarized" in sys.argv[3:]:
         subprocess.run([sys.executable, str(root / "script/verify_release.py"), str(packaged)], check=True)
         subprocess.run(["xcrun", "stapler", "validate", str(packaged)], check=True)

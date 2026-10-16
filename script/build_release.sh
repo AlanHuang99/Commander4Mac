@@ -3,9 +3,11 @@ set -euo pipefail
 TASK_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$TASK_ROOT"
 mkdir -p .build/distribution .build/logs
+case "${1:-}" in ''|--prepare-only) ;; *) echo 'usage: build_release.sh [--prepare-only]' >&2; exit 2;; esac
+./script/resolve_dependencies.sh
 python3 script/prepare_licenses.py
 python3 script/verify_licenses.py
-xcodegen generate >.build/logs/release-project.log
+if [[ "${1:-}" == --prepare-only ]]; then echo 'Release dependencies and source resources prepared.'; exit 0; fi
 xcodebuild -project Commander4Mac.xcodeproj -scheme Commander4Mac -configuration Release -destination 'generic/platform=macOS' -derivedDataPath .build/xcode -archivePath .build/distribution/Commander4Mac.xcarchive archive >.build/logs/release-archive.log 2>&1
 APP="$TASK_ROOT/.build/distribution/Commander4Mac.xcarchive/Products/Applications/Commander4Mac.app"
 python3 script/verify_release.py "$APP"

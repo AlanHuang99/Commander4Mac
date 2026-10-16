@@ -28,6 +28,17 @@ def tracked(path):
             yield p, name
 
 
+def check_checkout(path):
+    if subprocess.check_output(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=all"]):
+        raise RuntimeError(f"Modified or untracked dependency inputs: {path.name}")
+    ignored = subprocess.check_output(["git", "-C", str(path), "ls-files", "--others", "--ignored", "--exclude-standard", "-z"]).decode().split("\0")
+    extensions = {".swift", ".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx", ".m", ".mm", ".s", ".asm", ".inc", ".modulemap"}
+    for name in ignored:
+        p = Path(name)
+        if name and not any(part in {".build", ".swiftpm", ".git"} for part in p.parts) and p.suffix.lower() in extensions:
+            raise RuntimeError(f"Ignored build input omitted from pinned source: {path.name}/{name}")
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     pins = json.loads((ROOT / "Commander4Mac.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved").read_text())["pins"]
@@ -39,14 +50,14 @@ def main():
         path = matches[0]
         if revision(path) != pin["state"]["revision"]:
             raise RuntimeError(f"Unexpected revision: {path.name}")
-        if subprocess.check_output(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=no"]):
-            raise RuntimeError(f"Modified dependency: {path.name}")
+        check_checkout(path)
         components.append((path.name, path, pin["location"], pin["state"]))
     components.append(("Citadel", ROOT / "Vendor/Citadel", "https://github.com/orlandos-nl/Citadel", {"revision": "ae8562f895de06ccb86fdb1cbb65fd99c8976e12", "patches": "COMMANDER_PATCHES.md"}))
     smb = CHECKOUTS / "AMSMB2/Dependencies/libsmb2"
     expected_smb = subprocess.check_output(["git", "-C", str(CHECKOUTS / "AMSMB2"), "ls-tree", "HEAD", "Dependencies/libsmb2"], text=True).split()[2]
-    if revision(smb) != expected_smb or subprocess.check_output(["git", "-C", str(smb), "status", "--porcelain", "--untracked-files=no"]):
+    if revision(smb) != expected_smb:
         raise RuntimeError("Modified or mismatched libsmb2 submodule")
+    check_checkout(smb)
     components.append(("libsmb2", smb, "https://github.com/sahlberg/libsmb2", {"revision": expected_smb}))
     sections = ["Commander4Mac third-party software\n\nThis product includes software developed by Niels Provos.\n\nAMSMB2 and libsmb2 are distributed under LGPL 2.1 or later. Complete corresponding source, licenses, and rebuild/replacement instructions accompany this app in Contents/Resources/OpenSource. Open this folder using the app's Open Source Components menu. Personal modification and reverse engineering for debugging modifications to these libraries are permitted. No app terms restrict the rights granted by the third-party licenses.\n"]
     manifest = []

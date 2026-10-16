@@ -8,9 +8,11 @@ As of October 16, 2026. The release identity is `com.alanhuang.Commander4Mac`, v
 ./script/build_release.sh
 ```
 
-This prepares licenses and exact LGPL sources, generates the project, archives Release into `.build/distribution/Commander4Mac.xcarchive`, and validates the actual app. Verification requires production identity/version, secure timestamps, every required architecture and UUID, Developer ID nested signatures, hardened runtime, no debug or library-validation exceptions, complete license/source resources and dynamic SMB linkage. Do not replace the development installation to produce a release.
+This generates the project, resolves the locked packages and submodules, prepares licenses and exact LGPL sources, archives Release into `.build/distribution/Commander4Mac.xcarchive`, and validates the actual app. Verification requires production identity/version, secure timestamps, every required architecture and UUID, Developer ID nested signatures, hardened runtime, no debug or library-validation exceptions, complete license/source resources and dynamic SMB linkage. Do not replace the development installation to produce a release.
 
 ## Apple credentials
+
+This Mac now has a validated `Commander4Mac-notary` profile backed by the existing team API key. Reuse it. The setup below is for configuring another Mac.
 
 Create a profile interactively in your own Terminal, never by pasting passwords into chat, source, arguments or logs:
 
@@ -44,3 +46,12 @@ The production app keeps hardened runtime and library validation. Replacing a li
 ## References
 
 Apple: [notarization](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution), [custom workflows](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow), [packaging](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution). GNU: [LGPL 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html).
+
+## Release validation regressions
+
+```sh
+python3 -m unittest discover -s Tests -p test_release_validation.py
+python3 script/test_release_fresh_cache.py
+```
+
+The fresh-cache test creates an owned checkout snapshot without build artifacts, runs `build_release.sh --prepare-only`, verifies identical pinned source output, and cleans that snapshot. It needs Xcode, xcodegen and access to the dependency repositories. The all-slice production verifier runs normally and with optimized Python. See the [final acceptance record](../docs/verification/distribution-release.md).

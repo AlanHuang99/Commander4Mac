@@ -2,6 +2,7 @@ import SwiftUI
 import CommanderCore
 
 struct WorkspaceView: View {
+    @Environment(\.undoManager) private var undoManager
     @Environment(\.openWindow) private var openWindow
     @State private var controller = WorkspaceController()
     @AppStorage("accessSetupAcknowledged") private var acknowledged = false
@@ -55,6 +56,7 @@ struct WorkspaceView: View {
             ConflictSheet(conflict: conflict) { controller.services.resolve(conflict, $0) }
         }
         .task {
+            controller.undoManager = undoManager
             showAccessSetup = !acknowledged
             let count = await controller.start()
             for _ in 0..<count { openWindow(id: "workspace") }

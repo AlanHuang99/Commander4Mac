@@ -17,6 +17,7 @@ final class AppServices {
     let favorites: FavoriteStore
     let shelf: ShelfStore
     let transferQueue: TransferQueue
+    let fileActions: LocalFileActions
     let operationGate: OperationGate
     let journal: OperationJournal
     let marker: ActiveOperationMarker
@@ -27,7 +28,16 @@ final class AppServices {
     private var jobOwners: [UUID: UUID] = [:]
     private var finishedJobs: Set<UUID> = []
     private var observationTask: Task<Void, Never>?
-    var activeJobCount: Int { jobs.filter { !$0.state.isTerminal }.count }
+    private var shortActionCount = 0
+    var activeJobCount: Int { jobs.filter { !$0.state.isTerminal }.count + shortActionCount }
+    func beginFileAction() { shortActionCount += 1; updateMarker() }
+    func endFileAction() { shortActionCount = max(0, shortActionCount - 1); updateMarker() }
+    private func updateMarker() {
+        do {
+            try marker.publish(pid: ProcessInfo.processInfo.processIdentifier,
+                executablePath: RuntimeIdentity.executableURL?.path ?? "", executableUUID: RuntimeIdentity.executableUUID, activeJobs: activeJobCount)
+        } catch { startupDiagnostic = "Could not update operation status: \(error.localizedDescription)" }
+    }
     var pendingConflict: TransferConflict? { jobs.compactMap(\.pendingConflict).first }
     var startupDiagnostic: String?
     var isTerminating = false
@@ -47,6 +57,7 @@ final class AppServices {
         favorites = FavoriteStore(items: loaded.state.favorites)
         shelf = ShelfStore(items: loaded.state.shelf)
         let gate = OperationGate(); operationGate = gate
+        fileActions = LocalFileActions(gate: gate)
         let operationJournal = OperationJournal(directory: directory.appendingPathComponent("Operations")); journal = operationJournal
         transferQueue = TransferQueue(executor: LocalOperationExecutor(journal: operationJournal), gate: gate)
         marker = ActiveOperationMarker(directory: directory)
@@ -71,13 +82,7 @@ final class AppServices {
                         Task { await controller.refresh(.left); await controller.refresh(.right) }
                     }
                 }
-                let count = self.activeJobCount
-                let marker = self.marker
-                do {
-                    let path = RuntimeIdentity.executableURL?.path ?? ""
-                    let uuid = RuntimeIdentity.executableUUID
-                    try await BlockingFileWorker.run { try marker.publish(pid: ProcessInfo.processInfo.processIdentifier, executablePath: path, executableUUID: uuid, activeJobs: count) }
-                } catch { self.startupDiagnostic = "Could not update operation status: \(error.localizedDescription)" }
+                self.updateMarker()
             }
         }
     }

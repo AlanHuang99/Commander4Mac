@@ -3,7 +3,7 @@ import CommanderCore
 import UniformTypeIdentifiers
 
 @MainActor
-final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate {
+final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate {
     var owner: FileTableView
     weak var table: CommanderTableView?
     var entries: [FileEntry] = []
@@ -11,6 +11,8 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
     var options = ViewOptions()
     var synchronizing = false
     var wasActive = false
+    var lastRenameRequest: UUID?
+    private var editingEntry: FileEntry?
     private var icons: [String: NSImage] = [:]
     init(owner: FileTableView) { self.owner = owner }
     func numberOfRows(in tableView: NSTableView) -> Int { entries.count }
@@ -61,6 +63,49 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
     func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
         guard let sort = tableView.sortDescriptors.first, let key = sort.key, let column = SortColumn(rawValue: key) else { return }
         owner.tab.options.sortColumn = column; owner.tab.options.ascending = sort.ascending
+    }
+    func beginRename() {
+        guard let table, table.selectedRowIndexes.count == 1, entries.indices.contains(table.selectedRow),
+              let cell = table.view(atColumn: 0, row: table.selectedRow, makeIfNecessary: true) as? NSTableCellView,
+              let field = cell.textField else { return }
+        editingEntry = entries[table.selectedRow]
+        field.isEditable = true; field.isSelectable = true; field.delegate = self
+        table.scrollRowToVisible(table.selectedRow)
+        table.editColumn(0, row: table.selectedRow, with: nil, select: true)
+    }
+    func tableView(_ tableView: NSTableView, shouldEdit tableColumn: NSTableColumn?, row: Int) -> Bool { editingEntry != nil && tableColumn?.identifier.rawValue == "name" }
+    func controlTextDidEndEditing(_ notification: Notification) {
+        guard let field = notification.object as? NSTextField, let entry = editingEntry else { return }
+        let canceled = (notification.userInfo?["NSTextMovement"] as? Int) == NSTextMovement.cancel.rawValue
+        let name = field.stringValue
+        field.isEditable = false; field.isSelectable = false; field.delegate = nil; editingEntry = nil
+        field.stringValue = entry.name
+        if !canceled && name != entry.name { owner.onRename(entry, name) }
+    }
+    func tableView(_ tableView: NSTableView, pasteboardWriterForRow row: Int) -> (any NSPasteboardWriting)? {
+        guard entries.indices.contains(row) else { return nil }
+        return entries[row].location.url as NSURL
+    }
+    private func dropDestination(row: Int, operation: NSTableView.DropOperation) -> FileLocation? {
+        if operation == .on && entries.indices.contains(row) { return entries[row].isDirectory ? entries[row].location : nil }
+        return owner.tab.location
+    }
+    private func dropKind(_ info: any NSDraggingInfo) -> TransferKind? {
+        let allowed = info.draggingSourceOperationMask
+        if NSEvent.modifierFlags.contains(.command) && !NSEvent.modifierFlags.contains(.option) && allowed.contains(.move) { return .move }
+        if allowed.contains(.copy) { return .copy }
+        return nil
+    }
+    func tableView(_ tableView: NSTableView, validateDrop info: any NSDraggingInfo, proposedRow row: Int, proposedDropOperation operation: NSTableView.DropOperation) -> NSDragOperation {
+        guard dropDestination(row: row, operation: operation) != nil, let kind = dropKind(info),
+              !FilePasteboard.readLocations(from: info.draggingPasteboard).isEmpty else { return [] }
+        return kind == .copy ? .copy : .move
+    }
+    func tableView(_ tableView: NSTableView, acceptDrop info: any NSDraggingInfo, row: Int, dropOperation: NSTableView.DropOperation) -> Bool {
+        guard let destination = dropDestination(row: row, operation: dropOperation), let kind = dropKind(info) else { return false }
+        let sources = FilePasteboard.readLocations(from: info.draggingPasteboard)
+        guard !sources.isEmpty else { return false }
+        owner.onDrop(.init(kind: kind, sources: sources, destinationDirectory: destination)); return true
     }
     @objc func activate() {
         guard let table, entries.indices.contains(table.clickedRow) else { return }

@@ -13,6 +13,9 @@ final class WorkspaceController {
     var sidebarVisible = true
     var shelfVisible = true
     var activityVisible = false
+    var renameRequest: UUID?
+    var renamePane: PaneID?
+    @ObservationIgnored weak var undoManager: UndoManager?
     init(services: AppServices = .shared) {
         self.services = services
         let initial = WorkspaceSession()
@@ -98,6 +101,68 @@ final class WorkspaceController {
         guard let ticket = forward ? tab.goForward() : tab.goBack() else { return }
         Task { await loader.load(target: .init(paneID: paneID, tabID: tab.id, ticket: ticket), options: .init(includeHidden: tab.options.includeHidden)) }
     }
+    func rename(_ entry: FileEntry, to name: String, pane: PaneID) {
+        guard name != entry.name else { return }
+        Task {
+            do {
+                services.beginFileAction(); defer { services.endFileAction() }
+                let mutation = try await services.fileActions.rename(entry.location, to: name)
+                registerUndo(mutation, name: "Rename")
+                await refresh(pane)
+                if workspace.pane(pane).activeTab.location == mutation.after.parent { workspace.pane(pane).activeTab.selection = [EntryID(mutation.after.url)] }
+            } catch { errorMessage = error.localizedDescription; await refresh(pane) }
+        }
+    }
+    func newFolder() {
+        let pane = workspace.activePane
+        let parent = workspace.activeTab.location
+        let alert = NSAlert(); alert.messageText = "New Folder"
+        alert.informativeText = parent.url.path
+        let field = NSTextField(string: "New Folder"); field.frame = NSRect(x: 0, y: 0, width: 280, height: 24)
+        alert.accessoryView = field; alert.addButton(withTitle: "Create"); alert.addButton(withTitle: "Cancel")
+        alert.window.initialFirstResponder = field
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let name = field.stringValue
+        Task {
+            do {
+                services.beginFileAction(); defer { services.endFileAction() }
+                let mutation = try await services.fileActions.createDirectory(named: name, in: parent)
+                registerUndo(mutation, name: "New Folder")
+                await refresh(pane)
+                if workspace.pane(pane).activeTab.location == parent { workspace.pane(pane).activeTab.selection = [EntryID(mutation.after.url)] }
+            } catch { errorMessage = error.localizedDescription }
+        }
+    }
+    private func registerUndo(_ mutation: LocalMutation, name: String) {
+        undoManager?.registerUndo(withTarget: self) { target in
+            Task { @MainActor in
+                do {
+                    target.services.beginFileAction(); defer { target.services.endFileAction() }
+                    try await target.services.fileActions.undo(mutation)
+                    await target.refresh(.left); await target.refresh(.right)
+                } catch { target.errorMessage = error.localizedDescription }
+            }
+        }
+        undoManager?.setActionName(name)
+    }
+    func trashSelection() {
+        let locations = workspace.activeTab.selectedEntries.map(\.location)
+        guard !locations.isEmpty else { return }
+        Task {
+            services.beginFileAction(); defer { services.endFileAction() }
+            let results = await services.fileActions.trash(locations)
+            let failures = results.filter { $0.state != .completed }
+            if !failures.isEmpty { errorMessage = failures.map { $0.source.url.lastPathComponent + ": " + ($0.detail ?? "Could not move to Trash") }.joined(separator: "\n") }
+            await refresh(.left); await refresh(.right)
+        }
+    }
+    func paste(_ kind: TransferKind) {
+        let sources = FilePasteboard.readLocations()
+        guard !sources.isEmpty else { return }
+        services.enqueue(.init(kind: kind, sources: sources, destinationDirectory: workspace.activeTab.location), owner: workspace.id)
+        activityVisible = true
+    }
+    func acceptDrop(_ request: TransferRequest) { services.enqueue(request, owner: workspace.id); activityVisible = true }
     func stageSelection() {
         let locations = workspace.activeTab.selectedEntries.map(\.location)
         guard !locations.isEmpty else { return }
@@ -127,6 +192,15 @@ final class WorkspaceController {
     func tableCommand(_ command: TableCommand, pane: PaneID) {
         workspace.activePane = pane
         switch command {
+        case .rename: if workspace.activeTab.selection.count == 1 { renamePane = pane; renameRequest = UUID() }
+        case .newFolder: newFolder()
+        case .trash: trashSelection()
+        case .copyClipboard: FilePasteboard.write(workspace.activeTab.selectedEntries.map(\.location))
+        case .pasteClipboard: paste(.copy)
+        case .moveClipboard: paste(.move)
+        case .copyPath:
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(workspace.activeTab.selectedEntries.map { $0.location.url.path }.joined(separator: "\n"), forType: .string)
         case .stage: stageSelection()
         case .copy: transferSelection(.copy, from: pane)
         case .move: transferSelection(.move, from: pane)

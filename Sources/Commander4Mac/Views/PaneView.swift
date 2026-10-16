@@ -34,7 +34,10 @@ struct PaneView: View {
                 FileTableView(tab: tab, paneID: paneID, isActive: workspace.activePane == paneID,
                     onFocus: { workspace.activePane = paneID },
                     onActivate: { controller.activate($0, pane: paneID) },
-                    onCommand: { controller.tableCommand($0, pane: paneID) })
+                    onCommand: { controller.tableCommand($0, pane: paneID) },
+                    renameRequest: controller.renamePane == paneID ? controller.renameRequest : nil,
+                    onRename: { controller.rename($0, to: $1, pane: paneID) },
+                    onDrop: { controller.acceptDrop($0) })
                 if let failure = tab.failure {
                     VStack(spacing: 12) {
                         Image(systemName: failure.category == .accessDenied ? "lock.shield" : "folder.badge.questionmark").font(.largeTitle)

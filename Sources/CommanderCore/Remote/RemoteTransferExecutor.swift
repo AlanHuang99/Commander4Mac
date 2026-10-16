@@ -1,5 +1,6 @@
 import Foundation
 import Darwin
+import CryptoKit
 
 /// Cross-provider copies never delete a source. Fully local jobs use the existing executor.
 public struct RemoteTransferExecutor: TransferExecuting {
@@ -64,7 +65,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
             guard value.mode & UInt16(S_IFMT) == UInt16(S_IFREG), value.size >= 0 else { throw unsupportedFile() }
             return .local(value)
         }
-        guard let value = try await remote.metadata(location), value.isRegularFile, let size = value.size, size <= UInt64(Int64.max), value.modified != nil else { throw unsupportedFile() }
+        guard let value = try await remote.metadata(location), value.isRegularFile, let size = value.size, size <= UInt64(Int64.max), (value.modified != nil || value.revision != nil) else { throw unsupportedFile() }
         return .remote(value)
     }
     private func unsupportedFile() -> FileOperationError { .message("Remote copies currently support regular files with size and modification metadata. Folders, packages, symlinks, and special files are not transferred.") }
@@ -149,6 +150,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
             let expectedSize: UInt64
             switch version { case .local(let value): expectedSize = UInt64(value.size); case .remote(let value): expectedSize = value.size! }
             var offset: UInt64 = 0
+            var digest = SHA256()
             if source.isLocal {
                 let sourceHandle = try await BlockingFileWorker.run { try Self.openReader(source.url, version: version) }
                 defer { try? sourceHandle.close() }
@@ -161,12 +163,13 @@ public struct RemoteTransferExecutor: TransferExecuting {
                         if bytes.isEmpty { break }
                         guard offset + UInt64(bytes.count) <= expectedSize else { throw FileOperationError.message("The source grew during copying.") }
                         try await writer.write(bytes, offset: offset)
+                        digest.update(data: bytes)
                         offset += UInt64(bytes.count); progress.bytesCopied += Int64(bytes.count)
                         let now = ProcessInfo.processInfo.systemUptime
                         if now - lastProgressTime >= 0.08 { emit(.progress(progress)); lastProgressTime = now }
                     }
                     try await writer.close()
-                } catch { try? await writer.close(); throw error }
+                } catch { await writer.abort(); throw error }
             } else {
                 let stageURL = stage!.url
                 let handle = try await BlockingFileWorker.run {
@@ -182,13 +185,14 @@ public struct RemoteTransferExecutor: TransferExecuting {
                         if bytes.isEmpty { break }
                         guard offset + UInt64(bytes.count) <= expectedSize else { throw FileOperationError.message("The remote source grew during copying.") }
                         try await BlockingFileWorker.run { try handle.write(contentsOf: bytes) }
+                        digest.update(data: bytes)
                         offset += UInt64(bytes.count); progress.bytesCopied += Int64(bytes.count)
                         let now = ProcessInfo.processInfo.systemUptime
                         if now - lastProgressTime >= 0.08 { emit(.progress(progress)); lastProgressTime = now }
                     }
                     try await reader.close()
                     try await BlockingFileWorker.run { try handle.synchronize(); try handle.close() }
-                } catch { try? await reader.close(); try? handle.close(); throw error }
+                } catch { await reader.abort(); try? handle.close(); throw error }
             }
             try cancellation.check()
             guard offset == expectedSize, try await sourceVersion(source) == version else { throw FileOperationError.message("The source changed or the copy was incomplete. The source has been retained.") }
@@ -218,7 +222,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
             }
             guard committed else { throw FileOperationError.message("The destination kept changing. The source was retained.") }
             try await verifyParent(request.destinationDirectory, identity: parentIdentity)
-            guard try await sourceVersion(destination!) == completedStage else {
+            guard try await verifyFinal(destination!, stage: completedStage, digest: Data(digest.finalize()), cancellation: cancellation) else {
                 throw FileOperationError.message("The finalized destination changed or could not be verified. The source was retained.")
             }
             if let container, let containerIdentity { try await cleanup(container, identity: containerIdentity) }
@@ -235,6 +239,26 @@ public struct RemoteTransferExecutor: TransferExecuting {
             return .init(id: itemID, source: source, destination: committed ? destination : nil,
                          state: partial ? .partial : (cancellation.isRequested ? .canceled : .failed), detail: detail)
         }
+    }
+    private func verifyFinal(_ destination: FileLocation, stage: SourceVersion, digest: Data, cancellation: OperationCancellation) async throws -> Bool {
+        let final = try await sourceVersion(destination)
+        guard destination.connectionProtocol == .webdav else { return final == stage }
+        guard case .remote(let before) = stage, case .remote(let after) = final, before.size == after.size else { return false }
+        if let tag = before.revision, tag == after.revision { return true }
+        // RFC 4918 permits validators to change during MOVE. Verify the bytes
+        // when a server cannot carry its strong validator across publication.
+        let reader = try await remote.openFile(destination, writeExclusive: false)
+        do {
+            var hash = SHA256(); var offset: UInt64 = 0
+            while true {
+                try cancellation.check(); let data = try await reader.read(offset: offset, length: 65536)
+                if data.isEmpty { break }; guard offset + UInt64(data.count) <= after.size! else { await reader.abort(); return false }
+                hash.update(data: data); offset += UInt64(data.count)
+            }
+            try await reader.close()
+            let unchanged = try await sourceVersion(destination) == final
+            return offset == after.size && Data(hash.finalize()) == digest && unchanged
+        } catch { await reader.abort(); throw error }
     }
     private static func openReader(_ url: URL, version: SourceVersion) throws -> FileHandle {
         let fd = open(url.path, O_RDONLY | O_NOFOLLOW)

@@ -280,7 +280,7 @@ private actor CitadelFileChannel: RemoteFileChannel {
             } onCancel: { Task { await self.abort() } }
         } catch { await abort(); throw error }
     }
-    private func abort() async {
+    func abort() async {
         closed = true
         // SSH child close waits for the peer. Closing the owned parent TCP
         // transport fails pending requests even when that peer is unresponsive.

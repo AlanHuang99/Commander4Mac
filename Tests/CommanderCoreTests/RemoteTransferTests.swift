@@ -11,6 +11,21 @@ final class RemoteTransferTests: XCTestCase, @unchecked Sendable {
                 return .init(decision)
             }, emit: { _ in })
     }
+    func testWebDAVMoveMayChangeETagButCannotChangeContents() async throws {
+        let f = try FixtureDirectory(); let source = try f.file("etag.txt", content: "original")
+        for corrupt in [false, true] {
+            let remote = MemoryRemote(webDAVRevisions: true, corruptAfterRename: corrupt)
+            let result = await run(.init(kind: .copy, sources: [.local(source)], destinationDirectory: remote.root), remote: remote, journal: f.url.appendingPathComponent(UUID().uuidString))
+            XCTAssertEqual(result.outcomes.first?.state, corrupt ? .partial : .completed, result.outcomes.first?.detail ?? "")
+        }
+    }
+    func testFailedUploadAbortsChannelWithoutCommittingSpool() async throws {
+        let f = try FixtureDirectory(); let file = try f.file("cancel", content: String(repeating: "x", count: 200000))
+        let token = OperationCancellation(); let remote = MemoryRemote(cancelAfterWrite: token)
+        _ = await run(.init(kind: .copy, sources: [.local(file)], destinationDirectory: remote.root), remote: remote, journal: f.url.appendingPathComponent("journal"), token: token)
+        let aborted = await remote.aborted; let closed = await remote.closed
+        XCTAssertEqual(aborted, 1); XCTAssertEqual(closed, 0)
+    }
     func testUploadDownloadLiteralNamesAndKeepBothPreserveSources() async throws {
         let f = try FixtureDirectory(); let name = "literal #$ 中文.txt"
         let source = try f.file(name, content: "network fixture"); let localDest = try f.directory("dest")
@@ -109,7 +124,10 @@ final class RemoteTransferTests: XCTestCase, @unchecked Sendable {
 }
 
 private actor MemoryRemote: RemoteFileAccess {
-    nonisolated let root = FileLocation.sftp(profileID: UUID(), path: try! RemotePath("/test"))
+    nonisolated let root: FileLocation
+    private let webDAVRevisions: Bool; private let corruptAfterRename: Bool
+    private(set) var aborted = 0; private(set) var closed = 0
+    func abortChannel() { aborted += 1 }; func closeChannel() { closed += 1 }
     private var files: [FileLocation: Data] = [:]
     private var stamps: [FileLocation: Date] = [:]
     private var reads = 0
@@ -120,7 +138,9 @@ private actor MemoryRemote: RemoteFileAccess {
     private var failAfterRename: Bool
     private let removeAfterRename: Bool
     private(set) var writeCount = 0
-    init(cancelAfterWrite: OperationCancellation? = nil, mutateSource: URL? = nil, failReads: Bool = false, raceOnRename: Bool = false, failAfterRename: Bool = false, removeAfterRename: Bool = false) {
+    init(webDAVRevisions: Bool = false, corruptAfterRename: Bool = false, cancelAfterWrite: OperationCancellation? = nil, mutateSource: URL? = nil, failReads: Bool = false, raceOnRename: Bool = false, failAfterRename: Bool = false, removeAfterRename: Bool = false) {
+        root = .remote(kind: webDAVRevisions ? .webdav : .sftp, profileID: UUID(), path: try! RemotePath("/test"))
+        self.webDAVRevisions = webDAVRevisions; self.corruptAfterRename = corruptAfterRename
         self.cancelAfterWrite = cancelAfterWrite; self.mutateSource = mutateSource; self.failReads = failReads; self.raceOnRename = raceOnRename; self.failAfterRename = failAfterRename; self.removeAfterRename = removeAfterRename
     }
     func seed(_ location: FileLocation, data: Data) { files[location] = data; stamps[location] = Date(timeIntervalSince1970: 100) }
@@ -128,7 +148,7 @@ private actor MemoryRemote: RemoteFileAccess {
     func list(_ location: FileLocation, options: ListingOptions) async throws -> DirectorySnapshot { .init(location: location, entries: []) }
     func metadata(_ location: FileLocation) async throws -> RemoteFileMetadata? {
         if location == root { return .init(size: nil, permissions: UInt32(S_IFDIR) | 0o755, modified: .distantPast) }
-        return files[location].map { .init(size: UInt64($0.count), permissions: UInt32(S_IFREG) | 0o600, modified: stamps[location]) }
+        return files[location].map { .init(size: UInt64($0.count), permissions: UInt32(S_IFREG) | 0o600, modified: webDAVRevisions ? nil : stamps[location], revision: webDAVRevisions ? "\"" + location.remotePath!.rawValue + "\"" : nil) }
     }
     func openFile(_ location: FileLocation, writeExclusive: Bool) async throws -> any RemoteFileChannel {
         if writeExclusive {
@@ -153,6 +173,7 @@ private actor MemoryRemote: RemoteFileAccess {
         guard files[destination] == nil else { throw FileOperationError.message("exists") }
         guard files[source] != nil else { throw FileOperationError.message("missing source") }
         files[destination] = files.removeValue(forKey: source); stamps[destination] = stamps.removeValue(forKey: source)
+        if corruptAfterRename { files[destination] = Data(repeating: 120, count: files[destination]!.count) }
         if removeAfterRename { files.removeValue(forKey: destination) }
         if failAfterRename { failAfterRename = false; throw FileOperationError.message("lost rename reply") }
     }
@@ -163,7 +184,8 @@ private actor MemoryChannel: RemoteFileChannel {
     init(server: MemoryRemote, location: FileLocation) { self.server = server; self.location = location }
     func read(offset: UInt64, length: UInt32) async throws -> Data { try await server.read(location, offset: offset, length: length) }
     func write(_ data: Data, offset: UInt64) async throws { try await server.write(location, data: data, offset: offset) }
-    func close() async throws { }
+    func close() async throws { await server.closeChannel() }
+    func abort() async { await server.abortChannel() }
 }
 
 private actor ConflictCounter { var count = 0; func increment() { count += 1 } }

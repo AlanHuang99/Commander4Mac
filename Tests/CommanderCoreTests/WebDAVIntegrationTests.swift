@@ -9,6 +9,14 @@ final class WebDAVIntegrationTests: XCTestCase, @unchecked Sendable {
         var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String); p.protocolKind = .webdav; p.secure = false; p.basePath = "/dav"
         return (root, p, c["secret"] as! String)
     }
+    func testUnifiedRouterConnectsAndKeepsProtocolIdentity() async throws {
+        let (_, p, secret) = try fixture(); let manager = RemoteConnectionManager()
+        try await manager.connect(p, secret: secret)
+        let root = FileLocation.webdav(profileID: p.id, path: try RemotePath("/"))
+        let listing = try await manager.list(root, options: .init()); XCTAssertFalse(listing.entries.isEmpty)
+        do { _ = try await manager.list(.smb(profileID: p.id, path: try RemotePath("/")), options: .init()); XCTFail("A profile cannot cross protocols") } catch { }
+        await manager.disconnectAll(); let connected = await manager.isConnected(p.id); XCTAssertFalse(connected)
+    }
     func testAuthenticatedRealBytesAndExclusiveMutations() async throws {
         let (fixture, p, secret) = try fixture(); let manager = WebDAVConnectionManager()
         try await manager.connect(p, secret: secret)

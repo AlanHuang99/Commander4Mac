@@ -3,6 +3,7 @@ import Foundation
 public actor RemoteConnectionManager: RemoteFileAccess {
     private let sftp = SFTPConnectionManager()
     private let smb = SMBConnectionManager()
+    private let webdav = WebDAVConnectionManager()
     private var kinds: [UUID: ConnectionProtocol] = [:]
     private var identities = ConnectionIdentityGuard()
     private var states: [UUID: SFTPConnectionState] = [:]
@@ -32,23 +33,23 @@ public actor RemoteConnectionManager: RemoteFileAccess {
             switch profile.protocolKind {
             case .sftp: try await sftp.connect(profile, secret: secret, attempt: attempt)
             case .smb: try await smb.connect(profile, secret: secret, attempt: attempt)
-            case .webdav: throw FileOperationError.message("WebDAV is not available in this build yet.")
+            case .webdav: try await webdav.connect(profile, secret: secret, attempt: attempt)
             }
             try Task.checkCancellation(); setState(.connected, id: profile.id)
         } catch { setState(error is HostKeyChallenge ? .verificationRequired : (error is CancellationError ? .disconnected : .failed), id: profile.id); throw error }
     }
     public func disconnect(_ id: UUID) async {
-        switch kinds[id] { case .sftp: await sftp.disconnect(id); case .smb: await smb.disconnect(id); default: break }
+        switch kinds[id] { case .sftp: await sftp.disconnect(id); case .smb: await smb.disconnect(id); case .webdav: await webdav.disconnect(id); default: break }
         setState(.disconnected, id: id)
     }
     public func disconnectAll() async { for id in Array(kinds.keys) { await disconnect(id) } }
-    public func cancelAttempt(_ id: UUID) async { await sftp.cancelAttempt(id); await smb.cancelAttempt(id) }
+    public func cancelAttempt(_ id: UUID) async { await sftp.cancelAttempt(id); await smb.cancelAttempt(id); await webdav.cancelAttempt(id) }
     public func isConnected(_ id: UUID) async -> Bool {
-        switch kinds[id] { case .sftp: return await sftp.isConnected(id); case .smb: return await smb.isConnected(id); default: return false }
+        switch kinds[id] { case .sftp: return await sftp.isConnected(id); case .smb: return await smb.isConnected(id); case .webdav: return await webdav.isConnected(id); default: return false }
     }
     private func provider(_ location: FileLocation) throws -> any RemoteFileAccess {
         guard let id = location.profileID, kinds[id] == location.connectionProtocol else { throw FileOperationError.message("This connection is disconnected. Open it from Connections.") }
-        switch location.connectionProtocol { case .sftp: return sftp; case .smb: return smb; default: throw FileOperationError.message("This remote protocol is unavailable.") }
+        switch location.connectionProtocol { case .sftp: return sftp; case .smb: return smb; case .webdav: return webdav; default: throw FileOperationError.message("This remote protocol is unavailable.") }
     }
     public func list(_ location: FileLocation, options: ListingOptions) async throws -> DirectorySnapshot {
         do { return try await provider(location).list(location, options: options) }

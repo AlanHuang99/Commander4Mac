@@ -26,6 +26,7 @@ struct ConnectionEditor: View {
                 Picker("Protocol", selection: $profile.protocolKind) {
                     Text("SFTP").tag(ConnectionProtocol.sftp)
                     Text("SMB").tag(ConnectionProtocol.smb)
+                    Text("WebDAV").tag(ConnectionProtocol.webdav)
                 }.accessibilityIdentifier("connection.protocol")
                 TextField("Name", text: $profile.name).accessibilityIdentifier("connection.name")
                 TextField("Server", text: $profile.host).accessibilityIdentifier("connection.host")
@@ -34,12 +35,17 @@ struct ConnectionEditor: View {
                     TextField("Share", text: $profile.share).accessibilityIdentifier("connection.share")
                     TextField("Domain (optional)", text: $profile.domain).accessibilityIdentifier("connection.domain")
                 }
+                if profile.protocolKind == .webdav {
+                    TextField("Base collection", text: $profile.basePath).accessibilityIdentifier("connection.basePath")
+                    Toggle("Use HTTPS", isOn: $profile.secure).accessibilityIdentifier("connection.https")
+                    if !profile.secure { Text("HTTP is allowed only for numeric loopback servers.").font(.caption).foregroundStyle(.secondary) }
+                }
                 TextField("Username", text: $profile.username).disabled(profile.authentication == .guest).accessibilityIdentifier("connection.username")
                 TextField("Start folder", text: $profile.initialPath).accessibilityIdentifier("connection.path")
                 Picker("Authentication", selection: $profile.authentication) {
                     Text("Password").tag(SFTPAuthentication.password)
                     if profile.protocolKind == .sftp { Text("OpenSSH Ed25519 key").tag(SFTPAuthentication.ed25519Key) }
-                    else { Text("Guest").tag(SFTPAuthentication.guest) }
+                    else { Text(profile.protocolKind == .webdav ? "Anonymous" : "Guest").tag(SFTPAuthentication.guest) }
                 }.accessibilityIdentifier("connection.authentication")
                 if profile.authentication == .ed25519Key {
                     HStack {
@@ -78,6 +84,9 @@ struct ConnectionEditor: View {
             }
         }.padding(24).frame(width: 510).interactiveDismissDisabled(busy)
             .onDisappear { submission.cancel() }
+            .onChange(of: profile.secure) { _, secure in
+                if profile.protocolKind == .webdav && (profile.port == 80 || profile.port == 443) { profile.port = secure ? 443 : 80 }
+            }
             .onChange(of: profile.protocolKind) { _, kind in
                 profile.port = kind.defaultPort; profile.authentication = .password; profile.keyReference = nil; profile.serverKey = nil
                 profile.initialPath = "/"; profile.share = ""; profile.domain = ""; profile.basePath = "/"; profile.secure = true

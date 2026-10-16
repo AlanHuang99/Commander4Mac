@@ -73,7 +73,7 @@ Text fields keep standard editing behavior. Hardware function-key settings can a
 
 ## Architecture and evidence
 
-`CommanderCore` owns provider listings, pane/tab state, bookmarks, persistence, transfer planning, a serial mutation gate, execution, and journals. The app supplies SwiftUI scenes, reusable AppKit table/collection views, menus, previews, and system integration. SFTP sessions are actor-owned with strict host-key validation. The [Citadel 0.12.1 snapshot](Vendor/Citadel/COMMANDER_PATCHES.md) supplies bounded READDIR, no-follow LSTAT, and packet limits. SMB serializes libsmb2 on bounded workers; WebDAV uses ephemeral URLSession authentication and bounded private disk spools. Network file channels use 64 KiB blocks. AMSMB2/libsmb2 revisions are pinned; see ThirdPartyNotices.txt. LGPL distribution/relinking requirements need review before shipping outside this development Mac. Credentials are kept in Keychain or memory. No privileged helper, recursive folder-size scanning, or eager thumbnails are used.
+`CommanderCore` owns provider listings, pane/tab state, bookmarks, persistence, transfer planning, a serial mutation gate, execution, and journals. The app supplies SwiftUI scenes, reusable AppKit table/collection views, menus, previews, and system integration. SFTP sessions are actor-owned with strict host-key validation. The [Citadel 0.12.1 snapshot](Vendor/Citadel/COMMANDER_PATCHES.md) supplies bounded READDIR, no-follow LSTAT, and packet limits. SMB serializes libsmb2 on bounded workers; WebDAV uses ephemeral URLSession authentication and bounded private disk spools. Network file channels use 64 KiB blocks. AMSMB2/libsmb2 revisions are pinned; see ThirdPartyNotices.txt. The production workflow bundles LGPL corresponding source, license notices and tested rebuild/replacement instructions; see the dependency licensing review. Credentials are kept in Keychain or memory. No privileged helper, recursive folder-size scanning, or eager thumbnails are used.
 
 - [Approved design](docs/superpowers/specs/2026-10-16-commander4mac-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-16-local-file-manager.md)
@@ -88,6 +88,10 @@ Text fields keep standard editing behavior. Hardware function-key settings can a
 
 The selected blue/teal folded-pane icon is included in the app, with its PNG source, ten-size iconset, and `.icns` export. See [icon design and format guide](Design/AppIcon/README.md).
 
-A signed local drag-to-Applications DMG can be built with `./script/build_dmg.sh`. It includes Retina background artwork, the Applications shortcut, and first-launch installation guidance before Full Disk Access setup. See [installer design and build instructions](Packaging/README.md). External distribution still requires the licensing and notarization work documented there.
+A signed local drag-to-Applications DMG can be built with `./script/build_dmg.sh`. It includes Retina background artwork, the Applications shortcut, and first-launch installation guidance before Full Disk Access setup. See [installer design and build instructions](Packaging/README.md). Production distribution uses the separate release and notarization workflow documented there.
 
 See [reliability, icon and installer acceptance](docs/verification/reliability-icon-installer.md) for the latest test and installed-app evidence.
+
+This product includes software developed by Niels Provos.
+
+See [release and notarization instructions](Packaging/DISTRIBUTION.md) and the [dependency license review](docs/verification/dependency-licensing.md).

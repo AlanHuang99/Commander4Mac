@@ -22,4 +22,4 @@ APP_ID="$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$APP_PATH/Conte
 /usr/bin/hdiutil verify "$STAGED_DMG" >/dev/null
 mv -f "$STAGED_DMG" "$DMG_PATH"
 echo "Created signed local preview: $DMG_PATH"
-echo 'External release requires notarization/stapling and the dependency distribution review.'
+echo 'Image creation does not notarize it. Use script/notarize.sh for production validation.'

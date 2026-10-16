@@ -1,3 +1,7 @@
 
 # Preserve upstream formatting in the pinned dependency snapshot.
 Vendor/Citadel/** -whitespace
+
+# Preserve upstream notice text verbatim, including original whitespace.
+Resources/ThirdPartyNotices.txt -whitespace
+Resources/OpenSource/ThirdPartyNotices.txt -whitespace

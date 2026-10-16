@@ -31,6 +31,11 @@ try:
     assert signature(packaged) == signature(source), "Packaged app differs from the signed source"
     assert os.readlink(mount / "Applications") == "/Applications"
     assert (mount / ".DS_Store").is_file(), "Missing Finder window layout"
+    if "--notarized" in sys.argv[3:]:
+        subprocess.run([sys.executable, str(root / "script/verify_release.py"), str(packaged)], check=True)
+        subprocess.run(["xcrun", "stapler", "validate", str(packaged)], check=True)
+        subprocess.run(["syspolicy_check", "distribution", str(packaged)], check=True)
+        subprocess.run(["spctl", "--assess", "--type", "execute", "--verbose=4", str(packaged)], check=True)
     print("Verified packaged app signature, source identity, Applications shortcut, and Finder layout.")
 finally:
     # Never remove a directory while it is still a mounted filesystem.

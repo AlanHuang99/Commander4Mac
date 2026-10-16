@@ -22,6 +22,7 @@ for scale in [1, 2] {
     text("COMMANDER4MAC", x: 44, top: 29, size: 11, weight: .semibold, ink: color(0.13, 0.36, 0.58))
     text("Install Commander4Mac", x: 44, top: 57, size: 29, weight: .semibold, ink: navy)
     text("Drag the app to Applications.", x: 44, top: 105, size: 16, weight: .regular, ink: secondary)
+    text("This product includes software developed by Niels Provos.", x: 44, top: 137, size: 10, weight: .regular, ink: secondary)
     // This is a directional cue, never a fake clickable control.
     let arrow = NSBezierPath(); arrow.move(to: NSPoint(x: 326, y: height - 232)); arrow.line(to: NSPoint(x: 393, y: height - 232))
     arrow.move(to: NSPoint(x: 380, y: height - 219)); arrow.line(to: NSPoint(x: 393, y: height - 232)); arrow.line(to: NSPoint(x: 380, y: height - 245))

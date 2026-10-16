@@ -16,6 +16,11 @@ struct AppCommands: Commands {
         return localSelection && controller.workspace.pane(controller.workspace.activePane.opposite).activeTab.location.isLocal
     }
     var body: some Commands {
+        CommandGroup(after: .appInfo) {
+            Button("Open Source Components…") {
+                if let url = Bundle.main.url(forResource: "OpenSource", withExtension: nil) { NSWorkspace.shared.open(url) }
+            }
+        }
         CommandGroup(replacing: .newItem) {
             Button("New Window") { openWindow(id: "workspace") }.keyboardShortcut("n")
             Button("New Tab") { controller?.newTab() }.keyboardShortcut("t").disabled(controller == nil)

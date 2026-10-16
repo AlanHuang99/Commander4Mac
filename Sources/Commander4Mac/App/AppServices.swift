@@ -6,6 +6,14 @@ import CommanderCore
 final class AppServices {
     static let shared = AppServices()
     let stateStore: ApplicationStateStore
+    let preferencesStore: PreferencesStore
+    var preferences: Preferences {
+        didSet {
+            do { try preferencesStore.save(preferences) }
+            catch { startupDiagnostic = "Could not save preferences: \(error.localizedDescription)" }
+            for controller in controllers.values.compactMap(\.value) { controller.workspace.defaultOptions = preferences.view.validated() }
+        }
+    }
     let favorites: FavoriteStore
     var stagedItems: [StagedItem]
     var startupDiagnostic: String?
@@ -17,10 +25,14 @@ final class AppServices {
     init() {
         let directory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
             .appendingPathComponent(Bundle.main.bundleIdentifier ?? "com.alanhuang.Commander4Mac.dev")
+        let settingsStore = PreferencesStore(directory: directory)
+        preferencesStore = settingsStore
+        let initialPreferences = settingsStore.load()
+        preferences = initialPreferences
         stateStore = ApplicationStateStore(directory: directory)
         let loaded = stateStore.loadRecovering()
         favorites = FavoriteStore(items: loaded.state.favorites)
-        stagedItems = loaded.state.shelf; pendingWindows = loaded.state.windows; startupDiagnostic = loaded.diagnostic
+        stagedItems = loaded.state.shelf; pendingWindows = initialPreferences.restoreSession ? loaded.state.windows : []; startupDiagnostic = loaded.diagnostic
     }
     func nextRestoredWorkspace() -> WorkspaceSession? { pendingWindows.isEmpty ? nil : pendingWindows.removeFirst().restore() }
     func additionalWindowsToRestore() -> Int {

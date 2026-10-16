@@ -17,6 +17,13 @@ struct PaneView: View {
                     .accessibilityIdentifier(paneID.rawValue + ".filter")
                 if !tab.filter.isEmpty { Button { tab.filter = "" } label: { Image(systemName: "xmark.circle.fill") }.buttonStyle(.plain).foregroundStyle(.secondary) }
                 Menu {
+                    Menu("Text Size") {
+                        ForEach(11...20, id: \.self) { size in Button("\(size) pt") { tab.options.textSize = Double(size) } }
+                    }
+                    Menu("List Icon Size") {
+                        ForEach([16,20,24,28,32], id: \.self) { size in Button("\(size) pt") { tab.options.listIconSize = Double(size) } }
+                    }
+                    Divider()
                     Toggle("Folders First", isOn: $tab.options.foldersFirst)
                     Toggle("Show Hidden Files", isOn: $tab.options.includeHidden)
                         .onChange(of: tab.options.includeHidden) { Task { await controller.refresh(paneID) } }

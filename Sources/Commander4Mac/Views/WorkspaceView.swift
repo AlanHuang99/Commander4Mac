@@ -27,6 +27,7 @@ struct WorkspaceView: View {
             }
         }
         .frame(minWidth: 980, minHeight: 620)
+        .preferredColorScheme(controller.services.preferences.appearance.colorScheme)
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button { controller.sidebarVisible.toggle() } label: { Image(systemName: "sidebar.left") }.help("Toggle Sidebar")

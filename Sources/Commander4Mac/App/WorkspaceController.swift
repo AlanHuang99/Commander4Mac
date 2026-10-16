@@ -19,7 +19,13 @@ final class WorkspaceController {
     }
     func start() async -> Int {
         guard !started else { return 0 }; started = true
-        if let restored = services.nextRestoredWorkspace() { workspace = restored; loader = DirectoryLoader(workspace: restored) }
+        let restored = services.nextRestoredWorkspace()
+        if let restored { workspace = restored; loader = DirectoryLoader(workspace: restored) }
+        workspace.defaultOptions = services.preferences.view.validated()
+        if restored == nil {
+            workspace.left.activeTab.options = services.preferences.view
+            workspace.right.activeTab.options = services.preferences.view
+        }
         services.register(self)
         errorMessage = services.startupDiagnostic
         await refresh(.left); await refresh(.right)
@@ -53,7 +59,7 @@ final class WorkspaceController {
     func openFavorite(_ favorite: Favorite, destination: OpenDestination? = nil, newTab: Bool = false) {
         switch LocationResolver().resolve(favorite.reference) {
         case .available(let location):
-            let route = destination ?? favorite.destination ?? .current
+            let route = destination ?? favorite.destination ?? services.preferences.defaultDestination
             let pane: PaneID? = route == .current ? nil : (route == .left ? .left : .right)
             open(location, in: pane, newTab: newTab)
         case .unavailable(let message), .needsRelink(let message): errorMessage = message

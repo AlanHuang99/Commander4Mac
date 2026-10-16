@@ -25,8 +25,10 @@ ERRORS
   echo "Full log: $LOG" >&2
 }
 BUILD_COMMAND=(/usr/bin/xcodebuild)
+SIGNING_OPTIONS=()
+if [[ "${COMMANDER_CI:-0}" == 1 ]]; then SIGNING_OPTIONS=(CODE_SIGNING_ALLOWED=NO); fi
 if [[ "$BUNDLE" == "Commander4MacUITests" ]]; then BUILD_COMMAND=(python3 "$ROOT_DIR/script/run_ui_tests.py"); fi
-if ! "${BUILD_COMMAND[@]}" -project Commander4Mac.xcodeproj -scheme "$SCHEME" -configuration "$CONFIGURATION" -destination 'platform=macOS' -derivedDataPath .build/xcode -only-testing:"$FILTER" "$ACTION" >"$LOG" 2>&1; then
+if ! "${BUILD_COMMAND[@]}" -project Commander4Mac.xcodeproj -scheme "$SCHEME" -configuration "$CONFIGURATION" -destination 'platform=macOS' -derivedDataPath .build/xcode -onlyUsePackageVersionsFromResolvedFile -only-testing:"$FILTER" "${SIGNING_OPTIONS[@]}" "$ACTION" >"$LOG" 2>&1; then
   report_failure; exit 1
 fi
 if [[ "$BUNDLE" == "CommanderCoreTests" ]]; then

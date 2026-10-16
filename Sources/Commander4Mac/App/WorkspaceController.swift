@@ -16,6 +16,7 @@ final class WorkspaceController {
     var renameRequest: UUID?
     var renamePane: PaneID?
     let quickLook = QuickLookController()
+    @ObservationIgnored var forceWindowClose = false
     @ObservationIgnored weak var window: NSWindow?
     enum FieldFocus { case path, filter, files }
     struct FocusRequest { let id = UUID(); let pane: PaneID; let field: FieldFocus }
@@ -25,8 +26,12 @@ final class WorkspaceController {
     func newTab() { open(workspace.activeTab.location, newTab: true) }
     func closeTab() {
         let pane = workspace.pane(workspace.activePane)
-        if pane.tabs.count == 1 && !pane.activeTab.pin.isPinned { window?.performClose(nil) }
+        if pane.tabs.count == 1 && !pane.activeTab.pin.isPinned { closeWindow() }
         else { pane.close(tabID: pane.activeTabID); services.saveSoon() }
+    }
+    func closeWindow() {
+        forceWindowClose = true; defer { forceWindowClose = false }
+        window?.performClose(nil)
     }
     func openSelection() { for entry in workspace.activeTab.selectedEntries { activate(entry, pane: workspace.activePane) } }
     func previewSelection() { quickLook.present(CommandRouter.previewItems(in: workspace)) }
@@ -91,6 +96,28 @@ final class WorkspaceController {
         case .unavailable(let message), .needsRelink(let message): errorMessage = message
         }
     }
+    func relinkFavorite(_ favorite: Favorite) {
+        let panel = NSOpenPanel(); panel.canChooseDirectories = true; panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false; panel.message = "Choose the folder for this favorite."
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        Task {
+            do {
+                let reference = try await BlockingFileWorker.run { try LocationResolver().reference(for: .local(url)) }
+                if let index = services.favorites.items.firstIndex(where: { $0.id == favorite.id }) {
+                    services.favorites.items[index].reference = reference; services.saveSoon()
+                }
+            } catch { errorMessage = error.localizedDescription }
+        }
+    }
+    func relinkStagedItem(_ item: StagedItem) {
+        let panel = NSOpenPanel(); panel.canChooseDirectories = true; panel.canChooseFiles = true
+        panel.allowsMultipleSelection = false; panel.message = "Choose the item to use for this shelf reference."
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        Task {
+            do { try await services.shelf.relink(id: item.id, to: .local(url)); services.saveSoon() }
+            catch { errorMessage = error.localizedDescription }
+        }
+    }
     func renameFavorite(_ favorite: Favorite) {
         let alert = NSAlert(); alert.messageText = "Rename Favorite"
         let field = NSTextField(string: favorite.name); field.frame = NSRect(x: 0, y: 0, width: 260, height: 24)
@@ -108,6 +135,7 @@ final class WorkspaceController {
     }
     func selectTab(_ tab: TabSession, pane: PaneID) {
         let paneState = workspace.pane(pane)
+        if paneState.activeTabID != tab.id { tab.switchStartedAt = ProcessInfo.processInfo.systemUptime }
         workspace.activePane = pane; focus(.files)
         if paneState.activeTabID == tab.id, tab.pin.home != nil {
             if let target = workspace.returnToPinnedFolder(in: pane, tabID: tab.id) {

@@ -7,6 +7,7 @@ enum TableCommand { case open, rename, preview, parent, focusOther, copy, move, 
 
 struct FileTableView: NSViewRepresentable {
     var tab: TabSession
+    var revision: UInt64
     var paneID: PaneID
     var isActive: Bool
     var onFocus: () -> Void
@@ -50,6 +51,7 @@ struct FileTableView: NSViewRepresentable {
         table.menu = menu
         scroll.documentView = table
         context.coordinator.table = table
+        context.coordinator.observe(scroll)
         return scroll
     }
     func updateNSView(_ scroll: NSScrollView, context: Context) {
@@ -58,14 +60,29 @@ struct FileTableView: NSViewRepresentable {
         guard let table = coordinator.table else { return }
         table.previewController = previewController
         table.onFocus = onFocus; table.onCommand = onCommand
+        for column in table.tableColumns { column.isHidden = !tab.options.visibleColumns.contains(column.identifier.rawValue) }
         table.rowHeight = max(tab.options.textSize + 9, tab.options.listIconSize + 6)
+        if coordinator.tabID != tab.id { coordinator.needsRestore = true }
+        let savedAnchor = tab.scrollAnchor
         coordinator.synchronizing = true
-        if coordinator.entries != tab.visibleEntries || coordinator.tabID != tab.id || coordinator.options != tab.options {
-            coordinator.entries = tab.visibleEntries; coordinator.tabID = tab.id; coordinator.options = tab.options
+        if coordinator.entriesRevision != tab.entriesRevision || coordinator.tabID != tab.id || coordinator.options != tab.options {
+            coordinator.entries = tab.visibleEntries
+            coordinator.entriesRevision = tab.entriesRevision
+            coordinator.indexByID = Dictionary(uniqueKeysWithValues: coordinator.entries.enumerated().map { ($0.element.id, $0.offset) })
+            coordinator.tabID = tab.id; coordinator.options = tab.options
             table.reloadData()
         }
-        let indexes = IndexSet(coordinator.entries.indices.filter { tab.selection.contains(coordinator.entries[$0].id) })
+        let indexes = IndexSet(tab.selection.compactMap { coordinator.indexByID[$0] })
         if table.selectedRowIndexes != indexes { table.selectRowIndexes(indexes, byExtendingSelection: false) }
+        if coordinator.needsRestore, !coordinator.entries.isEmpty {
+            if let savedAnchor, let index = coordinator.entries.firstIndex(where: { $0.id == savedAnchor }) {
+                table.scroll(NSPoint(x: 0, y: table.rect(ofRow: index).minY))
+            }
+            coordinator.needsRestore = false
+        }
+        table.setAccessibilityLabel((paneID == .left ? "Left" : "Right") + (isActive ? " active file list" : " file list"))
+        table.layoutSubtreeIfNeeded()
+        RuntimeMetrics.rendered(tab, lastGeneration: &coordinator.renderedGeneration)
         coordinator.synchronizing = false
         if isActive && !coordinator.wasActive { table.window?.makeFirstResponder(table) }
         if isActive, let focusRequest, coordinator.lastFocusRequest != focusRequest {
@@ -90,7 +107,7 @@ final class CommanderTableView: NSTableView {
     @objc func paste(_ sender: Any?) { onCommand?(.pasteClipboard) }
     var onFocus: (() -> Void)?
     var onCommand: ((TableCommand) -> Void)?
-    override func mouseDown(with event: NSEvent) { onFocus?(); super.mouseDown(with: event) }
+    override func becomeFirstResponder() -> Bool { let accepted = super.becomeFirstResponder(); if accepted { onFocus?() }; return accepted }
     override func rightMouseDown(with event: NSEvent) {
         onFocus?()
         let index = row(at: convert(event.locationInWindow, from: nil))
@@ -98,6 +115,7 @@ final class CommanderTableView: NSTableView {
         super.rightMouseDown(with: event)
     }
     override func keyDown(with event: NSEvent) {
+        RuntimeMetrics.record("keyDelivery", since: event.timestamp)
         if currentEditor() != nil { super.keyDown(with: event); return }
         if let command = FileTableCommandHandler.command(for: event) { onCommand?(command) }
         else { super.keyDown(with: event) }
@@ -111,7 +129,9 @@ final class CommanderTableView: NSTableView {
         let width = max(280, contentSize.width)
         let sizeWidth: CGFloat = 67
         let dateWidth: CGFloat = width > 430 ? 145 : 112
-        let widths = [max(100, width - sizeWidth - dateWidth), sizeWidth, dateWidth]
+        let usedSize: CGFloat = table.tableColumns[1].isHidden ? 0 : sizeWidth
+        let usedDate: CGFloat = table.tableColumns[2].isHidden ? 0 : dateWidth
+        let widths = [max(100, width - usedSize - usedDate), sizeWidth, dateWidth]
         for (column, target) in zip(table.tableColumns, widths) where abs(column.width - target) > 0.5 { column.width = target }
         if abs(table.frame.width - width) > 0.5 { table.setFrameSize(NSSize(width: width, height: table.frame.height)) }
         if contentView.bounds.origin.x != 0 { contentView.scroll(to: NSPoint(x: 0, y: contentView.bounds.origin.y)) }

@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import OSLog
 import CommanderCore
 
 @MainActor @Observable
@@ -22,20 +23,26 @@ final class AppServices {
     let journal: OperationJournal
     let marker: ActiveOperationMarker
     var jobs: [JobSnapshot] = []
+    var recoveryDiagnostic: String?
     var recoveryRecords: [JournalRecord] = []
     var conflictPresenter: UUID?
     private var shelfJobs: [UUID: Set<UUID>] = [:]
     private var jobOwners: [UUID: UUID] = [:]
+    private static let operationsLog = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Commander4Mac", category: "Operations")
+    private var jobStates: [UUID: JobState] = [:]
     private var finishedJobs: Set<UUID> = []
     private var observationTask: Task<Void, Never>?
     private var shortActionCount = 0
+    private var lastPublishedActivityCount: Int?
     var activeJobCount: Int { jobs.filter { !$0.state.isTerminal }.count + shortActionCount }
     func beginFileAction() { shortActionCount += 1; updateMarker() }
     func endFileAction() { shortActionCount = max(0, shortActionCount - 1); updateMarker() }
     private func updateMarker() {
+        guard lastPublishedActivityCount != activeJobCount else { return }
         do {
             try marker.publish(pid: ProcessInfo.processInfo.processIdentifier,
                 executablePath: RuntimeIdentity.executableURL?.path ?? "", executableUUID: RuntimeIdentity.executableUUID, activeJobs: activeJobCount)
+            lastPublishedActivityCount = activeJobCount
         } catch { startupDiagnostic = "Could not update operation status: \(error.localizedDescription)" }
     }
     var pendingConflict: TransferConflict? { jobs.compactMap(\.pendingConflict).first }
@@ -78,11 +85,15 @@ final class AppServices {
         marker = ActiveOperationMarker(directory: directory)
          pendingWindows = initialPreferences.restoreSession ? loaded.state.windows : []; startupDiagnostic = loaded.diagnostic
         observationTask = Task { [weak self, transferQueue, operationJournal] in
-            let records = try? await BlockingFileWorker.run { try operationJournal.recoverableJobs() }
-            self?.recoveryRecords = records ?? []
+            do { self?.recoveryRecords = try await BlockingFileWorker.run { try operationJournal.recoverableJobs() } }
+            catch { self?.recoveryDiagnostic = "Could not read interrupted-operation records: \(error.localizedDescription)" }
             for await snapshots in await transferQueue.snapshots() {
                 guard let self else { return }
                 self.jobs = snapshots
+                for job in snapshots where self.jobStates[job.id] != job.state {
+                    self.jobStates[job.id] = job.state
+                    Self.operationsLog.info("job=\(job.id.uuidString, privacy: .public) state=\(job.state.rawValue, privacy: .public)")
+                }
                 if let conflict = self.pendingConflict {
                     let owner = self.jobOwners[conflict.jobID]
                     self.conflictPresenter = owner.flatMap { self.controllers[$0]?.value == nil ? nil : $0 } ?? self.controllers.keys.first
@@ -99,6 +110,16 @@ final class AppServices {
                 }
                 self.updateMarker()
             }
+        }
+    }
+    func keepRecoveryFiles(_ record: JournalRecord) {
+        Task {
+            var reviewed = record; reviewed.phase = .complete; reviewed.detail = "Reviewed by the user. Files retained without replay."
+            do {
+                let journal = journal; let captured = reviewed
+                try await BlockingFileWorker.run { try journal.record(captured) }
+                recoveryRecords.removeAll { $0.itemID == record.itemID }
+            } catch { recoveryDiagnostic = error.localizedDescription }
         }
     }
     func enqueue(_ request: TransferRequest, owner: UUID, shelfIDs: Set<UUID>? = nil) {

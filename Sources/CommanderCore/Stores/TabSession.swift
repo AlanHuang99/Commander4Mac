@@ -3,6 +3,8 @@ import Observation
 
 @MainActor @Observable
 public final class TabSession: Identifiable {
+    @ObservationIgnored public var loadStartedAt: TimeInterval = 0
+    @ObservationIgnored public var switchStartedAt: TimeInterval?
     public let id: UUID
     public private(set) var location: FileLocation
     public var pin: TabPin = .none
@@ -10,9 +12,15 @@ public final class TabSession: Identifiable {
     public var unresolvedReference: LocationReference?
     public var scrollAnchor: EntryID?
     public var filter = "" { didSet { rebuildVisibleEntries() } }
-    public var options: ViewOptions { didSet { rebuildVisibleEntries() } }
+    public var options: ViewOptions {
+        didSet {
+            if oldValue.sortColumn != options.sortColumn || oldValue.ascending != options.ascending || oldValue.foldersFirst != options.foldersFirst || oldValue.includeHidden != options.includeHidden { rebuildVisibleEntries() }
+        }
+    }
     public private(set) var snapshot: DirectorySnapshot?
-    public private(set) var visibleEntries: [FileEntry] = []
+    public private(set) var entriesRevision: UInt64 = 0
+    // Notify via entriesRevision so Observation does not compare every file on the main thread.
+    @ObservationIgnored public private(set) var visibleEntries: [FileEntry] = []
     public private(set) var isLoading = false
     public private(set) var failure: FileFailure?
     public private(set) var generation: UInt64 = 0
@@ -37,18 +45,30 @@ public final class TabSession: Identifiable {
         return begin(location)
     }
     private func begin(_ location: FileLocation) -> NavigationTicket {
-        if self.location != location { snapshot = nil; visibleEntries = []; selection = []; filter = ""; scrollAnchor = nil }
+        if self.location != location { snapshot = nil; visibleEntries = []; entriesRevision &+= 1; selection = []; filter = ""; scrollAnchor = nil }
+        loadStartedAt = ProcessInfo.processInfo.systemUptime
         self.location = location; generation &+= 1; isLoading = true; failure = nil
         return NavigationTicket(tabID: id, generation: generation, location: location)
     }
     @discardableResult public func apply(_ snapshot: DirectorySnapshot, for ticket: NavigationTicket) -> Bool {
-        guard ticket.tabID == id, ticket.generation == generation, ticket.location == location else { return false }
+        guard ticket.tabID == id, ticket.generation == generation, ticket.location == location, snapshot.location == location else { return false }
+        if let previous = self.snapshot {
+            let newIDs = Set(snapshot.entries.map(\.id))
+            let oldGroups = Dictionary(grouping: previous.entries.filter { $0.fileIdentity != nil }, by: { $0.fileIdentity! })
+            let newGroups = Dictionary(grouping: snapshot.entries.filter { $0.fileIdentity != nil }, by: { $0.fileIdentity! })
+            var replacements: [EntryID: EntryID] = [:]
+            for (identity, old) in oldGroups where old.count == 1 && !newIDs.contains(old[0].id) {
+                if let new = newGroups[identity], new.count == 1 { replacements[old[0].id] = new[0].id }
+            }
+            selection = Set(selection.map { replacements[$0] ?? $0 })
+            if let anchor = scrollAnchor { scrollAnchor = replacements[anchor] ?? anchor }
+        }
         self.snapshot = snapshot; isLoading = false; failure = nil; rebuildVisibleEntries(); return true
     }
     @discardableResult public func fail(_ error: Error, for ticket: NavigationTicket) -> Bool {
         guard ticket.tabID == id, ticket.generation == generation else { return false }
         failure = (error as? FileFailure) ?? FileFailure(error, at: location)
-        isLoading = false; snapshot = nil; visibleEntries = []; return true
+        isLoading = false; snapshot = nil; visibleEntries = []; entriesRevision &+= 1; return true
     }
     public func goBack() -> NavigationTicket? {
         guard canGoBack else { return nil }; historyIndex -= 1; return begin(history[historyIndex])
@@ -75,6 +95,7 @@ public final class TabSession: Identifiable {
             }
             return options.ascending ? order == .orderedAscending : order == .orderedDescending
         }
+        entriesRevision &+= 1
         visibleEntries = rows
         selection.formIntersection(Set(rows.map(\.id)))
     }

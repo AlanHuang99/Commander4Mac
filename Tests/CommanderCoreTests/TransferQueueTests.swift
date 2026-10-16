@@ -44,6 +44,17 @@ final class TransferQueueTests: XCTestCase, @unchecked Sendable {
         try await eventually { await queue.currentSnapshots().last?.state == .canceled }
         XCTAssertEqual(try String(contentsOf: d.appendingPathComponent("a"), encoding: .utf8), "old")
     }
+    func testCancelRequestRemainsPendingUntilExecutorHasStopped() async throws {
+        let f = try FixtureDirectory(); let a = try f.file("a"); let d = try f.directory("dest")
+        let executor = HeldExecutor(); let queue = TransferQueue(executor: executor)
+        let id = await queue.enqueue(.init(kind: .copy, sources: [.local(a)], destinationDirectory: .local(d)))
+        try await eventually { await executor.startedCount == 1 }
+        await queue.cancel(jobID: id)
+        let stopping = await queue.currentSnapshots().first?.state
+        XCTAssertEqual(stopping, .cancelRequested)
+        await executor.release()
+        try await eventually { await queue.currentSnapshots().first?.state == .canceled }
+    }
     func testTwoJobsNeverExecuteTogether() async throws {
         let f = try FixtureDirectory(); let a = try f.file("a"); let d = try f.directory("dest")
         let executor = HeldExecutor(); let queue = TransferQueue(executor: executor)
@@ -71,7 +82,7 @@ private actor HeldExecutor: TransferExecuting {
         active += 1; maximum = max(maximum, active); requests.append(plan.request)
         await withCheckedContinuation { continuation = $0 }
         active -= 1
-        return .init(jobID: plan.request.id, outcomes: [], state: .completed)
+        return .init(jobID: plan.request.id, outcomes: [], state: cancellation.isRequested ? .canceled : .completed)
     }
 }
 private func eventually(_ condition: @escaping @Sendable () async -> Bool) async throws {

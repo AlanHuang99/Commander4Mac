@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-16",
+  "installedApp": "/Applications/Commander4Mac Dev.app",
+  "verifiedProcessPathAndUUID": true,
+  "termination": "SIGKILL during recursive copy",
+  "journalPhaseAfterKill": "copying",
+  "sourceEntryCountAfterRelaunch": 10000,
+  "partialEntryCountAfterKillAndRelaunch": 113,
+  "finalDestinationAbsent": true,
+  "automaticReplayObserved": false,
+  "automaticCleanupObserved": false,
+  "explicitKeepFilesAcknowledgementPersisted": true
+}

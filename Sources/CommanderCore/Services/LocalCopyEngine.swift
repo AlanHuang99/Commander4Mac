@@ -18,12 +18,12 @@ public struct LocalCopyEngine: FileCopying {
             let context = Unmanaged<CopyContext>.fromOpaque(opaque).takeUnretainedValue()
             if context.cancellation.isRequested { return Int32(COPYFILE_QUIT) }
             if stage == Int32(COPYFILE_ERR) { return Int32(COPYFILE_QUIT) }
+            if what == Int32(COPYFILE_RECURSE_FILE) && stage == Int32(COPYFILE_START) { context.beginFile() }
             if what == Int32(COPYFILE_COPY_DATA), let state {
                 var copied: off_t = 0
-                if copyfile_state_get(state, UInt32(COPYFILE_STATE_COPIED), &copied) == 0 {
-                    context.report(copied: Int64(copied), finished: stage == Int32(COPYFILE_FINISH))
-                }
+                if copyfile_state_get(state, UInt32(COPYFILE_STATE_COPIED), &copied) == 0 { context.report(copied: Int64(copied)) }
             }
+            if what == Int32(COPYFILE_RECURSE_FILE) && stage == Int32(COPYFILE_FINISH) { context.finishFile() }
             return context.cancellation.isRequested ? Int32(COPYFILE_QUIT) : Int32(COPYFILE_CONTINUE)
         }
         guard copyfile_state_set(state, UInt32(COPYFILE_STATE_STATUS_CB), unsafeBitCast(callback, to: UnsafeRawPointer.self)) == 0,
@@ -35,6 +35,7 @@ public struct LocalCopyEngine: FileCopying {
         let copyError = errno
         if cancellation.isRequested { throw CancellationError() }
         if status != 0 { throw NSError(domain: NSPOSIXErrorDomain, code: Int(copyError)) }
+        context.flush()
     }
 }
 private final class CopyContext {
@@ -46,12 +47,13 @@ private final class CopyContext {
     init(cancellation: OperationCancellation, progress: @escaping @Sendable (CopyProgress) -> Void) {
         self.cancellation = cancellation; self.progress = progress
     }
-    func report(copied: Int64, finished: Bool) {
+    private var currentBytes: Int64 = 0
+    func beginFile() { currentBytes = 0 }
+    func report(copied: Int64) { currentBytes = max(currentBytes, copied); emitIfDue() }
+    func finishFile() { completedBytes += currentBytes; currentBytes = 0; files += 1; emitIfDue() }
+    func flush() { progress(.init(bytesCopied: completedBytes + currentBytes, completedItems: files)) }
+    private func emitIfDue() {
         let now = DispatchTime.now().uptimeNanoseconds
-        let total = completedBytes + copied
-        if finished { completedBytes = total; files += 1 }
-        if finished || now - lastReport > 80_000_000 {
-            lastReport = now; progress(.init(bytesCopied: total, completedItems: files))
-        }
+        if now - lastReport > 80_000_000 { lastReport = now; flush() }
     }
 }

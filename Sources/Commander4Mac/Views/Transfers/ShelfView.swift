@@ -9,7 +9,7 @@ struct ShelfView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Label("Shelf", systemImage: "tray.full").fontWeight(.semibold)
-                Text("Stage files from any folder").foregroundStyle(.secondary)
+                Text(controller.services.shelf.items.isEmpty ? "Drop files here to collect them for later" : "Stage files from any folder").foregroundStyle(.secondary)
                 Spacer()
                 Button("Add Selection") { controller.stageSelection() }
                     .disabled(controller.workspace.activeTab.selection.isEmpty)
@@ -17,15 +17,12 @@ struct ShelfView: View {
                     .disabled(controller.services.shelf.items.isEmpty)
                 Button { controller.shelfVisible = false } label: { Image(systemName: "xmark") }.buttonStyle(.plain).help("Hide Shelf")
             }.font(.system(size: 12))
-            if controller.services.shelf.items.isEmpty {
-                Text("Drop files here to collect them for a later transfer.").foregroundStyle(.secondary)
-                    .font(.callout).frame(maxWidth: .infinity, minHeight: 32)
-            } else {
+            if !controller.services.shelf.items.isEmpty {
                 ScrollView(.horizontal) {
                     HStack(spacing: 7) {
                         ForEach(controller.services.shelf.items) { item in
                             HStack(spacing: 6) {
-                                Image(systemName: "doc")
+                                Image(systemName: controller.services.shelf.unavailable[item.id] == nil ? "doc" : "exclamationmark.triangle")
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(item.displayName).lineLimit(1)
                                     Text(item.reference.displayURL.deletingLastPathComponent().path).font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
@@ -33,16 +30,20 @@ struct ShelfView: View {
                                 Button {
                                     controller.services.shelf.remove(ids: [item.id]); controller.services.saveSoon()
                                 } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }.buttonStyle(.plain).help("Remove from Shelf")
-                            }.font(.system(size: 12)).padding(7).background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
+                            }.contextMenu { Button("Relink Item…") { controller.relinkStagedItem(item) } }
+                                .help(controller.services.shelf.unavailable[item.id] ?? item.reference.displayURL.path)
+                                .font(.system(size: 12)).padding(7).background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
                         }
                     }
                 }.frame(height: 48)
             }
-            HStack(spacing: 18) {
-                transferButtons(.left)
-                Divider().frame(height: 26)
-                transferButtons(.right)
-            }.disabled(controller.services.shelf.items.isEmpty)
+            if !controller.services.shelf.items.isEmpty {
+                HStack(spacing: 18) {
+                    transferButtons(.left)
+                    Divider().frame(height: 26)
+                    transferButtons(.right)
+                }
+            }
         }
         .padding(12)
         .background(dropTargeted ? Color.accentColor.opacity(0.1) : Color(nsColor: .controlBackgroundColor))

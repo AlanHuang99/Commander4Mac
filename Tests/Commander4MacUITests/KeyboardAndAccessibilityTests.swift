@@ -1,6 +1,26 @@
 import XCTest
 
 @MainActor final class KeyboardAndAccessibilityTests: XCTestCase {
+    func testCommandWClosesTabBeforeWindow() {
+        let app = XCUIApplication(); app.launchArguments = ["-accessSetupAcknowledged", "YES"]; app.launch()
+        XCTAssertTrue(app.tables["left.fileTable"].waitForExistence(timeout: 8))
+        let windowID = app.windows.firstMatch.identifier
+        app.typeKey("t", modifierFlags: .command)
+        app.typeKey("w", modifierFlags: .command)
+        XCTAssertTrue(app.windows[windowID].exists, "Closing one of two tabs must preserve its window")
+        app.terminate()
+    }
+    func testClosingSettingsDoesNotRouteToTheFileWindow() {
+        let app = XCUIApplication(); app.launchArguments = ["-accessSetupAcknowledged", "YES"]; app.launch()
+        XCTAssertTrue(app.tables["left.fileTable"].waitForExistence(timeout: 8))
+        app.typeKey(",", modifierFlags: .command)
+        let settings = app.windows["com_apple_SwiftUI_Settings_window"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 5))
+        app.typeKey("w", modifierFlags: .command)
+        XCTAssertTrue(settings.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.tables["left.fileTable"].exists)
+        app.terminate()
+    }
     func testPathFilterAndTabsRemainWindowLocal() {
         let app = XCUIApplication(); app.launchArguments = ["-accessSetupAcknowledged", "YES"]; app.launch()
         XCTAssertTrue(app.tables["left.fileTable"].waitForExistence(timeout: 8))

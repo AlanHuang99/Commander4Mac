@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 public struct LocalOperationExecutor: Sendable {
     private let journal: OperationJournal
@@ -27,6 +28,7 @@ public struct LocalOperationExecutor: Sendable {
                              policy: JobConflictPolicy, emit: @escaping @Sendable (OperationEvent) -> Void) async -> ItemOperationOutcome {
         var destination = item.destination
         var staging: URL?
+        var ownedStageIdentity: FileIdentity?
         var preserveStaging = false
         var committed = false
         var record = JournalRecord(jobID: plan.request.id, itemID: item.id, source: item.source, destination: destination, staging: nil, phase: .planned)
@@ -59,9 +61,15 @@ public struct LocalOperationExecutor: Sendable {
                 }
             }
             let sourceManifest = try await manifest(item.source.url, cancellation: cancellation)
-            let temporary = destination.deletingLastPathComponent().appendingPathComponent(".commander4mac-" + item.id.uuidString + ".partial")
-            staging = temporary; record.staging = temporary; record.phase = .copying
+            let container = destination.deletingLastPathComponent().appendingPathComponent(".commander4mac-" + item.id.uuidString + ".partial")
+            let temporary = container.appendingPathComponent("payload")
+            record.staging = container; record.phase = .copying
             try await write(record)
+            let containerIdentity = try await BlockingFileWorker.run {
+                guard mkdir(container.path, 0o700) == 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+                return try ItemVersion.read(at: container).identity
+            }
+            staging = container; ownedStageIdentity = containerIdentity
             try await copy(item.source.url, to: temporary, cancellation: cancellation, emit: emit)
             try cancellation.check()
             guard try await manifest(item.source.url, cancellation: cancellation) == sourceManifest else {
@@ -82,12 +90,14 @@ public struct LocalOperationExecutor: Sendable {
                         throw FileOperationError.message("A concurrent destination change was preserved at \(temporary.path). Review both items before continuing.")
                     }
                     record.phase = .destinationReady; try await write(record)
-                    try await removeOwnedStage(temporary)
+                    try await removeOwnedStage(container, expecting: containerIdentity)
                     staging = nil; preserveStaging = false; finalized = true; break
                 }
                 do {
                     try await rename(temporary, to: destination)
-                    committed = true; staging = nil
+                    committed = true
+                    try await removeOwnedStage(container, expecting: containerIdentity)
+                    staging = nil
                     record.phase = .destinationReady; record.staging = nil; try await write(record)
                     finalized = true; break
                 } catch {
@@ -95,7 +105,7 @@ public struct LocalOperationExecutor: Sendable {
                     guard !committed, ns.domain == NSPOSIXErrorDomain, ns.code == Int(EEXIST) else { throw error }
                     target = try await chooseTarget(item, destination: destination, jobID: plan.request.id, policy: policy, cancellation: cancellation)
                     if target.skip {
-                        try await removeOwnedStage(temporary); staging = nil
+                        try await removeOwnedStage(container, expecting: containerIdentity); staging = nil
                         record.phase = .complete; record.staging = nil; try await write(record)
                         return outcome(item, destination, .skipped)
                     }
@@ -113,8 +123,8 @@ public struct LocalOperationExecutor: Sendable {
             record.phase = .complete; record.staging = nil; try await write(record)
             return outcome(item, destination, .completed)
         } catch {
-            if let staging, !preserveStaging {
-                do { try await removeOwnedStage(staging) }
+            if let staging, let identity = ownedStageIdentity, !preserveStaging {
+                do { try await removeOwnedStage(staging, expecting: identity) }
                 catch { preserveStaging = true }
             }
             let canceled = error is CancellationError || cancellation.isRequested
@@ -170,11 +180,13 @@ public struct LocalOperationExecutor: Sendable {
     private func rename(_ source: URL, to destination: URL) async throws { try await BlockingFileWorker.run { try backend.renameExclusive(from: source, to: destination) } }
     private func swap(_ first: URL, _ second: URL) async throws { try await BlockingFileWorker.run { try backend.swap(first, second) } }
     private func removeSource(_ source: URL, expecting expected: ItemVersion) async throws { try await BlockingFileWorker.run { try backend.removeSource(at: source, expecting: expected) } }
-    private func removeOwnedStage(_ url: URL) async throws {
-        guard url.lastPathComponent.hasPrefix(".commander4mac-") else { throw FileOperationError.message("Refusing to remove an unrelated staging path.") }
+    private func removeOwnedStage(_ url: URL, expecting identity: FileIdentity) async throws {
         try await BlockingFileWorker.run {
             do {
-                _ = try ItemVersion.read(at: url)
+                let actual = try ItemVersion.read(at: url)
+                guard actual.identity == identity, actual.isDirectory else {
+                    throw FileOperationError.message("The staging folder changed identity. It has been left for review at \(url.path).")
+                }
                 try FileManager.default.removeItem(at: url)
             } catch let error as NSError where error.domain == NSPOSIXErrorDomain && error.code == Int(ENOENT) { }
         }

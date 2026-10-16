@@ -10,15 +10,21 @@ extension FocusedValues {
     }
 }
 struct AppCommands: Commands {
-    @FocusedValue(\.workspaceController) private var controller
+    @FocusedValue(\.workspaceController) private var focusedController
+    private var controller: WorkspaceController? {
+        guard let controller = focusedController, controller.window?.isKeyWindow == true else { return nil }
+        return controller
+    }
     @Environment(\.openWindow) private var openWindow
     private var hasSelection: Bool { controller?.workspace.activeTab.selection.isEmpty == false && controller?.isEditingText == false }
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
             Button("New Window") { openWindow(id: "workspace") }.keyboardShortcut("n")
             Button("New Tab") { controller?.newTab() }.keyboardShortcut("t").disabled(controller == nil)
-            Button("Close Tab") { controller?.closeTab() }.keyboardShortcut("w").disabled(controller == nil)
-            Button("Close Window") { NSApp.keyWindow?.performClose(nil) }.keyboardShortcut("w", modifiers: [.command, .shift])
+            Button(controller == nil ? "Close Window" : "Close Tab") {
+                if let controller { controller.closeTab() } else { NSApp.keyWindow?.performClose(nil) }
+            }
+            Button("Close Window") { if let controller { controller.closeWindow() } else { NSApp.keyWindow?.performClose(nil) } }.keyboardShortcut("w", modifiers: [.command, .shift])
         }
         CommandGroup(before: .saveItem) {
             Button("Open") { controller?.openSelection() }.keyboardShortcut("o").disabled(!hasSelection)

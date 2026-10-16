@@ -7,14 +7,29 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
     var owner: FileTableView
     weak var table: CommanderTableView?
     var entries: [FileEntry] = []
+    var entriesRevision: UInt64?
+    var indexByID: [EntryID: Int] = [:]
     var tabID: UUID?
     var options = ViewOptions()
     var synchronizing = false
     var wasActive = false
+    var renderedGeneration: UInt64?
+    var needsRestore = true
+    private var scrollObserver: NotificationToken?
+    func observe(_ scroll: NSScrollView) {
+        scroll.contentView.postsBoundsChangedNotifications = true
+        scrollObserver = NotificationToken(NotificationCenter.default.addObserver(forName: NSView.boundsDidChangeNotification, object: scroll.contentView, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, !self.synchronizing, let table = self.table else { return }
+                let index = table.rows(in: table.visibleRect).location
+                if self.entries.indices.contains(index) { self.owner.tab.scrollAnchor = self.entries[index].id }
+            }
+        })
+    }
     var lastFocusRequest: UUID?
     var lastRenameRequest: UUID?
     private var editingEntry: FileEntry?
-    private var icons: [String: NSImage] = [:]
+
     init(owner: FileTableView) { self.owner = owner }
     func numberOfRows(in tableView: NSTableView) -> Int { entries.count }
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
@@ -44,12 +59,7 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
         switch key {
         case "name":
             cell.textField?.stringValue = entry.name; cell.toolTip = entry.location.url.path
-            let iconKey = entry.kind == .directory ? "folder" : (entry.kind == .package ? "app" : entry.location.url.pathExtension)
-            if icons[iconKey] == nil {
-                if icons.count > 128 { icons.removeAll() }
-                icons[iconKey] = NSWorkspace.shared.icon(for: entry.kind == .directory ? .folder : (entry.kind == .package ? .application : (UTType(filenameExtension: iconKey) ?? .item)))
-            }
-            cell.imageView?.image = icons[iconKey]
+            cell.imageView?.image = FileIconCache.shared.icon(for: entry)
             cell.imageView?.constraints.filter { $0.firstAttribute == .width || $0.firstAttribute == .height }.forEach { $0.constant = options.listIconSize }
         case "size": cell.textField?.stringValue = entry.byteSize.map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) } ?? "–"
         case "modified": cell.textField?.stringValue = entry.modificationDate?.formatted(date: .abbreviated, time: .shortened) ?? ""

@@ -1,32 +1,60 @@
 # Commander4Mac
 
-A native macOS file explorer built around two independent panes, fast keyboard navigation, and useful defaults.
+A native macOS file manager with two independent panes. The local development build is installed at `/Applications/Commander4Mac Dev.app`.
 
-## Project status
+## Local development build
 
-As of October 16, 2026, the product design is approved. The repository contains the design, local-release implementation plan, and reference research. Application implementation has not started.
+Implemented: independent tabs and histories, locked and navigable pins, bookmarks and favorite routing, a shared staging shelf, list and icon views, System/Light/Dark appearance, independent text/icon sizing, and workspace restoration. Local operations include queued copy/move, explicit conflicts, cancellation, metadata preservation, rename, new folder, macOS Trash, safe rename/new-folder undo, file URL clipboard actions, Quick Look, and Open With.
+
+The app is a signed development build. Native drag source/destination handlers are implemented, but end-to-end drag completion remains unverified. The XCTest UI runner stalls on this Mac. See [local acceptance](docs/verification/local-release.md) for exact coverage and limitations. Remote SFTP, SMB connection management, and WebDAV are the next phase. Existing mounted volumes can be browsed through the local provider.
+
+## Build and run
+
+Requirements: macOS 15 or later, Xcode with Swift 6, XcodeGen, and an available signing identity. Tested here with Xcode 27.0 on macOS 27.0.1, Apple M4. The checked-in signing team is this development Mac's team; change `project.yml` when building on another machine.
+
+```sh
+./script/build_and_run.sh
+./script/build_and_run.sh --verify
+```
+
+The script generates the Xcode project, builds and signs Debug, installs only the development identity at its stable path, and launches that installed app. It refuses relaunch when a matching live process reports active operations. Codex's Run action uses the same script. Release and UI-test hosts have separate bundle identifiers.
+
+Enable that exact installed development app in **System Settings → Privacy & Security → Full Disk Access**, then restart if macOS requests it. Acknowledging the setup screen is separate from granting permission. Actual protected-location browsing has been verified in the installed app. Individual file permissions still apply.
+
+## Verify
+
+```sh
+./script/test.sh
+./script/test.sh LocalOperationExecutorTests
+./script/test_cross_volume.sh
+COMMANDER_PERFORMANCE=1 ./script/test.sh LocalPerformanceTests
+./script/test.sh --ui
+```
+
+Core tests run real XCTest assertions directly after `build-for-testing`, avoiding this Mac's stalled UI automation service. Cross-volume integration creates and detaches its own disposable APFS image. Performance tests create their own 10,000-entry fixture. UI execution has a 180-second deadline and never treats a timeout as a pass. Logs are under `.build/logs`.
+
+## Keyboard
+
+| Action | Shortcut |
+|---|---|
+| Open selected / rename / Quick Look | Command-O / Return / Space |
+| Switch pane | Tab |
+| Copy / move to other pane / new folder | F5 / F6 / F7 |
+| New folder | Shift-Command-N |
+| Copy file URLs / paste copy / paste move | Command-C / Command-V / Option-Command-V |
+| Trash | Command-Delete |
+| Path / filter | Command-L / Command-F |
+| New tab / close tab / new window | Command-T / Command-W / Command-N |
+| Parent / back / forward | Command-Up / Command-[ / Command-] |
+| Stage selected items | Shift-Command-S |
+
+Text fields keep standard editing behavior. Hardware function-key settings can affect F5 through F7; all operations also have menu or button actions. Dropping on the shelf is intended to collect references only. File-list drops advertise copy by default and move with Command when the source permits it.
+
+## Architecture and evidence
+
+`CommanderCore` owns provider listings, pane/tab state, bookmarks, persistence, transfer planning, a serial mutation gate, execution, and journals. The app supplies SwiftUI scenes, reusable AppKit table/collection views, menus, previews, and system integration. No remote credentials, privileged helper, recursive folder-size scanning, or eager thumbnails are used.
 
 - [Approved design](docs/superpowers/specs/2026-10-16-commander4mac-design.md)
-- [Local file manager implementation plan](docs/superpowers/plans/2026-10-16-local-file-manager.md)
-- [Reference observations and sources](docs/research/2026-10-16-reference-review.md)
-
-## Product direction
-
-- Two panes with independent tabs, history, selection, and view options.
-- Favorites, connections, and a shared shelf for staging files from multiple locations.
-- Locked pins and navigable pins with a saved home location.
-- System, Light, and Dark appearance; separate text and icon sizes.
-- Explicit destination routing to the current, left, or right pane.
-- Reliable local file operations, followed by integrated SFTP, SMB, and WebDAV.
-- Full Disk Access setup for a signed, directly installed, non-App-Sandbox app.
-- An original interface informed by established file-management workflows.
-
-## Development direction
-
-Use the Build macOS Apps plugin workflows. The proposed implementation combines SwiftUI scenes and settings with AppKit file tables. Keep browsing state, file access, transfer execution, and persistence separate.
-
-The first implementation milestone is a working local file manager. Remote protocols are planned follow-up milestones, not implemented features.
-
-## Environment prerequisite
-
-On October 16, 2026, the installed Xcode toolchain reported that its license agreements had not been accepted. The user must review and accept Apple's agreements before compilation can be verified. No license acceptance or system permission changes were performed.
+- [Implementation plan](docs/superpowers/plans/2026-10-16-local-file-manager.md)
+- [Acceptance record](docs/verification/local-release.md)
+- [Performance measurements](docs/verification/local-performance.md)

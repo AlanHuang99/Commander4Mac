@@ -44,7 +44,7 @@ struct WorkspaceView: View {
                 Button { controller.activityVisible.toggle() } label: {
                     Label("Activity \(controller.services.activeJobCount)", systemImage: "arrow.left.arrow.right")
                 }.help("Show File Operations")
-                Button { controller.addFavorite() } label: { Image(systemName: "star.badge.plus") }.help("Favorite Current Folder")
+                Button { controller.addFavorite() } label: { Image(systemName: "star") }.help("Favorite Current Folder")
                 Button { Task { await controller.refresh(.left); await controller.refresh(.right) } } label: { Image(systemName: "arrow.clockwise") }.help("Refresh")
                 Button { showAccessSetup = true } label: { Image(systemName: "externaldrive.badge.checkmark") }.help("Full Disk Access Setup")
             }

@@ -13,6 +13,7 @@ struct ActivityView: View {
             }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 10) {
+                    if let diagnostic = services.recoveryDiagnostic { Label(diagnostic, systemImage: "exclamationmark.triangle").textSelection(.enabled) }
                     if services.jobs.isEmpty && services.recoveryRecords.isEmpty { Text("No file operations yet").foregroundStyle(.secondary) }
                     ForEach(services.jobs.reversed()) { job in
                         VStack(alignment: .leading, spacing: 5) {
@@ -51,6 +52,7 @@ struct ActivityView: View {
                             Text("Source: \(record.source.url.path)\nDestination: \(record.destination.path)").textSelection(.enabled)
                             if let staging = record.staging { Text("Recovery file: \(staging.path)").textSelection(.enabled) }
                             HStack {
+                                Button("Keep Files and Dismiss") { services.keepRecoveryFiles(record) }
                                 Button("Show Source") { NSWorkspace.shared.activateFileViewerSelecting([record.source.url]) }
                                 Button("Show Destination") { NSWorkspace.shared.activateFileViewerSelecting([record.destination]) }
                                 if let staging = record.staging { Button("Show Recovery File") { NSWorkspace.shared.activateFileViewerSelecting([staging]) } }
@@ -58,7 +60,7 @@ struct ActivityView: View {
                         }.padding(9).background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
                     }
                 }.font(.system(size: 11))
-            }.frame(maxHeight: 200)
+            }.frame(height: 90)
         }.padding(12).frame(minHeight: 70)
     }
     private func stateLabel(_ state: JobState) -> String {

@@ -9,6 +9,19 @@ final class LocalOperationExecutorTests: XCTestCase, @unchecked Sendable {
         let executor = LocalOperationExecutor(journal: OperationJournal(directory: destination.deletingLastPathComponent().appendingPathComponent(".journal")), backend: backend, copier: copier)
         return await executor.execute(plan, cancellation: cancellation, resolveConflict: { _ in .init(decision) }, emit: { _ in })
     }
+    func testOccupiedStagingPathIsNeverRemoved() async throws {
+        let f = try FixtureDirectory(); let source = try f.file("source"); let dest = try f.directory("dest")
+        let plan = try LocalTransferPlanner().plan(.init(kind: .copy, sources: [.local(source)], destinationDirectory: .local(dest)))
+        let occupied = dest.appendingPathComponent(".commander4mac-" + plan.items[0].id.uuidString + ".partial")
+        try FileManager.default.createDirectory(at: occupied, withIntermediateDirectories: false)
+        let sentinel = occupied.appendingPathComponent("unrelated")
+        try Data("must survive".utf8).write(to: sentinel)
+        let executor = LocalOperationExecutor(journal: .init(directory: f.url.appendingPathComponent("journal")))
+        let result = await executor.execute(plan, cancellation: .init(), resolveConflict: { _ in .init(.skip) }, emit: { _ in })
+        XCTAssertEqual(result.state, .failed)
+        XCTAssertEqual(try String(contentsOf: sentinel, encoding: .utf8), "must survive")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: source.path))
+    }
     func testCopyKeepsSourceAndFinalizesCompleteContents() async throws {
         let f = try FixtureDirectory(); let source = try f.file("file.txt", content: "complete contents"); let dest = try f.directory("dest")
         let result = try await execute(source: source, destination: dest)

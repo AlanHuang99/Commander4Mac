@@ -22,7 +22,9 @@ print("\n".join(errors[-35:] if errors else lines[-25:]))
 ERRORS
   echo "Full log: $LOG" >&2
 }
-if ! /usr/bin/xcodebuild -project Commander4Mac.xcodeproj -scheme "$SCHEME" -configuration UITest -destination 'platform=macOS' -derivedDataPath .build/xcode -only-testing:"$FILTER" "$ACTION" >"$LOG" 2>&1; then
+BUILD_COMMAND=(/usr/bin/xcodebuild)
+if [[ "$BUNDLE" == "Commander4MacUITests" ]]; then BUILD_COMMAND=(python3 "$ROOT_DIR/script/run_ui_tests.py"); fi
+if ! "${BUILD_COMMAND[@]}" -project Commander4Mac.xcodeproj -scheme "$SCHEME" -configuration UITest -destination 'platform=macOS' -derivedDataPath .build/xcode -only-testing:"$FILTER" "$ACTION" >"$LOG" 2>&1; then
   report_failure; exit 1
 fi
 if [[ "$BUNDLE" == "CommanderCoreTests" ]]; then

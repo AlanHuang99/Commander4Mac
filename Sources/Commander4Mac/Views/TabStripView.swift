@@ -19,6 +19,8 @@ struct TabStripView: View {
                                     if let home = tab.pin.home, home != tab.location { Image(systemName: "arrow.uturn.backward").font(.caption2) }
                                 }.padding(.leading, 9).padding(.vertical, 8)
                             }.buttonStyle(.plain)
+                                .accessibilityLabel(tab.title + (tab.pin.isLocked ? ", locked pin" : (tab.pin.isPinned ? ", navigable pin" : ", tab")))
+                                .help(tab.location.url.path)
                             if !tab.pin.isPinned && pane.tabs.count > 1 {
                                 Button { _ = pane.close(tabID: tab.id); Task { await controller.refresh(paneID) } } label: { Image(systemName: "xmark").font(.system(size: 9)) }.buttonStyle(.plain).padding(.trailing, 7)
                             }

@@ -17,6 +17,22 @@ public struct ViewOptions: Codable, Equatable, Sendable {
     public var gridIconSize: Double = 64
     public var mode: BrowserViewMode = .list
     public init() {}
+    private enum CodingKeys: String, CodingKey {
+        case sortColumn, ascending, foldersFirst, includeHidden, visibleColumns, textSize, listIconSize, gridIconSize, mode
+    }
+    public init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        sortColumn = try values.decodeIfPresent(SortColumn.self, forKey: .sortColumn) ?? .name
+        ascending = try values.decodeIfPresent(Bool.self, forKey: .ascending) ?? true
+        foldersFirst = try values.decodeIfPresent(Bool.self, forKey: .foldersFirst) ?? true
+        includeHidden = try values.decodeIfPresent(Bool.self, forKey: .includeHidden) ?? false
+        visibleColumns = try values.decodeIfPresent([String].self, forKey: .visibleColumns) ?? ["name", "size", "modified"]
+        textSize = try values.decodeIfPresent(Double.self, forKey: .textSize) ?? 13
+        listIconSize = try values.decodeIfPresent(Double.self, forKey: .listIconSize) ?? 20
+        gridIconSize = try values.decodeIfPresent(Double.self, forKey: .gridIconSize) ?? 64
+        mode = try values.decodeIfPresent(BrowserViewMode.self, forKey: .mode) ?? .list
+        self = validated()
+    }
     public func validated() -> ViewOptions {
         var result = self
         result.textSize = min(20, max(11, textSize.isFinite ? textSize : 13))

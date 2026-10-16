@@ -3,6 +3,17 @@ import CommanderCore
 import Darwin
 
 final class MetadataPreservationTests: XCTestCase {
+    func testProgressIsThrottledForManySmallFilesAndEndsWithActualCounts() throws {
+        let f = try FixtureDirectory(); let source = try f.directory("many")
+        for index in 0..<128 { try Data("x".utf8).write(to: source.appendingPathComponent("file-\(index)")) }
+        let progress = ProgressCapture()
+        try LocalCopyEngine().copy(source: source, stagingDestination: f.url.appendingPathComponent("copied"), cancellation: .init()) { progress.add($0) }
+        let events = progress.values
+        XCTAssertLessThan(events.count, 100, "Small-file completion must not flood the UI with one update per file")
+        XCTAssertEqual(events.last?.completedItems, 128)
+        XCTAssertEqual(events.last?.bytesCopied, 128)
+    }
+
     func testCopyPreservesPermissionsDateAndExtendedAttributes() throws {
         let f = try FixtureDirectory(); let source = try f.file("source.txt", content: "payload")
         let payload = Data("extended-metadata".utf8)
@@ -59,4 +70,11 @@ final class MetadataPreservationTests: XCTestCase {
         record.phase = .complete; try journal.record(record)
         XCTAssertEqual(try journal.recoverableJobs().count, 0)
     }
+}
+
+private final class ProgressCapture: @unchecked Sendable {
+    private let lock = NSLock()
+    private var captured: [CopyProgress] = []
+    func add(_ value: CopyProgress) { lock.withLock { captured.append(value) } }
+    var values: [CopyProgress] { lock.withLock { captured } }
 }

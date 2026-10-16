@@ -22,6 +22,7 @@ public struct LocalFileActions: Sendable {
     private let trasher: any FileTrashing
     public init(gate: OperationGate = .init(), trasher: any FileTrashing = SystemFileTrasher()) { self.gate = gate; self.trasher = trasher }
     public func rename(_ source: FileLocation, to name: String) async throws -> LocalMutation {
+        try source.requireLocal()
         let name = try FileNameRules.validateComponent(name)
         return try await perform {
             let destination = source.url.deletingLastPathComponent().appendingPathComponent(name)
@@ -32,6 +33,7 @@ public struct LocalFileActions: Sendable {
         }
     }
     public func createDirectory(named name: String, in parent: FileLocation) async throws -> LocalMutation {
+        try parent.requireLocal()
         let name = try FileNameRules.validateComponent(name)
         return try await perform {
             let url = parent.url.appendingPathComponent(name)
@@ -44,6 +46,7 @@ public struct LocalFileActions: Sendable {
             return try await perform {
                 locations.map { location in
                     do {
+                        try location.requireLocal()
                         let destination = try trasher.trash(location.url)
                         return .init(source: location, destination: destination.map(FileLocation.local), state: .completed)
                     } catch { return .init(source: location, state: .failed, detail: FileFailure(error, at: location).detail) }

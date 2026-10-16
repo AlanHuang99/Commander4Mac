@@ -4,7 +4,8 @@ import Darwin
 public struct LocalFileSystem: DirectoryProviding {
     public init() {}
     public func list(_ location: FileLocation, options: ListingOptions = .init()) async throws -> DirectorySnapshot {
-        try await BlockingFileWorker.run {
+        try location.requireLocal()
+        return try await BlockingFileWorker.run {
             do {
                 let urls = try FileManager.default.contentsOfDirectory(at: location.url, includingPropertiesForKeys: nil,
                     options: options.includeHidden ? [] : [.skipsHiddenFiles])

@@ -42,26 +42,27 @@ public struct TabSnapshot: Codable, Sendable {
     let history: [FileLocation]
     let historyIndex: Int
     // Save-only values. They are not serialized and never perform filesystem work.
+    var remoteLocation: FileLocation? = nil
     var referenceLocation: FileLocation? = nil
     var capturedGeneration: UInt64? = nil
-    enum CodingKeys: String, CodingKey { case id, reference, pin, options, selection, scrollAnchor, filter, history, historyIndex }
+    enum CodingKeys: String, CodingKey { case id, reference, pin, options, selection, scrollAnchor, filter, history, historyIndex, remoteLocation }
     @MainActor init(_ tab: TabSession) throws {
         id = tab.id
         let displayURL: URL
-        switch tab.location { case .local(let url): displayURL = url }
+        switch tab.location { case .local(let url): displayURL = url; case .sftp: displayURL = tab.location.url; remoteLocation = tab.location }
         reference = tab.unresolvedReference ?? tab.savedReference ??
             LocationReference(bookmark: Data(), displayURL: displayURL, expectedIdentity: .init(device: 0, inode: 0))
         pin = tab.pin; options = tab.options; selection = tab.selection; scrollAnchor = tab.scrollAnchor
         filter = tab.filter; history = tab.history; historyIndex = tab.historyIndex
-        referenceLocation = tab.unresolvedReference == nil ? tab.location : nil
+        referenceLocation = tab.unresolvedReference == nil && tab.location.isLocal ? tab.location : nil
         capturedGeneration = tab.generation
     }
     @MainActor func restore() -> TabSession {
         // Resolve lazily on a bounded worker when the tab is activated.
-        let tab = TabSession(id: id, location: .local(reference.displayURL), options: options)
+        let tab = TabSession(id: id, location: remoteLocation ?? .local(reference.displayURL), options: options)
         tab.pin = pin; tab.filter = filter; tab.selection = selection; tab.scrollAnchor = scrollAnchor
         tab.restoreHistory(history, index: historyIndex)
-        tab.unresolvedReference = reference
+        if remoteLocation == nil { tab.unresolvedReference = reference }
         return tab
     }
     mutating func refreshReference(using resolver: any LocationResolving) {

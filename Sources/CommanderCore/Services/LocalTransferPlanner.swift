@@ -4,6 +4,8 @@ import Darwin
 public struct LocalTransferPlanner: Sendable {
     public init() {}
     public func plan(_ request: TransferRequest) throws -> TransferPlan {
+        try request.destinationDirectory.requireLocal()
+        for source in request.sources { try source.requireLocal() }
         guard !request.sources.isEmpty else { throw FileOperationError.message("Select files to transfer.") }
         let destination = request.destinationDirectory.url
         var directory: ObjCBool = false

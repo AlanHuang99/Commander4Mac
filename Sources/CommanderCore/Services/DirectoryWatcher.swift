@@ -5,7 +5,8 @@ import Darwin
 public struct DirectoryWatcher: Sendable {
     public init() {}
     public func events(for location: FileLocation) -> AsyncStream<Void> {
-        AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
+        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
+            guard location.isLocal else { continuation.finish(); return }
             let handle = WatchHandle()
             continuation.onTermination = { _ in handle.cancel() }
             DispatchQueue.global(qos: .utility).async {

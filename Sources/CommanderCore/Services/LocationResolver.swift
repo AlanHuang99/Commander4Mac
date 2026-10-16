@@ -8,6 +8,7 @@ public protocol LocationResolving: Sendable {
 public struct LocationResolver: LocationResolving {
     public init() {}
     public func reference(for location: FileLocation) throws -> LocationReference {
+        try location.requireLocal()
         let identity = try Self.identity(at: location.url)
         return LocationReference(bookmark: try location.url.bookmarkData(options: []), displayURL: location.url, expectedIdentity: identity)
     }

@@ -1,0 +1,96 @@
+name: Commander4Mac
+options:
+  deploymentTarget:
+    macOS: "15.0"
+configs:
+  Debug: debug
+  Release: release
+  UITest: debug
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    CODE_SIGN_STYLE: Manual
+    DEVELOPMENT_TEAM: 66LBY954DT
+    CODE_SIGN_IDENTITY: Developer ID Application
+    ENABLE_APP_SANDBOX: NO
+    ENABLE_HARDENED_RUNTIME: YES
+    GENERATE_INFOPLIST_FILE: YES
+targets:
+  CommanderCore:
+    type: framework
+    platform: macOS
+    sources: [Sources/CommanderCore]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac.core
+      DEFINES_MODULE: YES
+      SKIP_INSTALL: YES
+  Commander4Mac:
+    type: application
+    platform: macOS
+    sources: [Sources/Commander4Mac]
+    dependencies:
+      - target: CommanderCore
+        embed: true
+    info:
+      path: Configuration/Info.plist
+      properties:
+        CFBundleDisplayName: $(APP_DISPLAY_NAME)
+        LSMinimumSystemVersion: "15.0"
+        NSHighResolutionCapable: true
+        NSDesktopFolderUsageDescription: Browse and organize files on your Desktop.
+        NSDocumentsFolderUsageDescription: Browse and organize your documents.
+        NSDownloadsFolderUsageDescription: Browse and organize your downloads.
+        NSRemovableVolumesUsageDescription: Browse and organize files on removable drives.
+        NSNetworkVolumesUsageDescription: Browse and organize files on mounted network drives.
+    entitlements:
+      path: Configuration/Commander4Mac.entitlements
+      properties: {}
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: Configuration/Commander4Mac.entitlements
+      configs:
+        Debug:
+          PRODUCT_NAME: Commander4MacDev
+          PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac.dev
+          APP_DISPLAY_NAME: Commander4Mac Dev
+        Release:
+          PRODUCT_NAME: Commander4Mac
+          PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac
+          APP_DISPLAY_NAME: Commander4Mac
+        UITest:
+          PRODUCT_NAME: Commander4MacUITestHost
+          PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac.uitest
+          APP_DISPLAY_NAME: Commander4Mac UI Tests
+  CommanderCoreTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [Tests/CommanderCoreTests, Tests/Support]
+    dependencies:
+      - target: CommanderCore
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac.coretests
+  Commander4MacUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources: [Tests/Commander4MacUITests]
+    dependencies:
+      - target: Commander4Mac
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.alanhuang.Commander4Mac.uitests
+      TEST_TARGET_NAME: Commander4Mac
+schemes:
+  Commander4Mac:
+    build:
+      targets:
+        Commander4Mac: all
+        CommanderCoreTests: [test]
+        Commander4MacUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: UITest
+      targets: [CommanderCoreTests, Commander4MacUITests]
+    archive:
+      config: Release

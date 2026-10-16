@@ -10,10 +10,11 @@ struct ConnectionEditor: View {
     @State private var secret = ""
     @State private var remember = true
     @State private var busy = false
+    @State private var submission = ConnectionSubmission()
     @State private var error: String?
-    init(controller: WorkspaceController, profile: ConnectionProfile?) {
+    init(controller: WorkspaceController, profile: ConnectionProfile?, request: ConnectionOpenRequest? = nil) {
         self.controller = controller
-        let initial = profile ?? ConnectionProfile(username: NSUserName())
+        let initial = request?.credentialEntryProfile ?? profile ?? ConnectionProfile(username: NSUserName())
         _profile = State(initialValue: initial)
         _keyPath = State(initialValue: initial.keyReference?.displayURL.path ?? "")
     }
@@ -56,8 +57,7 @@ struct ConnectionEditor: View {
             if let error { Text(error).font(.callout).foregroundStyle(.red).textSelection(.enabled).fixedSize(horizontal: false, vertical: true) }
             HStack {
                 Button("Cancel") {
-                    if busy { let id = profile.id; Task { await controller.services.remote.disconnect(id) } }
-                    dismiss()
+                    submission.cancel(); dismiss()
                 }.keyboardShortcut(.cancelAction).accessibilityIdentifier("connection.cancel")
                 Spacer()
                 if busy { ProgressView().controlSize(.small) }
@@ -66,38 +66,46 @@ struct ConnectionEditor: View {
                     .accessibilityIdentifier("connection.connect")
             }
         }.padding(24).frame(width: 510).interactiveDismissDisabled(busy)
+            .onDisappear { submission.cancel() }
     }
     private func submit(connect: Bool) {
         let pane = controller.workspace.activePane
         let defaultDestination = controller.services.preferences.defaultDestination
         let candidate = profile; let selectedKeyPath = keyPath; let capturedSecret = secret; let remember = remember
         busy = true; error = nil
-        Task {
-            do {
-                var candidate = candidate
-                if candidate.authentication == .ed25519Key {
-                    guard !selectedKeyPath.isEmpty else { throw FileOperationError.message("Choose an OpenSSH Ed25519 private key.") }
-                    if candidate.keyReference?.displayURL.path != selectedKeyPath {
-                        candidate.keyReference = try await BlockingFileWorker.run {
-                            try LocationResolver().reference(for: .local(URL(fileURLWithPath: (selectedKeyPath as NSString).expandingTildeInPath)))
-                        }
+        submission.start(prepare: {
+            var candidate = candidate
+            if candidate.authentication == .ed25519Key {
+                guard !selectedKeyPath.isEmpty else { throw FileOperationError.message("Choose an OpenSSH Ed25519 private key.") }
+                if candidate.keyReference?.displayURL.path != selectedKeyPath {
+                    candidate.keyReference = try await BlockingFileWorker.run {
+                        try LocationResolver().reference(for: .local(URL(fileURLWithPath: (selectedKeyPath as NSString).expandingTildeInPath)))
                     }
                 }
-                let saved = try await controller.services.connections.save(candidate, secret: capturedSecret.isEmpty ? nil : capturedSecret, remember: remember)
-                profile = saved
-                if connect {
-                    let request = try ConnectionOpenRequest(profile: saved, activePane: pane, defaultDestination: defaultDestination)
-                    let credential: String
-                    if !capturedSecret.isEmpty { credential = capturedSecret }
-                    else if let stored = try await controller.services.connections.secret(for: saved) { credential = stored }
-                    else if saved.authentication == .ed25519Key { credential = "" }
-                    else { throw FileOperationError.message("Enter a password. There is no saved credential for this server and username.") }
-                    try await controller.establishConnection(request, secret: credential, onProfileChange: { profile = $0 })
-                }
-                secret = ""; dismiss()
-            } catch is CancellationError { }
-            catch { self.error = error.localizedDescription }
+            }
+            try Task.checkCancellation()
+            let saved = try await controller.services.connections.save(candidate, secret: capturedSecret.isEmpty ? nil : capturedSecret, remember: remember)
+            try Task.checkCancellation()
+            // Keep the committed identity even when credential entry must retry.
+            profile = saved
+            var credential = capturedSecret
+            if connect, credential.isEmpty {
+                if let stored = try await controller.services.connections.secret(for: saved) { credential = stored }
+                else if saved.authentication != .ed25519Key { throw FileOperationError.message("Enter a password. There is no saved credential for this server and username.") }
+            }
+            return (saved, credential)
+        }, perform: { saved, credential in
+            profile = saved
+            if connect {
+                let request = try ConnectionOpenRequest(profile: saved, activePane: pane, defaultDestination: defaultDestination)
+                try await controller.establishConnection(request, secret: credential, onProfileChange: { profile = $0 })
+            }
+        }, completion: { result in
             busy = false
-        }
+            switch result {
+            case .success: secret = ""; dismiss()
+            case .failure(let failure): if !(failure is CancellationError) { error = failure.localizedDescription }
+            }
+        })
     }
 }

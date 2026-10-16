@@ -28,52 +28,54 @@
 
 **Files:** Models/ConnectionProfile.swift, Services/KeychainCredentialStore.swift, Stores/ConnectionStore.swift, FileLocation.swift; local boundary adapters; ConnectionProfileTests.swift and RemoteLocationTests.swift.
 **Interfaces:** `ConnectionProfile.validated() throws -> ConnectionProfile`, `ConnectionStore.load()/save([ConnectionProfile])`, `CredentialVault.read/write/remove(profile:)`, `FileLocation.sftp(profileID:path:)`, `isLocal`, `remotePath`, `profileID`.
-- [ ] Write failing tests for validation, non-secret JSON, endpoint-bound credentials, provider-specific IDs, lexical paths, legacy location/session decode, and local service rejection.
-- [ ] Run ./script/test.sh ConnectionProfileTests; expect missing API failure.
-- [ ] Implement models, Keychain boundary, atomic profile store, remote locations, and explicit local guards. Preserve old Codable cases.
-- [ ] Run full ./script/test.sh; expect all enabled tests pass.
-- [ ] Commit feat: add secure SFTP profiles and provider locations.
+- [x] Write failing tests for validation, non-secret JSON, endpoint-bound credentials, provider-specific IDs, lexical paths, legacy location/session decode, and local service rejection.
+- [x] Run ./script/test.sh ConnectionProfileTests; expect missing API failure.
+- [x] Implement models, Keychain boundary, atomic profile store, remote locations, and explicit local guards. Preserve old Codable cases.
+- [x] Run full ./script/test.sh; expect all enabled tests pass.
+- [x] Commit feat: add secure SFTP profiles and provider locations.
 
 ### Task 2: Verified SFTP transport
 
 **Files:** Remote/SFTPTransport.swift, Remote/CitadelSFTPTransport.swift, Remote/HostKeyVerification.swift, project.yml, script/test_sftp.sh, SFTPIntegrationTests.swift.
 **Interfaces:** `SFTPTransport` protocol for list/stat/read/writeExclusive/rename/mkdir/removeOwnedTemporary/disconnect; `SFTPConnectionManager` actor with explicit connect/disconnect and no reconnect during listing. `RemoteFileMetadata` and regular-file mode checks.
-- [ ] Write failing tests for unknown/matching/changed keys, safe entry names, missing/disconnected listing, and real loopback key-auth operations.
-- [ ] Run targeted tests; expect missing API failure.
-- [ ] Pin Citadel 0.12.1, implement strict validator, credential/key loading, quiet logging, connection deadlines and channel cleanup. Create isolated loopback fixture using generated keys and owned files only.
-- [ ] Run targeted host tests plus fixture integration; expect real listing/read/write/rename/mkdir and changed-key rejection.
-- [ ] Commit feat: add verified SFTP transport.
+- [x] Write failing tests for unknown/matching/changed keys, safe entry names, missing/disconnected listing, and real loopback key-auth operations.
+- [x] Run targeted tests; expect missing API failure.
+- [x] Pin Citadel 0.12.1, implement strict validator, credential/key loading, quiet logging, connection deadlines and channel cleanup. Create isolated loopback fixture using generated keys and owned files only.
+- [x] Run targeted host tests plus fixture integration; expect real listing/read/write/rename/mkdir and changed-key rejection.
+- [x] Commit feat: add verified SFTP transport.
 
 ### Task 3: Remote pane integration and persistence
 
 **Files:** ProviderRouter.swift, DirectoryLoader callers, ApplicationStateStore.swift, WorkspaceController.swift, LocationBarView.swift, PaneView.swift; ProviderRouterTests.swift.
 **Interfaces:** `ProviderRouter(local:remote:)` implements DirectoryProviding; `WorkspaceController.openPath(_:in:)` retains profile identity; remote TabSnapshot restores without resolving a bookmark or connecting.
-- [ ] Write failing tests for provider dispatch, stale remote replies, remote saved tabs/pins/history, and no-connect restoration.
-- [ ] Run targeted tests; expect missing behavior.
-- [ ] Implement provider routing, remote-aware path navigation, capability guards for local-only actions, and snapshot compatibility.
-- [ ] Run full core suite; expect pass. Build app; expect success.
-- [ ] Commit feat: browse SFTP locations in both panes.
+- [x] Write failing tests for provider dispatch, stale remote replies, remote saved tabs/pins/history, and no-connect restoration.
+- [x] Run targeted tests; expect missing behavior.
+- [x] Implement provider routing, remote-aware path navigation, capability guards for local-only actions, and snapshot compatibility.
+- [x] Run full core suite; expect pass. Build app; expect success.
+- [x] Commit feat: browse SFTP locations in both panes.
 
 ### Task 4: Safe queued remote file copies and management
 
 **Files:** RemoteTransferExecutor.swift, TransferQueue.swift, TransferModels.swift, ConflictSheet.swift, WorkspaceController.swift; RemoteTransferTests.swift.
 **Interfaces:** Request-level `TransferExecuting.executeRequest(_:cancellation:resolveConflict:emit:)`, default local adapter; remote executor delegates all-local requests, streams 64 KiB, journals artifacts, excludes unsupported moves/folders/remote relays, and exposes conflict replacement capability.
-- [ ] Write failing tests for upload/download bytes, skip/keep-both/collision, source mutation, cancellation/disconnect, unsupported batches, and literal/traversal names.
-- [ ] Run targeted suite; expect missing API failure.
-- [ ] Implement request routing, bounded copy staging/finalization, accurate outcomes, remote rename/mkdir with gate serialization, and explicit unsupported actions.
-- [ ] Run full suite and real fixture transfers; expect retained sources and byte matches.
-- [ ] Commit feat: add safe queued SFTP file transfers.
+- [x] Write failing tests for upload/download bytes, skip/keep-both/collision, source mutation, cancellation/disconnect, unsupported batches, and literal/traversal names.
+- [x] Run targeted suite; expect missing API failure.
+- [x] Implement request routing, bounded copy staging/finalization, accurate outcomes, remote rename/mkdir with gate serialization, and explicit unsupported actions.
+- [x] Run full suite and real fixture transfers; expect retained sources and byte matches.
+- [x] Commit feat: add safe queued SFTP file transfers.
 
 ### Task 5: Connection interface and installed acceptance
 
 **Files:** ConnectionsView.swift, ConnectionEditor.swift, ConnectionController.swift, SidebarView.swift, WorkspaceView.swift, AppServices.swift, project permissions strings, docs/verification/sftp-release.md.
 **Interfaces:** Saved profiles and session states shared app-wide; pane destination captured before async connect; trust challenge handled explicitly; credentials stay out of Observable profile values and persistence.
-- [ ] Write failing routing/state/credential tests and UI test source for Connect/sidebar flow.
-- [ ] Run targeted core tests; expect missing API failure.
-- [ ] Implement compact Connect sheet, sidebar profile actions, auth/key picker, explicit trust sheet, disconnect/edit/remove, capability presentation and actionable errors.
-- [ ] Run full core suite, loopback integration, UI compile, signed install and CUA checks against canonical app. Reverify protected listing and local workflow.
-- [ ] Record exact executed/unverified evidence and dependency licenses; commit feat: ship first SFTP connection milestone.
+- [x] Write failing routing/state/credential tests and UI test source for Connect/sidebar flow.
+- [x] Run targeted core tests; expect missing API failure.
+- [x] Implement compact Connect sheet, sidebar profile actions, auth/key picker, explicit trust sheet, disconnect/edit/remove, capability presentation and actionable errors.
+- [x] Run full core suite, loopback integration, UI compile, signed install and CUA checks against canonical app. Reverify protected listing and local workflow.
+- [x] Record exact executed/unverified evidence and dependency licenses; commit feat: ship first SFTP connection milestone.
 
 ## Self-review
 
 Scope intentionally implements the first protocol and individual-file transfers; subsequent protocols/recursive and remote destructive operations stay separate. Every Review Focus item has a task-owned regression. Models precede transport; transport precedes routing/transfers; UI consumes all interfaces. User standing authorization replaces new spec/plan confirmation checkpoints; native inline execution remains selected.
+
+Completion evidence: [SFTP acceptance](../../verification/sftp-release.md), [independent review and fixes](../../verification/sftp-final-review.md).

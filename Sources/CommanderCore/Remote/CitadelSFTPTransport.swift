@@ -43,7 +43,8 @@ public actor SFTPConnectionManager: RemoteFileAccess {
     private var attempts: [UUID: UUID] = [:]
     private var states: [UUID: SFTPConnectionState] = [:]
     private var observers: [UUID: AsyncStream<[UUID: SFTPConnectionState]>.Continuation] = [:]
-    public init() {}
+    private let operationTimeout: Duration
+    public init(operationTimeout: Duration = .seconds(30)) { self.operationTimeout = operationTimeout }
     public func state(_ id: UUID) -> SFTPConnectionState { states[id] ?? .disconnected }
     public func snapshots() -> AsyncStream<[UUID: SFTPConnectionState]> {
         let id = UUID(); let (stream, continuation) = AsyncStream<[UUID: SFTPConnectionState]>.makeStream(bufferingPolicy: .bufferingNewest(1))
@@ -55,12 +56,23 @@ public actor SFTPConnectionManager: RemoteFileAccess {
     private func setState(_ state: SFTPConnectionState, id: UUID) { states[id] = state; for observer in observers.values { observer.yield(states) } }
     private static var quietLogger: Logger { var logger = Logger(label: "Commander4Mac.SFTP"); logger.logLevel = .critical; return logger }
     public func isConnected(_ id: UUID) -> Bool { sessions[id]?.client.isConnected == true }
-    public func connect(_ rawProfile: ConnectionProfile, secret: String) async throws {
+    public func connect(_ rawProfile: ConnectionProfile, secret: String, attempt: UUID = UUID()) async throws {
+        try await withTaskCancellationHandler {
+            try await connectTransport(rawProfile, secret: secret, attempt: attempt)
+        } onCancel: { Task { await self.cancelAttempt(attempt) } }
+    }
+    public func cancelAttempt(_ attempt: UUID) async {
+        let ids = attempts.filter { $0.value == attempt }.map(\.key)
+        for id in ids where attempts[id] == attempt { await disconnect(id) }
+    }
+    private func connectTransport(_ rawProfile: ConnectionProfile, secret: String, attempt: UUID) async throws {
+        try Task.checkCancellation()
         let profile = try rawProfile.validated()
         try identities.bind(profile)
         if let existing = sessions[profile.id], existing.profile.hasSameCredentialScope(as: profile) && existing.client.isConnected { setState(.connected, id: profile.id); return }
         await disconnect(profile.id)
-        let attempt = UUID(); attempts[profile.id] = attempt; setState(.connecting, id: profile.id)
+        try Task.checkCancellation()
+        attempts[profile.id] = attempt; setState(.connecting, id: profile.id)
         let validator = StrictHostValidator(profile)
         var openedChannel: (any Channel)?
         do {
@@ -73,19 +85,22 @@ public actor SFTPConnectionManager: RemoteFileAccess {
                 auth = try .ed25519(username: profile.username, privateKey: Curve25519.Signing.PrivateKey(sshEd25519: keyData,
                     decryptionKey: secret.isEmpty ? nil : Data(secret.utf8)))
             }
+            try Task.checkCancellation()
             guard attempts[profile.id] == attempt else { throw CancellationError() }
             // Own TCP lifetime: Citadel's host convenience API leaves failed-handshake
             // channels open. Its settings overload awaits authentication on our channel.
             let channel = try await ClientBootstrap(group: MultiThreadedEventLoopGroup.singleton)
                 .connectTimeout(.seconds(15)).connect(host: profile.host, port: profile.port).get()
             openedChannel = channel
+            try Task.checkCancellation()
             guard attempts[profile.id] == attempt else { throw CancellationError() }
             pendingChannels[profile.id] = .init(attempt: attempt, channel: channel)
             let settings = SSHClientSettings(host: profile.host, port: profile.port, authenticationMethod: { auth }, hostKeyValidator: .custom(validator))
             let client = try await withTaskExecutorPreference(SSHHandshakeExecutor(channel.eventLoop)) {
                 try await SSHClient.connect(on: channel, settings: settings)
             }
-            guard attempts[profile.id] == attempt else { try? await client.close(); throw CancellationError() }
+            try Task.checkCancellation()
+            guard attempts[profile.id] == attempt else { throw CancellationError() }
             let token = UUID()
             pendingChannels.removeValue(forKey: profile.id)
             sessions[profile.id] = .init(client: client, channel: channel, profile: profile, token: token)
@@ -94,6 +109,7 @@ public actor SFTPConnectionManager: RemoteFileAccess {
         } catch {
             if pendingChannels[profile.id]?.attempt == attempt { pendingChannels.removeValue(forKey: profile.id) }
             if let openedChannel { try? await openedChannel.close() }
+            try Task.checkCancellation()
             guard attempts[profile.id] == attempt else { throw CancellationError() }
             if let challenge = validator.challenge { setState(.verificationRequired, id: profile.id); throw challenge }
             setState(.failed, id: profile.id)
@@ -117,8 +133,9 @@ public actor SFTPConnectionManager: RemoteFileAccess {
         return session
     }
     private func timer(for location: FileLocation, token: UUID) -> Task<Void, Never> {
-        Task { [weak self] in
-            do { try await Task.sleep(for: .seconds(30)) } catch { return }
+        let timeout = operationTimeout
+        return Task { [weak self] in
+            do { try await Task.sleep(for: timeout) } catch { return }
             await self?.expire(location.profileID, token: token)
         }
     }
@@ -128,7 +145,10 @@ public actor SFTPConnectionManager: RemoteFileAccess {
     }
     public func list(_ location: FileLocation, options: ListingOptions) async throws -> DirectorySnapshot {
         let session = try session(location); let deadline = timer(for: location, token: session.token); defer { deadline.cancel() }
+        let token = session.token
         do {
+        return try await withTaskCancellationHandler {
+        try Task.checkCancellation()
         return try await session.client.withSFTP(logger: Self.quietLogger) { sftp in
             let groups = try await sftp.listDirectory(atPath: location.remotePath!.rawValue)
             var entries: [FileEntry] = []
@@ -144,6 +164,7 @@ public actor SFTPConnectionManager: RemoteFileAccess {
             guard Set(entries.map(\.id)).count == entries.count else { throw FileOperationError.message("The server returned duplicate directory entries.") }
             return .init(location: location, entries: entries)
         }
+        } onCancel: { Task { await self.expire(location.profileID, token: token) } }
         } catch { throw sftpError(error) }
     }
     private nonisolated static func metadata(_ attributes: SFTPFileAttributes) -> RemoteFileMetadata {
@@ -152,7 +173,10 @@ public actor SFTPConnectionManager: RemoteFileAccess {
     public func metadata(_ location: FileLocation) async throws -> RemoteFileMetadata? {
         let session = try session(location); let deadline = timer(for: location, token: session.token); defer { deadline.cancel() }
         // READDIR retains symlink type, unlike STAT, which follows it.
+        let token = session.token
         do {
+        return try await withTaskCancellationHandler {
+        try Task.checkCancellation()
         return try await session.client.withSFTP(logger: Self.quietLogger) { sftp in
             if location.remotePath!.rawValue == "/" { return Self.metadata(try await sftp.getAttributes(at: "/")) }
             let groups = try await sftp.listDirectory(atPath: location.parent.remotePath!.rawValue)
@@ -160,34 +184,48 @@ public actor SFTPConnectionManager: RemoteFileAccess {
             guard matches.count <= 1 else { throw FileOperationError.message("The server returned an ambiguous filename.") }
             return matches.first.map { Self.metadata($0.attributes) }
         }
+        } onCancel: { Task { await self.expire(location.profileID, token: token) } }
         } catch { throw sftpError(error) }
     }
     public func openFile(_ location: FileLocation, writeExclusive: Bool) async throws -> any RemoteFileChannel {
-        let session = try session(location); let deadline = timer(for: location, token: session.token); defer { deadline.cancel() }
-        let sftp = try await session.client.openSFTP(logger: Self.quietLogger)
-        do {
-            var attributes = SFTPFileAttributes.none
-            if writeExclusive { attributes.permissions = 0o600 }
-            let file = try await sftp.openFile(filePath: location.remotePath!.rawValue,
-                flags: writeExclusive ? [.write, .create, .forceCreate] : .read, attributes: attributes)
-            return CitadelFileChannel(file: file, client: sftp)
-        } catch { try? await sftp.close(); throw sftpError(error) }
+        let session = try session(location); let token = session.token
+        let deadline = timer(for: location, token: token); defer { deadline.cancel() }
+        return try await withTaskCancellationHandler {
+            try Task.checkCancellation()
+            let sftp = try await session.client.openSFTP(logger: Self.quietLogger)
+            do {
+                var attributes = SFTPFileAttributes.none
+                if writeExclusive { attributes.permissions = 0o600 }
+                let file = try await sftp.openFile(filePath: location.remotePath!.rawValue,
+                    flags: writeExclusive ? [.write, .create, .forceCreate] : .read, attributes: attributes)
+                return CitadelFileChannel(file: file, client: sftp, timeout: operationTimeout,
+                    hardAbort: { [weak self] in await self?.expire(location.profileID, token: token) })
+            } catch { try? await sftp.close(); throw sftpError(error) }
+        } onCancel: { Task { await self.expire(location.profileID, token: token) } }
     }
     public func rename(_ source: FileLocation, to destination: FileLocation) async throws {
         guard source.profileID == destination.profileID else { throw FileOperationError.message("Rename requires the same server.") }
         let session = try session(source); let deadline = timer(for: source, token: session.token); defer { deadline.cancel() }
+        let token = session.token
         do {
+        try await withTaskCancellationHandler {
+        try Task.checkCancellation()
         try await session.client.withSFTP(logger: Self.quietLogger) { sftp in
             try await sftp.rename(at: source.remotePath!.rawValue, to: destination.remotePath!.rawValue)
         }
+        } onCancel: { Task { await self.expire(source.profileID, token: token) } }
         } catch { throw sftpError(error) }
     }
     public func createDirectory(_ location: FileLocation) async throws {
         let session = try session(location); let deadline = timer(for: location, token: session.token); defer { deadline.cancel() }
+        let token = session.token
         do {
+        try await withTaskCancellationHandler {
+        try Task.checkCancellation()
         try await session.client.withSFTP(logger: Self.quietLogger) { sftp in
             try await sftp.createDirectory(atPath: location.remotePath!.rawValue)
         }
+        } onCancel: { Task { await self.expire(location.profileID, token: token) } }
         } catch { throw sftpError(error) }
     }
 }
@@ -196,36 +234,55 @@ private actor CitadelFileChannel: RemoteFileChannel {
     private let file: SFTPFile
     private let client: SFTPClient
     private var closed = false
-    init(file: SFTPFile, client: SFTPClient) { self.file = file; self.client = client }
+    private let timeout: Duration
+    private let hardAbort: @Sendable () async -> Void
+    init(file: SFTPFile, client: SFTPClient, timeout: Duration, hardAbort: @escaping @Sendable () async -> Void) {
+        self.file = file; self.client = client; self.timeout = timeout; self.hardAbort = hardAbort
+    }
     private func deadline() -> Task<Void, Never> {
-        Task { [weak self] in
-            do { try await Task.sleep(for: .seconds(30)) } catch { return }
-            try? await self?.abort()
+        let timeout = timeout
+        return Task { [weak self] in
+            do { try await Task.sleep(for: timeout) } catch { return }
+            await self?.abort()
         }
     }
     func read(offset: UInt64, length: UInt32) async throws -> Data {
         guard !closed else { throw FileOperationError.message("The SFTP file channel is closed.") }
         let timeout = deadline(); defer { timeout.cancel() }
         do {
+            return try await withTaskCancellationHandler {
+            try Task.checkCancellation()
             let bytes = try await file.read(from: offset, length: min(length, 65536))
             guard bytes.readableBytes <= 65536 else { throw FileOperationError.message("The server returned an oversized SFTP chunk.") }
             return Data(bytes.readableBytesView)
+            } onCancel: { Task { await self.abort() } }
         } catch { throw sftpError(error) }
     }
     func write(_ data: Data, offset: UInt64) async throws {
         guard !closed, data.count <= 65536 else { throw FileOperationError.message("Invalid SFTP write chunk.") }
         let timeout = deadline(); defer { timeout.cancel() }
-        do { try await file.write(ByteBuffer(bytes: data), at: offset) } catch { throw sftpError(error) }
+        do {
+            try await withTaskCancellationHandler {
+                try Task.checkCancellation()
+                try await file.write(ByteBuffer(bytes: data), at: offset)
+            } onCancel: { Task { await self.abort() } }
+        } catch { throw sftpError(error) }
     }
     func close() async throws {
         guard !closed else { return }; closed = true
         let timeout = deadline(); defer { timeout.cancel() }
-        do { try await file.close(); try await client.close() }
-        catch { try? await client.close(); throw error }
+        do {
+            try await withTaskCancellationHandler {
+                try Task.checkCancellation()
+                try await file.close(); try await client.close()
+            } onCancel: { Task { await self.abort() } }
+        } catch { await abort(); throw error }
     }
-    private func abort() async throws {
+    private func abort() async {
         closed = true
-        try await client.close()
+        // SSH child close waits for the peer. Closing the owned parent TCP
+        // transport fails pending requests even when that peer is unresponsive.
+        await hardAbort()
     }
 }
 

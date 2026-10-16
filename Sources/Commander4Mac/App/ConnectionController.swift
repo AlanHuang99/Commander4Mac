@@ -36,18 +36,11 @@ import CommanderCore
             var updated = profiles
             if let index = updated.firstIndex(where: { $0.id == candidate.id }) { updated[index] = prepared } else { updated.append(prepared) }
             let captured = updated; let vault = vault; let store = store
-            try await BlockingFileWorker.run {
-                // Moving an existing secret to a new identity is allowed only for an
-                // explicitly re-trusted host key at the same credential scope.
-                let transferred = try previous.flatMap { old -> String? in
-                    guard allowHostKeyChange, old.hasSameCredentialScope(as: prepared) else { return nil }
-                    return try vault.read(for: old)
-                }
-                if let previous, previous.id != prepared.id { try vault.remove(for: previous) }
-                if !remember { try vault.remove(for: prepared) }
-                if remember, let value = secret ?? transferred, !value.isEmpty { try vault.write(value, for: prepared) }
-                try store.save(captured)
+            let warning = try await BlockingFileWorker.run {
+                try ConnectionProfileCommit(store: store, vault: vault).save(profiles: captured, previous: previous,
+                    prepared: prepared, secret: secret, remember: remember, allowCredentialTransfer: allowHostKeyChange)
             }
+            if let warning { diagnostic = warning }
             profiles = updated; knownIDs.insert(prepared.id)
             if let previous, previous.id != prepared.id { await remote.disconnect(previous.id) }
             await edits.release(); return prepared
@@ -61,7 +54,10 @@ import CommanderCore
         await edits.acquire()
         do {
             let updated = profiles.filter { $0.id != profile.id }; let store = store; let vault = vault
-            try await BlockingFileWorker.run { try vault.remove(for: profile); try store.save(updated) }
+            let warning = try await BlockingFileWorker.run {
+                try ConnectionProfileCommit(store: store, vault: vault).remove(profiles: updated, removed: profile)
+            }
+            if let warning { diagnostic = warning }
             profiles = updated; await remote.disconnect(profile.id); await edits.release()
         } catch { await edits.release(); throw error }
     }

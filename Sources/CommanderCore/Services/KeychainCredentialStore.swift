@@ -47,4 +47,9 @@ public struct CredentialVault: Sendable {
         try store.write(JSONEncoder().encode(Record(scope: profile.credentialScope, secret: secret)), account: profile.id.uuidString)
     }
     public func remove(for profile: ConnectionProfile) throws { try store.remove(account: profile.id.uuidString) }
+    func record(for profile: ConnectionProfile) throws -> Data? { try store.read(account: profile.id.uuidString) }
+    func restore(_ data: Data?, for profile: ConnectionProfile) throws {
+        if let data { try store.write(data, account: profile.id.uuidString) }
+        else { try store.remove(account: profile.id.uuidString) }
+    }
 }

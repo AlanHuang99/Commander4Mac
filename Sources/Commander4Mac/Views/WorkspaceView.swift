@@ -51,7 +51,7 @@ struct WorkspaceView: View {
                 Button { showAccessSetup = true } label: { Image(systemName: "externaldrive.badge.checkmark") }.help("Full Disk Access Setup")
             }
         }
-        .sheet(isPresented: $controller.showConnections) { ConnectionEditor(controller: controller, profile: controller.editingConnection) }
+        .sheet(isPresented: $controller.showConnections) { ConnectionEditor(controller: controller, profile: controller.editingConnection, request: controller.editingConnectionRequest) }
         .sheet(isPresented: $showAccessSetup) {
             AccessSetupView { acknowledged = true; showAccessSetup = false }
         }

@@ -4,6 +4,11 @@ public struct ConnectionOpenRequest: Sendable {
     public let profile: ConnectionProfile
     public let paneID: PaneID
     public let location: FileLocation
+    /// Credential entry retains the resolved destination, even when focus or
+    /// application defaults change while Keychain is being consulted.
+    public var credentialEntryProfile: ConnectionProfile {
+        var result = profile; result.destination = paneID == .left ? .left : .right; return result
+    }
     public init(profile: ConnectionProfile, activePane: PaneID, destination: OpenDestination? = nil, defaultDestination: OpenDestination = .current) throws {
         self.profile = try profile.validated()
         let route = destination ?? profile.destination ?? defaultDestination

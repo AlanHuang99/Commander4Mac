@@ -20,6 +20,14 @@ public struct RemoteTransferExecutor: TransferExecuting {
         if request.destinationDirectory.isLocal && request.sources.allSatisfy(\.isLocal) {
             return await local.executeRequest(request, cancellation: cancellation, resolveConflict: resolveConflict, emit: emit)
         }
+        let work = Task { await executeRemoteRequest(request, cancellation: cancellation, resolveConflict: resolveConflict, emit: emit) }
+        let observer = cancellation.observe { work.cancel() }
+        defer { cancellation.removeObserver(observer) }
+        return await withTaskCancellationHandler { await work.value } onCancel: { cancellation.cancel() }
+    }
+    private func executeRemoteRequest(_ request: TransferRequest, cancellation: OperationCancellation,
+                                      resolveConflict: @escaping @Sendable (TransferConflict) async -> ConflictResolution,
+                                      emit: @escaping @Sendable (OperationEvent) -> Void) async -> OperationResult {
         var results: [ItemOperationOutcome] = []
         do {
             try cancellation.check()

@@ -12,11 +12,11 @@ SFTP copies file contents only. Permissions, timestamps, extended attributes, an
 
 ## Automated evidence
 
-The final Debug core suite executed 104 tests, with four optional environment-gated skips and zero failures (`.build/logs/sftp-final-core-debug.log`). The owned real OpenSSH test separately passed host-key first use/match/change, no socket after rejected verification, listing/read/write/exclusive create, rename/mkdir, missing and denied directories, Unicode-name upload/download with byte equality, collision, and disconnect. Real Keychain create/read/delete passed using a random test-owned service and item, including the final Debug run (1/1, `.build/logs/sftp-final-keychain.log`).
+The final Debug core suite after independent-review fixes executed 111 tests, with six optional environment-gated skips and zero failures (`.build/logs/sftp-complete-core.log`). The owned real OpenSSH test separately passed host-key first use/match/change, no socket after rejected verification, listing/read/write/exclusive create, rename/mkdir, missing and denied directories, Unicode-name upload/download with byte equality, collision, and disconnect. Real Keychain create/read/delete passed using a random test-owned service and item, including the final Debug run (1/1, `.build/logs/sftp-review-final-keychain.log`).
 
 Native Debug acceptance exposed a dependency handler assertion hidden by optimized SPM dependencies in the custom UITest configuration. The real integration test reproduced the crash with Debug assertions before the fix. A narrow task executor now runs the library's existing-channel handshake on its NIO event loop; the same Debug integration test passed afterward. Core test scripts now default to Debug so those assertions remain enabled.
 
-Final UI bundles compiled successfully (`.build/logs/sftp-final-ui-compile.log`). The XCTest UI runner stalls on this Mac before assertions; UI execution is not reported as passing. Native CUA checks supply the installed-app evidence below.
+Final UI bundles compiled successfully after review fixes (`.build/logs/sftp-review-ui-compile.log`). The XCTest UI runner stalls on this Mac before assertions; UI execution is not reported as passing. Native CUA checks supply the installed-app evidence below.
 
 ## Installed-app evidence
 
@@ -30,7 +30,9 @@ All remote and local mutations used owned fixtures under ignored `.build`, a roo
 
 The final signed build again loaded real SFTP contents after the handler-thread fix. It successfully listed the protected `~/Library/Mail` folder, including `V10`, without opening message contents. Deep strict signature verification passed with the stable development identifier/team and hardened runtime. The running executable is the canonical installed path with a valid arm64 UUID.
 
-The generated test profile and test window were removed through the app. Persisted state confirms zero test profiles and one original window with Desktop in both panes. The owned server remains available only for final review verification, then is stopped through its cleanup trap.
+The generated test profile and test window were removed through the app. Persisted state confirms zero test profiles and one original window with Desktop in both panes. The owned server was stopped after final verification; its cleanup trap removed the fixture and generated keys.
+
+The final installed app also reproduced the missing-password handoff with Left active and an explicit Right request. Its credential editor retained Right. Switching that owned profile to key authentication connected and loaded actual remote content in Right; Left remained unchanged. Protected Mail listing passed again after the review fixes. The generated routing profile and window were then removed, preserving the single original Desktop/Desktop workspace. A separate native endpoint-edit/password retry regression was reproduced and corrected; retry now uses the saved identity. That test used a reserved `.invalid` host and a disposable value with Keychain remembering disabled, and its profile/window were removed afterward. Deep strict code-signature verification passed again.
 
 ## Validation limits
 
@@ -42,4 +44,4 @@ The app includes `NSLocalNetworkUsageDescription`. An enabled Local Network swit
 
 Citadel 0.12.1 is pinned exactly, and resolved transitive revisions are tracked. License notices are embedded in `ThirdPartyNotices.txt`. The transport owns TCP lifetime and closes rejected/canceled handshakes; it never uses an accept-anything host validator or automatic reconnect. See the pinned [upstream source](https://github.com/orlandos-nl/Citadel) and the [SFTP v3 rename contract](https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02).
 
-One independent whole-phase review is required before completion. Findings and final verification will be appended here. Decisions are preserved in [SFTP decisions](sftp-decisions.md).
+One independent whole-phase review found four Important defects and two Minor issues. All four Important defects were corrected in one regression-tested fix pass, including actual stopped-peer timeout/cancellation and queue-release checks. The two Minor issues remain explicitly deferred. See [review and regression evidence](sftp-final-review.md). Decisions are preserved in [SFTP decisions](sftp-decisions.md).

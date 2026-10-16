@@ -9,4 +9,6 @@
 
 - Ruling: Run core tests in Debug by default while keeping UI hosts in their separate UITest identity. Reason: the custom UITest configuration optimized dependency assertions away and missed a real installed Debug crash. Cost if wrong: test builds take longer and use more debug resources.
 
-Final review and deferred findings will be recorded here after the one independent review.
+- Ruling: The reviewer set aside later SMB/WebDAV, recursive, remote destructive/relay/preview implementations after checking their rejection boundaries. This scope stands because delivered capabilities are explicit and bounded. Cost if wrong: these workflows need later implementation.
+
+Deferred minors: remote recovery needs an endpoint snapshot after a profile is retired; Activity remote Reveal/Show needs remote navigation or copy-path behavior. See [review record](sftp-final-review.md).

@@ -15,6 +15,7 @@ final class WorkspaceController {
     var activityVisible = false
     var showConnections = false
     var editingConnection: ConnectionProfile?
+    var editingConnectionRequest: ConnectionOpenRequest?
     var renameRequest: UUID?
     var renamePane: PaneID?
     let quickLook = QuickLookController()
@@ -86,7 +87,7 @@ final class WorkspaceController {
         let ticket = tab.requestNavigation(to: tab.location)
         await loader.load(target: .init(paneID: paneID, tabID: tab.id, ticket: ticket), options: .init(includeHidden: tab.options.includeHidden))
     }
-    func manageConnection(_ profile: ConnectionProfile? = nil) { editingConnection = profile; showConnections = true }
+    func manageConnection(_ profile: ConnectionProfile? = nil, request: ConnectionOpenRequest? = nil) { editingConnection = profile; editingConnectionRequest = request; showConnections = true }
     func connectSaved(_ profile: ConnectionProfile, destination: OpenDestination? = nil) {
         do {
             let request = try ConnectionOpenRequest(profile: profile, activePane: workspace.activePane, destination: destination, defaultDestination: services.preferences.defaultDestination)
@@ -94,7 +95,7 @@ final class WorkspaceController {
                 do {
                     if await services.remote.isConnected(profile.id) { try await establishConnection(request, secret: ""); return }
                     let stored = try await services.connections.secret(for: profile)
-                    guard let credential = stored ?? (profile.authentication == .ed25519Key ? "" : nil) else { manageConnection(profile); return }
+                    guard let credential = stored ?? (profile.authentication == .ed25519Key ? "" : nil) else { manageConnection(profile, request: request); return }
                     try await establishConnection(request, secret: credential)
                 } catch is CancellationError { }
                 catch { errorMessage = error.localizedDescription }
@@ -102,9 +103,17 @@ final class WorkspaceController {
         } catch { errorMessage = error.localizedDescription }
     }
     func establishConnection(_ request: ConnectionOpenRequest, secret: String, onProfileChange: ((ConnectionProfile) -> Void)? = nil) async throws {
+        let attempt = UUID(); let remote = services.remote
+        try await withTaskCancellationHandler {
+            try await performConnection(request, secret: secret, attempt: attempt, onProfileChange: onProfileChange)
+        } onCancel: { Task { await remote.cancelAttempt(attempt) } }
+    }
+    private func performConnection(_ request: ConnectionOpenRequest, secret: String, attempt: UUID, onProfileChange: ((ConnectionProfile) -> Void)?) async throws {
+        try Task.checkCancellation()
         var profile = request.profile
-        do { try await services.remote.connect(profile, secret: secret) }
+        do { try await services.remote.connect(profile, secret: secret, attempt: attempt) }
         catch let challenge as HostKeyChallenge {
+            try Task.checkCancellation()
             let alert = NSAlert(); alert.alertStyle = challenge.previousFingerprint == nil ? .informational : .warning
             alert.messageText = challenge.previousFingerprint == nil ? "Verify SFTP Server" : "SSH Host Key Changed"
             var message = "Server: \(challenge.host):\(challenge.port)\nKey type: \(challenge.observedKey.split(separator: " ").first.map(String.init) ?? "SSH")\nFingerprint: \(challenge.fingerprint)"
@@ -113,11 +122,14 @@ final class WorkspaceController {
             alert.informativeText = message
             alert.addButton(withTitle: challenge.previousFingerprint == nil ? "Trust and Connect" : "Trust Changed Key")
             alert.addButton(withTitle: "Cancel"); alert.buttons[0].keyEquivalent = ""; alert.buttons[1].keyEquivalent = "\r"
-            guard alert.runModal() == .alertFirstButtonReturn else { await services.remote.disconnect(profile.id); throw CancellationError() }
+            guard alert.runModal() == .alertFirstButtonReturn else { await services.remote.cancelAttempt(attempt); throw CancellationError() }
+            try Task.checkCancellation()
             profile = try await services.connections.trust(challenge.observedKey, for: profile)
+            try Task.checkCancellation()
             onProfileChange?(profile)
-            try await services.remote.connect(profile, secret: secret)
+            try await services.remote.connect(profile, secret: secret, attempt: attempt)
         }
+        try Task.checkCancellation()
         guard window?.isVisible == true else { return }
         let verifiedLocation = FileLocation.sftp(profileID: profile.id, path: request.location.remotePath!)
         open(verifiedLocation, in: request.paneID)

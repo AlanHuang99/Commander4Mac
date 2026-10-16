@@ -14,7 +14,7 @@ Use the Connect toolbar button or Command-K. Save a server with password authent
 
 Browse, filter, sort, rename, create folders, and copy individual regular files between local and remote panes. Copies retain the source and support Skip, Keep Both, and Cancel. They copy file contents without preserving permissions, timestamps, extended attributes, or resource forks. Remote folder transfers, Move, Trash, replacement, and server-to-server copies are not available yet.
 
-The installed app has been exercised against an owned loopback OpenSSH server. Password authentication, encrypted keys, and real LAN/public-server interoperability still need acceptance on those environments. See [SFTP acceptance](docs/verification/sftp-release.md).
+The installed app has been exercised against an owned loopback OpenSSH server. Password authentication, encrypted keys, and real LAN/public-server interoperability still need acceptance on those environments. See [SFTP acceptance](docs/verification/sftp-release.md) and [review findings](docs/verification/sftp-final-review.md).
 
 ## Build and run
 

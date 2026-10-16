@@ -31,6 +31,8 @@ struct WorkspaceView: View {
             if controller.shelfVisible { Divider(); ShelfView(controller: controller) }
             if controller.activityVisible { Divider(); ActivityView(services: controller.services) }
         }
+        .focusedSceneValue(\.workspaceController, controller)
+        .background(WindowRegistration(controller: controller).frame(width: 0, height: 0))
         .frame(minWidth: 980, minHeight: 620)
         .preferredColorScheme(controller.services.preferences.appearance.colorScheme)
         .toolbar {
@@ -56,6 +58,7 @@ struct WorkspaceView: View {
             ConflictSheet(conflict: conflict) { controller.services.resolve(conflict, $0) }
         }
         .task {
+            controller.services.openWorkspaceWindow = { openWindow(id: "workspace") }
             controller.undoManager = undoManager
             showAccessSetup = !acknowledged
             let count = await controller.start()

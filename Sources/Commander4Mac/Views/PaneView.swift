@@ -4,6 +4,7 @@ import CommanderCore
 struct PaneView: View {
     var controller: WorkspaceController
     var paneID: PaneID
+    @FocusState private var filterFocused: Bool
     var body: some View {
         let workspace = controller.workspace
         @Bindable var tab = workspace.pane(paneID).activeTab
@@ -14,6 +15,8 @@ struct PaneView: View {
             HStack(spacing: 6) {
                 Image(systemName: "line.3.horizontal.decrease").foregroundStyle(.secondary)
                 TextField("Filter this folder", text: $tab.filter).textFieldStyle(.plain)
+                    .focused($filterFocused)
+                    .accessibilityLabel(paneID == .left ? "Filter left folder" : "Filter right folder")
                     .accessibilityIdentifier(paneID.rawValue + ".filter")
                 if !tab.filter.isEmpty { Button { tab.filter = "" } label: { Image(systemName: "xmark.circle.fill") }.buttonStyle(.plain).foregroundStyle(.secondary) }
                 Menu {
@@ -37,7 +40,8 @@ struct PaneView: View {
                     onCommand: { controller.tableCommand($0, pane: paneID) },
                     renameRequest: controller.renamePane == paneID ? controller.renameRequest : nil,
                     onRename: { controller.rename($0, to: $1, pane: paneID) },
-                    onDrop: { controller.acceptDrop($0) })
+                    onDrop: { controller.acceptDrop($0) }, previewController: controller.quickLook,
+                    focusRequest: controller.focusRequest?.pane == paneID && controller.focusRequest?.field == .files ? controller.focusRequest?.id : nil)
                 if let failure = tab.failure {
                     VStack(spacing: 12) {
                         Image(systemName: failure.category == .accessDenied ? "lock.shield" : "folder.badge.questionmark").font(.largeTitle)
@@ -66,6 +70,9 @@ struct PaneView: View {
                 if tab.isLoading { ProgressView().controlSize(.mini) }
                 Text(paneID == .left ? "Left" : "Right").foregroundStyle(.tertiary)
             }.font(.system(size: 11)).foregroundStyle(.secondary).padding(.horizontal, 11).padding(.vertical, 7)
+        }
+        .onChange(of: controller.focusRequest?.id) {
+            if let request = controller.focusRequest, request.pane == paneID, request.field == .filter { filterFocused = true }
         }
         .onChange(of: tab.pin) { controller.services.saveSoon() }
         .onChange(of: tab.options) { controller.services.saveSoon() }

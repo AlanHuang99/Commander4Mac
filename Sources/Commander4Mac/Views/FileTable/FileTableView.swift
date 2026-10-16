@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import Quartz
 import CommanderCore
 
 enum TableCommand { case open, rename, preview, parent, focusOther, copy, move, newFolder, trash, stage, copyPath, showPackage, copyClipboard, pasteClipboard, moveClipboard }
@@ -14,6 +15,8 @@ struct FileTableView: NSViewRepresentable {
     var renameRequest: UUID?
     var onRename: (FileEntry, String) -> Void
     var onDrop: (TransferRequest) -> Void
+    var previewController: QuickLookController
+    var focusRequest: UUID?
     func makeCoordinator() -> FileTableCoordinator { FileTableCoordinator(owner: self) }
     func makeNSView(context: Context) -> NSScrollView {
         let scroll = CommanderScrollView()
@@ -36,12 +39,14 @@ struct FileTableView: NSViewRepresentable {
         table.setDraggingSourceOperationMask([.copy, .move], forLocal: true)
         table.setDraggingSourceOperationMask([.copy, .move], forLocal: false)
         table.target = context.coordinator; table.doubleAction = #selector(FileTableCoordinator.activate)
+        table.previewController = previewController
         table.onFocus = onFocus; table.onCommand = onCommand
         let menu = NSMenu()
-        for (title, command) in [("Open", TableCommand.open), ("Quick Look", .preview), ("Copy Path", .copyPath), ("Add to Shelf", .stage), ("Copy to Other Pane", .copy), ("Move to Other Pane", .move), ("Rename", .rename), ("New Folder", .newFolder), ("Move to Trash", .trash)] {
+        for (title, command) in [("Open", TableCommand.open), ("Quick Look", .preview), ("Copy Path", .copyPath), ("Add to Shelf", .stage), ("Copy to Other Pane", .copy), ("Move to Other Pane", .move), ("Rename", .rename), ("New Folder", .newFolder), ("Move to Trash", .trash), ("Show Package Contents", .showPackage)] {
             let item = NSMenuItem(title: title, action: #selector(FileTableCoordinator.contextAction(_:)), keyEquivalent: "")
             item.target = context.coordinator; item.representedObject = CommandBox(command); menu.addItem(item)
         }
+        menu.delegate = context.coordinator
         table.menu = menu
         scroll.documentView = table
         context.coordinator.table = table
@@ -51,6 +56,7 @@ struct FileTableView: NSViewRepresentable {
         let coordinator = context.coordinator
         coordinator.owner = self
         guard let table = coordinator.table else { return }
+        table.previewController = previewController
         table.onFocus = onFocus; table.onCommand = onCommand
         table.rowHeight = max(tab.options.textSize + 9, tab.options.listIconSize + 6)
         coordinator.synchronizing = true
@@ -62,6 +68,9 @@ struct FileTableView: NSViewRepresentable {
         if table.selectedRowIndexes != indexes { table.selectRowIndexes(indexes, byExtendingSelection: false) }
         coordinator.synchronizing = false
         if isActive && !coordinator.wasActive { table.window?.makeFirstResponder(table) }
+        if isActive, let focusRequest, coordinator.lastFocusRequest != focusRequest {
+            coordinator.lastFocusRequest = focusRequest; table.window?.makeFirstResponder(table)
+        }
         coordinator.wasActive = isActive
         if let renameRequest, coordinator.lastRenameRequest != renameRequest, isActive {
             coordinator.lastRenameRequest = renameRequest
@@ -73,6 +82,12 @@ struct FileTableView: NSViewRepresentable {
 final class CommandBox: NSObject { let command: TableCommand; init(_ command: TableCommand) { self.command = command } }
 
 final class CommanderTableView: NSTableView {
+    weak var previewController: QuickLookController?
+    override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool { previewController?.hasItems == true }
+    override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) { panel.dataSource = previewController; panel.delegate = previewController }
+    override func endPreviewPanelControl(_ panel: QLPreviewPanel!) { panel.dataSource = nil; panel.delegate = nil }
+    @objc func copy(_ sender: Any?) { onCommand?(.copyClipboard) }
+    @objc func paste(_ sender: Any?) { onCommand?(.pasteClipboard) }
     var onFocus: (() -> Void)?
     var onCommand: ((TableCommand) -> Void)?
     override func mouseDown(with event: NSEvent) { onFocus?(); super.mouseDown(with: event) }
@@ -84,23 +99,8 @@ final class CommanderTableView: NSTableView {
     }
     override func keyDown(with event: NSEvent) {
         if currentEditor() != nil { super.keyDown(with: event); return }
-        if event.modifierFlags.contains(.command) {
-            switch event.charactersIgnoringModifiers?.lowercased() {
-            case "c": onCommand?(.copyClipboard); return
-            case "v": onCommand?(event.modifierFlags.contains(.option) ? .moveClipboard : .pasteClipboard); return
-            default: break
-            }
-        }
-        switch event.keyCode {
-        case 48: onCommand?(.focusOther)
-        case 36: onCommand?(.rename)
-        case 49: onCommand?(.preview)
-        case 51 where event.modifierFlags.contains(.command): onCommand?(.trash)
-        case 96: onCommand?(.copy)
-        case 97: onCommand?(.move)
-        case 98: onCommand?(.newFolder)
-        default: super.keyDown(with: event)
-        }
+        if let command = FileTableCommandHandler.command(for: event) { onCommand?(command) }
+        else { super.keyDown(with: event) }
     }
 }
 

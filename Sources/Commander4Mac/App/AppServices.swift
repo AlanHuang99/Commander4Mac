@@ -41,6 +41,21 @@ final class AppServices {
     var pendingConflict: TransferConflict? { jobs.compactMap(\.pendingConflict).first }
     var startupDiagnostic: String?
     var isTerminating = false
+    var openWorkspaceWindow: (() -> Void)?
+    private weak var activeController: WorkspaceController?
+    private var incomingFolders: [URL] = []
+    func activate(_ controller: WorkspaceController) { activeController = controller }
+    func acceptIncomingFolders(_ urls: [URL]) {
+        incomingFolders.append(contentsOf: urls)
+        if let controller = activeController ?? controllers.values.compactMap(\.value).first { routeIncoming(to: controller) }
+        else { openWorkspaceWindow?() }
+    }
+    private func routeIncoming(to controller: WorkspaceController) {
+        let folders = incomingFolders; incomingFolders = []
+        let route = preferences.defaultDestination
+        let pane: PaneID? = route == .current ? nil : (route == .left ? .left : .right)
+        for url in folders { controller.open(.local(url), in: pane, newTab: true) }
+    }
     private var pendingWindows: [WorkspaceSnapshot]
     private var controllers: [UUID: WeakController] = [:]
     private var saveTask: Task<Void, Never>?
@@ -99,7 +114,11 @@ final class AppServices {
         guard !restoredAdditionalWindows else { return 0 }
         restoredAdditionalWindows = true; return pendingWindows.count
     }
-    func register(_ controller: WorkspaceController) { controllers[controller.workspace.id] = WeakController(controller) }
+    func register(_ controller: WorkspaceController) {
+        controllers[controller.workspace.id] = WeakController(controller)
+        activeController = controller
+        if !incomingFolders.isEmpty { routeIncoming(to: controller) }
+    }
     func unregister(_ controller: WorkspaceController) {
         guard !isTerminating else { return }
         controllers.removeValue(forKey: controller.workspace.id)

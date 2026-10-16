@@ -15,6 +15,26 @@ final class WorkspaceController {
     var activityVisible = false
     var renameRequest: UUID?
     var renamePane: PaneID?
+    let quickLook = QuickLookController()
+    @ObservationIgnored weak var window: NSWindow?
+    enum FieldFocus { case path, filter, files }
+    struct FocusRequest { let id = UUID(); let pane: PaneID; let field: FieldFocus }
+    var focusRequest: FocusRequest?
+    var isEditingText: Bool { window?.firstResponder is NSTextView }
+    func focus(_ field: FieldFocus) { focusRequest = .init(pane: workspace.activePane, field: field) }
+    func newTab() { open(workspace.activeTab.location, newTab: true) }
+    func closeTab() {
+        let pane = workspace.pane(workspace.activePane)
+        if pane.tabs.count == 1 && !pane.activeTab.pin.isPinned { window?.performClose(nil) }
+        else { pane.close(tabID: pane.activeTabID); services.saveSoon() }
+    }
+    func openSelection() { for entry in workspace.activeTab.selectedEntries { activate(entry, pane: workspace.activePane) } }
+    func previewSelection() { quickLook.present(CommandRouter.previewItems(in: workspace)) }
+    func chooseFolder() {
+        let panel = NSOpenPanel(); panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.allowsMultipleSelection = false
+        panel.directoryURL = workspace.activeTab.location.url
+        if panel.runModal() == .OK, let url = panel.url { open(.local(url)) }
+    }
     @ObservationIgnored weak var undoManager: UndoManager?
     init(services: AppServices = .shared) {
         self.services = services
@@ -54,6 +74,7 @@ final class WorkspaceController {
     func open(_ location: FileLocation, in paneID: PaneID? = nil, newTab: Bool = false) {
         let destination: OpenDestination = paneID.map { $0 == .left ? .left : .right } ?? .current
         let target = workspace.open(location, destination: destination, inNewTab: newTab)
+        focus(.files)
         let tab = workspace.pane(target.paneID).activeTab
         Task { await loader.load(target: target, options: .init(includeHidden: tab.options.includeHidden)); services.saveSoon() }
     }
@@ -78,15 +99,16 @@ final class WorkspaceController {
     }
     func activate(_ entry: FileEntry, pane: PaneID) {
         workspace.activePane = pane
-        if entry.isDirectory { open(entry.location, in: pane) }
+        if CommandRouter.openDisposition(kind: entry.kind) == .browse { open(entry.location, in: pane) }
         else if entry.kind == .symbolicLink {
             var directory: ObjCBool = false
             if FileManager.default.fileExists(atPath: entry.location.url.path, isDirectory: &directory), directory.boolValue { open(entry.location, in: pane) }
-            else { NSWorkspace.shared.open(entry.location.url) }
-        } else { NSWorkspace.shared.open(entry.location.url) }
+            else { if !SystemFileActions.open([entry.location]) { errorMessage = "No application could open this item." } }
+        } else { if !SystemFileActions.open([entry.location]) { errorMessage = "No application could open this item." } }
     }
     func selectTab(_ tab: TabSession, pane: PaneID) {
         let paneState = workspace.pane(pane)
+        workspace.activePane = pane; focus(.files)
         if paneState.activeTabID == tab.id, tab.pin.home != nil {
             if let target = workspace.returnToPinnedFolder(in: pane, tabID: tab.id) {
                 Task { await loader.load(target: target, options: .init(includeHidden: tab.options.includeHidden)) }
@@ -99,6 +121,7 @@ final class WorkspaceController {
     func history(_ paneID: PaneID, forward: Bool) {
         let tab = workspace.pane(paneID).activeTab
         guard let ticket = forward ? tab.goForward() : tab.goBack() else { return }
+        focus(.files)
         Task { await loader.load(target: .init(paneID: paneID, tabID: tab.id, ticket: ticket), options: .init(includeHidden: tab.options.includeHidden)) }
     }
     func rename(_ entry: FileEntry, to name: String, pane: PaneID) {
@@ -172,9 +195,8 @@ final class WorkspaceController {
         }
     }
     func transferSelection(_ kind: TransferKind, from pane: PaneID) {
-        let sources = workspace.pane(pane).activeTab.selectedEntries.map(\.location)
-        guard !sources.isEmpty else { return }
-        let request = TransferRequest(kind: kind, sources: sources, destinationDirectory: workspace.pane(pane.opposite).activeTab.location)
+        workspace.activePane = pane
+        guard let request = CommandRouter.transfer(kind, in: workspace, textEditing: isEditingText) else { return }
         services.enqueue(request, owner: workspace.id); activityVisible = true
     }
     func transferShelf(_ kind: TransferKind, to pane: PaneID) {
@@ -192,6 +214,9 @@ final class WorkspaceController {
     func tableCommand(_ command: TableCommand, pane: PaneID) {
         workspace.activePane = pane
         switch command {
+        case .preview: previewSelection()
+        case .showPackage:
+            if let entry = workspace.activeTab.selectedEntries.first, entry.kind == .package { open(CommandRouter.packageContents(entry.location), in: pane) }
         case .rename: if workspace.activeTab.selection.count == 1 { renamePane = pane; renameRequest = UUID() }
         case .newFolder: newFolder()
         case .trash: trashSelection()

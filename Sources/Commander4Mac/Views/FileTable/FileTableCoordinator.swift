@@ -3,7 +3,7 @@ import CommanderCore
 import UniformTypeIdentifiers
 
 @MainActor
-final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate {
+final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate, NSTextFieldDelegate, NSMenuDelegate {
     var owner: FileTableView
     weak var table: CommanderTableView?
     var entries: [FileEntry] = []
@@ -11,6 +11,7 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
     var options = ViewOptions()
     var synchronizing = false
     var wasActive = false
+    var lastFocusRequest: UUID?
     var lastRenameRequest: UUID?
     private var editingEntry: FileEntry?
     private var icons: [String: NSImage] = [:]
@@ -110,6 +111,26 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
     @objc func activate() {
         guard let table, entries.indices.contains(table.clickedRow) else { return }
         owner.onActivate(entries[table.clickedRow])
+    }
+    func menuWillOpen(_ menu: NSMenu) {
+        menu.items.filter { $0.tag == 884 }.forEach { menu.removeItem($0) }
+        let entries = owner.tab.selectedEntries
+        guard let first = entries.first else { return }
+        let item = NSMenuItem(title: "Open With", action: nil, keyEquivalent: ""); item.tag = 884
+        let submenu = NSMenu()
+        for app in SystemFileActions.applications(for: first.location) {
+            let option = NSMenuItem(title: app.deletingPathExtension().lastPathComponent, action: #selector(openWith(_:)), keyEquivalent: "")
+            option.target = self; option.representedObject = app; submenu.addItem(option)
+        }
+        item.submenu = submenu; menu.addItem(item)
+        for item in menu.items where (item.representedObject as? CommandBox)?.command == .showPackage { item.isHidden = first.kind != .package }
+    }
+    @objc private func openWith(_ sender: NSMenuItem) {
+        guard let application = sender.representedObject as? URL else { return }
+        let locations = owner.tab.selectedEntries.map(\.location)
+        SystemFileActions.open(locations, with: application) { [weak self] message in
+            self?.table?.window?.presentError(FileOperationError.message(message))
+        }
     }
     @objc func contextAction(_ sender: NSMenuItem) {
         guard let box = sender.representedObject as? CommandBox else { return }

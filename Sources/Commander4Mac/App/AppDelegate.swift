@@ -1,7 +1,20 @@
 import AppKit
+import CommanderCore
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func application(_ application: NSApplication, open urls: [URL]) {
+        Task {
+            let folders = (try? await BlockingFileWorker.run {
+                urls.filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true }
+            }) ?? []
+            AppServices.shared.acceptIncomingFolders(folders)
+        }
+    }
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag { AppServices.shared.openWorkspaceWindow?() }
+        return true
+    }
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         let services = AppServices.shared
         guard services.activeJobCount > 0 else { return .terminateNow }

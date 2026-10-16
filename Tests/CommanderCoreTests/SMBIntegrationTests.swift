@@ -1,5 +1,6 @@
 import XCTest
 import CommanderCore
+import Darwin
 
 final class SMBIntegrationTests: XCTestCase, @unchecked Sendable {
     func testOwnedSMBBrowsingAndNonReplacingOperations() async throws {
@@ -43,6 +44,21 @@ final class SMBIntegrationTests: XCTestCase, @unchecked Sendable {
         await manager.disconnect(profile.id)
         let connected = await manager.isConnected(profile.id); XCTAssertFalse(connected)
         do { _ = try await manager.list(location, options: .init()); XCTFail("Disconnected mounts cannot fall through to local directories") } catch { }
+    }
+    func testCancelInterruptsAnActuallyStoppedSMBPeer() async throws {
+        guard let fixture = ProcessInfo.processInfo.environment["COMMANDER_SMB_FIXTURE"] else { throw XCTSkip("Owned SMB fixture required") }
+        let root = URL(fileURLWithPath: fixture); let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
+        let pid = try XCTUnwrap(Int32(String(contentsOf: root.appendingPathComponent("server.pid"), encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)))
+        var p = ConnectionProfile(host: "127.0.0.1", port: c["port"] as! Int, username: c["username"] as! String); p.protocolKind = .smb; p.share = "OwnedShare"
+        let manager = SMBConnectionManager(); try await manager.connect(p, secret: c["secret"] as! String)
+        let location = FileLocation.smb(profileID: p.id, path: try RemotePath("/stopped.bin")); let writer = try await manager.openFile(location, writeExclusive: true)
+        guard kill(pid, SIGSTOP) == 0 else { await manager.disconnect(p.id); throw FileOperationError.message("Could not stop owned SMB fixture") }
+        defer { _ = kill(pid, SIGCONT) }
+        let task = Task { try await writer.write(Data(repeating: 120, count: 65536), offset: 0) }
+        try await Task.sleep(for: .milliseconds(150)); let start = ContinuousClock.now; task.cancel()
+        do { try await task.value; XCTFail("Stopped peer cannot acknowledge write") } catch { }
+        XCTAssertLessThan(start.duration(to: .now), .seconds(3)); let connected = await manager.isConnected(p.id); XCTAssertFalse(connected)
+        _ = kill(pid, SIGCONT); await writer.abort(); await manager.disconnect(p.id)
     }
     @MainActor func testCanceledConnectionCannotBeginAQueuedHandshake() async throws {
         let manager = SMBConnectionManager()

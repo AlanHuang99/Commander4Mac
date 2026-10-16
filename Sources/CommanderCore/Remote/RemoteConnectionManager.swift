@@ -5,6 +5,10 @@ public actor RemoteConnectionManager: RemoteFileAccess {
     private let smb = SMBConnectionManager()
     private let webdav = WebDAVConnectionManager()
     private var kinds: [UUID: ConnectionProtocol] = [:]
+    private var endpointSnapshots: [UUID: RemoteEndpointSnapshot] = [:]
+    public func endpointSnapshot(_ location: FileLocation) -> RemoteEndpointSnapshot? {
+        guard let id = location.profileID, let snapshot = endpointSnapshots[id], snapshot.protocolKind == location.connectionProtocol else { return nil }; return snapshot
+    }
     private var identities = ConnectionIdentityGuard()
     private var states: [UUID: SFTPConnectionState] = [:]
     private var observers: [UUID: AsyncStream<[UUID: SFTPConnectionState]>.Continuation] = [:]
@@ -27,7 +31,7 @@ public actor RemoteConnectionManager: RemoteFileAccess {
     private func publish() { for observer in observers.values { observer.yield(states) } }
     private func setState(_ state: SFTPConnectionState, id: UUID) { states[id] = state; publish() }
     public func connect(_ raw: ConnectionProfile, secret: String, attempt: UUID = UUID()) async throws {
-        let profile = try raw.validated(); try identities.bind(profile); try Task.checkCancellation()
+        let profile = try raw.validated(); try identities.bind(profile); endpointSnapshots[profile.id] = .init(profile: profile); try Task.checkCancellation()
         kinds[profile.id] = profile.protocolKind; setState(.connecting, id: profile.id)
         do {
             switch profile.protocolKind {

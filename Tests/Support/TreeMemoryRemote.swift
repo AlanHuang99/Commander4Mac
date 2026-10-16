@@ -5,6 +5,9 @@ import Darwin
 actor TreeMemoryRemote: RemoteFileAccess {
     nonisolated let root = FileLocation.sftp(profileID: UUID(), path: try! RemotePath("/"))
     struct Node { var kind: FileKind; var bytes: Data; var revision: Int }
+    private var endpoint: RemoteEndpointSnapshot?
+    func setEndpoint(_ value: RemoteEndpointSnapshot) { endpoint = value }
+    func endpointSnapshot(_ location: FileLocation) -> RemoteEndpointSnapshot? { endpoint }
     private var nodes: [FileLocation: Node] = [:]
     var token: OperationCancellation?; var mutate: URL?; var loseRename = false; var raceRename = false; var tamperStage = false; var failReads = false; var readCount = 0
     private(set) var mutations = 0

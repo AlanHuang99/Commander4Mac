@@ -25,11 +25,11 @@ struct ActivityView: View {
                                     Button("Cancel") { Task { await services.transferQueue.cancel(jobID: job.id) } }.disabled(job.state == .cancelRequested)
                                 }
                             }
-                            Text(job.request.destinationDirectory.url.path).lineLimit(1).truncationMode(.middle).foregroundStyle(.secondary)
+                            Text(LocationPresentation.text(for: job.request.destinationDirectory.url, endpoint: endpoint(for: job.request.destinationDirectory))).lineLimit(1).truncationMode(.middle).foregroundStyle(.secondary)
                             if !job.state.isTerminal {
                                 HStack {
                                     ProgressView().controlSize(.small)
-                                    Text("\(ByteCountFormatter.string(fromByteCount: job.progress.bytesCopied, countStyle: .file)) in current copy · \(job.outcomes.count) roots finished")
+                                    Text("\(ByteCountFormatter.string(fromByteCount: job.progress.bytesCopied, countStyle: .file)) copied · \(job.progress.completedItems) files finished")
                                 }
                             }
                             ForEach(job.outcomes) { outcome in
@@ -40,7 +40,7 @@ struct ActivityView: View {
                                         if let detail = outcome.detail { Text(detail).foregroundStyle(.secondary).textSelection(.enabled) }
                                     }
                                     Spacer()
-                                    if let destination = outcome.destination { Button("Reveal") { NSWorkspace.shared.activateFileViewerSelecting([destination.url]) } }
+                                    if let destination = outcome.destination { locationButton("Reveal", url: destination.url, endpoint: endpoint(for: destination)) }
                                 }
                             }
                         }.padding(9).background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
@@ -49,19 +49,29 @@ struct ActivityView: View {
                         VStack(alignment: .leading, spacing: 5) {
                             Label("Interrupted operation requires review", systemImage: "exclamationmark.triangle")
                             Text(record.detail ?? "Review both locations before moving or removing any remaining files.")
-                            Text("Source: \(record.source.url.path)\nDestination: \(record.destination.path)").textSelection(.enabled)
-                            if let staging = record.staging { Text("Recovery file: \(staging.path)").textSelection(.enabled) }
+                            if let endpoint = record.endpointSnapshot { Text(endpoint.label).foregroundStyle(.secondary).textSelection(.enabled) }
+                            Text("Source: \(LocationPresentation.text(for: record.source.url, endpoint: record.endpointSnapshot))\nDestination: \(LocationPresentation.text(for: record.destination, endpoint: record.endpointSnapshot))").textSelection(.enabled)
+                            if let staging = record.staging { Text("Recovery file: \(LocationPresentation.text(for: staging, endpoint: record.endpointSnapshot))").textSelection(.enabled) }
                             HStack {
                                 Button("Keep Files and Dismiss") { services.keepRecoveryFiles(record) }
-                                Button("Show Source") { NSWorkspace.shared.activateFileViewerSelecting([record.source.url]) }
-                                Button("Show Destination") { NSWorkspace.shared.activateFileViewerSelecting([record.destination]) }
-                                if let staging = record.staging { Button("Show Recovery File") { NSWorkspace.shared.activateFileViewerSelecting([staging]) } }
+                                locationButton("Show Source", url: record.source.url, endpoint: record.endpointSnapshot)
+                                locationButton("Show Destination", url: record.destination, endpoint: record.endpointSnapshot)
+                                if let staging = record.staging { locationButton("Show Recovery File", url: staging, endpoint: record.endpointSnapshot) }
                             }
                         }.padding(9).background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
                     }
                 }.font(.system(size: 11))
             }.frame(height: 90)
         }.padding(12).frame(minHeight: 70)
+    }
+    private func endpoint(for location: FileLocation) -> RemoteEndpointSnapshot? {
+        services.connections.profiles.first { $0.id == location.profileID }.map { RemoteEndpointSnapshot(profile: $0) }
+    }
+    @ViewBuilder private func locationButton(_ localTitle: String, url: URL, endpoint: RemoteEndpointSnapshot?) -> some View {
+        switch LocationPresentation.action(for: url, endpoint: endpoint) {
+        case .revealLocal(let file): Button(localTitle) { NSWorkspace.shared.activateFileViewerSelecting([file]) }
+        case .copyRemotePath(let path): Button("Copy Remote Path") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(path, forType: .string) }.help(path)
+        }
     }
     private func stateLabel(_ state: JobState) -> String {
         switch state {

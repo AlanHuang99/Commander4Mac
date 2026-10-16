@@ -147,8 +147,7 @@ extension TableCommand {
         case .move: return local && browser.destination.isLocal
         case .moveClipboard: return local
         case .copy:
-            if local && browser.destination.isLocal { return true }
-            return local != browser.destination.isLocal && browser.tab.selectedEntries.allSatisfy { $0.kind == .file }
+            return TransferCapabilities.canTransfer(.copy, from: browser.tab.location, to: browser.destination, entries: browser.tab.selectedEntries)
         case .showPackage: return local && browser.tab.selectedEntries.first?.kind == .package
         default: return true
         }

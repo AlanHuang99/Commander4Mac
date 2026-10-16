@@ -63,10 +63,14 @@ public actor SMBConnectionManager: RemoteFileAccess {
     private var sessions: [UUID: SMBSession] = [:]
     private var attempts: [UUID: UUID] = [:]
     private var pending: [UUID: SMBSession] = [:]
+    private var endpointSnapshots: [UUID: RemoteEndpointSnapshot] = [:]
+    public func endpointSnapshot(_ location: FileLocation) -> RemoteEndpointSnapshot? {
+        guard let id = location.profileID, let snapshot = endpointSnapshots[id], snapshot.protocolKind == location.connectionProtocol else { return nil }; return snapshot
+    }
     private var identities = ConnectionIdentityGuard()
     public init() {}
     public func connect(_ raw: ConnectionProfile, secret: String, attempt: UUID = UUID()) async throws {
-        let profile = try raw.validated(); try identities.bind(profile)
+        let profile = try raw.validated(); try identities.bind(profile); endpointSnapshots[profile.id] = .init(profile: profile)
         guard profile.protocolKind == .smb else { throw FileOperationError.message("This provider requires SMB.") }
         if sessions[profile.id]?.connected == true { return }
         await disconnect(profile.id); try Task.checkCancellation()

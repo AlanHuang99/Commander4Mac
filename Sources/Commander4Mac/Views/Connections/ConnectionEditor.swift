@@ -70,7 +70,7 @@ struct ConnectionEditor: View {
                 }
             }.disabled(busy)
             Text("Leave the credential blank to use Keychain. Nothing connects automatically on launch.").font(.caption).foregroundStyle(.secondary)
-            Text("Remote copies currently support individual files without preserving permissions, timestamps, or extended metadata. Folder transfers, remote moves, and remote Trash are not available yet.").font(.caption).foregroundStyle(.secondary)
+            Text("Copy regular files and folders between a local pane and a server. Contents and folder structure are copied; permissions, dates, and extended metadata are not preserved. Remote moves and Trash are unavailable.").font(.caption).foregroundStyle(.secondary)
             if let error { Text(error).font(.callout).foregroundStyle(.red).textSelection(.enabled).fixedSize(horizontal: false, vertical: true) }
             HStack {
                 Button("Cancel") {

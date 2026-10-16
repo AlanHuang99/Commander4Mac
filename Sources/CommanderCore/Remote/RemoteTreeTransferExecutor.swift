@@ -33,7 +33,7 @@ struct RemoteTreeTransferExecutor: Sendable {
                           emit: @escaping @Sendable (OperationEvent) -> Void) async -> ItemOperationOutcome {
         let id = UUID(); let source = manifest.source; let parent = request.destinationDirectory
         let planner = TransferTreePlanner(remote: remote); let digests = TreeDigests()
-        var record = JournalRecord(jobID: request.id, itemID: id, source: source, destination: parent.url, staging: nil, phase: .planned)
+        var record = JournalRecord(jobID: request.id, itemID: id, source: source, destination: parent.url, staging: nil, phase: .planned, endpointSnapshot: await remote.endpointSnapshot(source.isLocal ? request.destinationDirectory : source))
         var destination: FileLocation?; var stage: FileLocation?; var container: URL?; var containerIdentity: FileIdentity?
         var remoteStagePossible = false; var published = false
         do {

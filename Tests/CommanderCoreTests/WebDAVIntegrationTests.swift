@@ -64,6 +64,15 @@ final class WebDAVIntegrationTests: XCTestCase, @unchecked Sendable {
         do { try await manager.connect(bad, secret: "invalid disposable password"); XCTFail("Authentication failure must not connect") } catch { }
         let connected = await manager.isConnected(bad.id); XCTAssertFalse(connected)
     }
+    func testSystemTLSRejectsOwnedSelfSignedServer() async throws {
+        let (root, initial, secret) = try fixture(); var profile = initial
+        let c = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent("fixture.json"))) as! [String: Any]
+        profile.secure = true; profile.port = c["tls_port"] as! Int
+        let manager = WebDAVConnectionManager()
+        do { try await manager.connect(profile, secret: secret); XCTFail("Untrusted TLS cannot connect") }
+        catch { let failure = error as NSError; XCTAssertEqual(failure.domain, NSURLErrorDomain); XCTAssertTrue([-1200, -1202].contains(failure.code), failure.localizedDescription) }
+        let connected = await manager.isConnected(profile.id); XCTAssertFalse(connected)
+    }
     func testStalledGETCancellationAndDisconnectRetireOwnedRequests() async throws {
         let (_, p, secret) = try fixture(); let manager = WebDAVConnectionManager(); try await manager.connect(p, secret: secret)
         let file = FileLocation.webdav(profileID: p.id, path: try RemotePath("/stall.bin"))

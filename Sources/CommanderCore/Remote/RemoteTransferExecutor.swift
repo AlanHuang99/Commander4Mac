@@ -139,7 +139,7 @@ public struct RemoteTransferExecutor: TransferExecuting {
         var containerIdentity: FileIdentity?
         var remoteStagePossible = false
         var committed = false
-        var record = JournalRecord(jobID: request.id, itemID: itemID, source: source, destination: request.destinationDirectory.url, staging: nil, phase: .planned)
+        var record = JournalRecord(jobID: request.id, itemID: itemID, source: source, destination: request.destinationDirectory.url, staging: nil, phase: .planned, endpointSnapshot: await remote.endpointSnapshot(source.isLocal ? request.destinationDirectory : source))
         do {
             let initial = try request.destinationDirectory.appending(source.url.lastPathComponent)
             guard let selected = try await target(source, initial: initial, request: request, cancellation: cancellation, all: &applyAll, resolve: resolve) else {

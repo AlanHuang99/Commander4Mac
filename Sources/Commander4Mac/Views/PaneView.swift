@@ -78,9 +78,8 @@ struct PaneView: View {
             Divider()
             HStack(spacing: 10) {
                 Button("Copy to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.copy, from: paneID) }
-                    .disabled((!tab.location.isLocal || !workspace.pane(paneID.opposite).activeTab.location.isLocal) &&
-                        (tab.location.isLocal == workspace.pane(paneID.opposite).activeTab.location.isLocal || tab.selectedEntries.contains { $0.kind != .file }))
-                    .help("Copy to the other pane. Remote copies support individual regular files.")
+                    .disabled(!TransferCapabilities.canTransfer(.copy, from: tab.location, to: workspace.pane(paneID.opposite).activeTab.location, entries: tab.selectedEntries))
+                    .help("Copy to the other pane. Remote copies support regular files and folders.")
                 Button("Move to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.move, from: paneID) }.disabled(!tab.location.isLocal || !workspace.pane(paneID.opposite).activeTab.location.isLocal)
                 Button("Stage") { workspace.activePane = paneID; controller.stageSelection() }.disabled(!tab.location.isLocal)
                 Spacer()

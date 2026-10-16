@@ -24,8 +24,11 @@ public protocol RemoteFileChannel: Sendable {
 }
 public extension RemoteFileChannel { func abort() async { try? await close() } }
 public protocol RemoteFileAccess: DirectoryProviding {
+    func endpointSnapshot(_ location: FileLocation) async -> RemoteEndpointSnapshot?
     func metadata(_ location: FileLocation) async throws -> RemoteFileMetadata?
     func openFile(_ location: FileLocation, writeExclusive: Bool) async throws -> any RemoteFileChannel
     func rename(_ source: FileLocation, to destination: FileLocation) async throws
     func createDirectory(_ location: FileLocation) async throws
 }
+
+public extension RemoteFileAccess { func endpointSnapshot(_ location: FileLocation) async -> RemoteEndpointSnapshot? { nil } }

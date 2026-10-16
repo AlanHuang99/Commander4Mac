@@ -39,6 +39,10 @@ public actor SFTPConnectionManager: RemoteFileAccess {
     private struct PendingChannel { let attempt: UUID; let channel: any Channel }
     private var pendingChannels: [UUID: PendingChannel] = [:]
     private var sessions: [UUID: Session] = [:]
+    private var endpointSnapshots: [UUID: RemoteEndpointSnapshot] = [:]
+    public func endpointSnapshot(_ location: FileLocation) -> RemoteEndpointSnapshot? {
+        guard let id = location.profileID, let snapshot = endpointSnapshots[id], snapshot.protocolKind == location.connectionProtocol else { return nil }; return snapshot
+    }
     private var identities = ConnectionIdentityGuard()
     private var attempts: [UUID: UUID] = [:]
     private var states: [UUID: SFTPConnectionState] = [:]
@@ -69,7 +73,7 @@ public actor SFTPConnectionManager: RemoteFileAccess {
         try Task.checkCancellation()
         let profile = try rawProfile.validated()
         guard profile.protocolKind == .sftp else { throw FileOperationError.message("This provider requires an SFTP profile.") }
-        try identities.bind(profile)
+        try identities.bind(profile); endpointSnapshots[profile.id] = .init(profile: profile)
         if let existing = sessions[profile.id], existing.profile.hasSameCredentialScope(as: profile) && existing.client.isConnected { setState(.connected, id: profile.id); return }
         await disconnect(profile.id)
         try Task.checkCancellation()

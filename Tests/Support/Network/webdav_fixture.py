@@ -1,4 +1,5 @@
-import json,logging,secrets,socket,sys,os,time
+import json,logging,secrets,socket,sys,os,time,threading,subprocess
+from cheroot.ssl.builtin import BuiltinSSLAdapter
 from pathlib import Path
 from wsgidav.wsgidav_app import WsgiDAVApp
 from cheroot.wsgi import Server
@@ -27,5 +28,11 @@ def wrapper(env,start):
     return app(env,start)
 with socket.socket() as sock:
     sock.bind(('127.0.0.1',0)); port=sock.getsockname()[1]
-(root/'fixture.json').write_text(json.dumps({'port':port,'username':'commander','secret':secret})); (root/'fixture.json').chmod(0o600)
+with socket.socket() as sock:
+    sock.bind(('127.0.0.1',0)); tls_port=sock.getsockname()[1]
+subprocess.run(['/usr/bin/openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','1','-subj','/CN=127.0.0.1','-addext','subjectAltName=IP:127.0.0.1','-keyout',str(root/'tls-key.pem'),'-out',str(root/'tls-cert.pem')],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+(root/'tls-key.pem').chmod(0o600)
+tls_server=Server(('127.0.0.1',tls_port),wrapper,numthreads=2); tls_server.ssl_adapter=BuiltinSSLAdapter(str(root/'tls-cert.pem'),str(root/'tls-key.pem'),None)
+threading.Thread(target=tls_server.start,daemon=True).start()
+(root/'fixture.json').write_text(json.dumps({'port':port,'tls_port':tls_port,'username':'commander','secret':secret})); (root/'fixture.json').chmod(0o600)
 Server(('127.0.0.1',port),wrapper,numthreads=8).start()

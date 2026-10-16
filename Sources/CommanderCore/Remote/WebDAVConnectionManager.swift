@@ -3,11 +3,15 @@ import Foundation
 public actor WebDAVConnectionManager: RemoteFileAccess {
     private struct Session: Sendable { let endpoint: WebDAVEndpoint; let transport: WebDAVHTTPTransport }
     private var sessions: [UUID: Session] = [:]; private var pending: [UUID: (UUID, Session)] = [:]
+    private var endpointSnapshots: [UUID: RemoteEndpointSnapshot] = [:]
+    public func endpointSnapshot(_ location: FileLocation) -> RemoteEndpointSnapshot? {
+        guard let id = location.profileID, let snapshot = endpointSnapshots[id], snapshot.protocolKind == location.connectionProtocol else { return nil }; return snapshot
+    }
     private var identities = ConnectionIdentityGuard()
     public init() {}
     public func connect(_ raw: ConnectionProfile, secret: String, attempt: UUID = UUID()) async throws {
         let profile = try raw.validated(); guard profile.protocolKind == .webdav else { throw WebDAVEndpoint.invalid() }
-        try identities.bind(profile); try Task.checkCancellation()
+        try identities.bind(profile); endpointSnapshots[profile.id] = .init(profile: profile); try Task.checkCancellation()
         let session = Session(endpoint: try WebDAVEndpoint(profile: profile), transport: WebDAVHTTPTransport(profile: profile, secret: secret))
         if let old = pending.removeValue(forKey: profile.id) { old.1.transport.close() }
         pending[profile.id] = (attempt, session)

@@ -10,9 +10,10 @@ public struct JournalRecord: Identifiable, Codable, Sendable {
     public var staging: URL?
     public var phase: JournalPhase
     public var detail: String?
-    public init(jobID: UUID, itemID: UUID, source: FileLocation, destination: URL, staging: URL?, phase: JournalPhase, detail: String? = nil) {
+    public var endpointSnapshot: RemoteEndpointSnapshot?
+    public init(jobID: UUID, itemID: UUID, source: FileLocation, destination: URL, staging: URL?, phase: JournalPhase, detail: String? = nil, endpointSnapshot: RemoteEndpointSnapshot? = nil) {
         self.jobID = jobID; self.itemID = itemID; self.source = source; self.destination = destination
-        self.staging = staging; self.phase = phase; self.detail = detail
+        self.staging = staging; self.phase = phase; self.detail = detail; self.endpointSnapshot = endpointSnapshot
     }
 }
 public struct OperationJournal: Sendable {

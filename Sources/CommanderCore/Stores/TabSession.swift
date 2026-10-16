@@ -7,6 +7,7 @@ public final class TabSession: Identifiable {
     public private(set) var location: FileLocation
     public var pin: TabPin = .none
     public var selection: Set<EntryID> = []
+    public var unresolvedReference: LocationReference?
     public var scrollAnchor: EntryID?
     public var filter = "" { didSet { rebuildVisibleEntries() } }
     public var options: ViewOptions { didSet { rebuildVisibleEntries() } }
@@ -24,7 +25,12 @@ public final class TabSession: Identifiable {
     public init(id: UUID = UUID(), location: FileLocation, options: ViewOptions = .init()) {
         self.id = id; self.location = location; self.options = options.validated(); history = [location]
     }
+    public func restoreHistory(_ locations: [FileLocation], index: Int) {
+        guard locations.indices.contains(index), locations[index] == location else { return }
+        history = locations; historyIndex = index
+    }
     @discardableResult public func requestNavigation(to location: FileLocation) -> NavigationTicket {
+        unresolvedReference = nil
         if self.location != location {
             history = Array(history.prefix(historyIndex + 1)); history.append(location); historyIndex = history.count - 1
         }

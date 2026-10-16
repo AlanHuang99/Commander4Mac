@@ -3,22 +3,32 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 BUNDLE="CommanderCoreTests"
-if [[ "${1:-}" == "--ui" ]]; then BUNDLE="Commander4MacUITests"; shift; fi
+SCHEME="CommanderCore"
+ACTION="build-for-testing"
+if [[ "${1:-}" == "--ui" ]]; then BUNDLE="Commander4MacUITests"; SCHEME="Commander4Mac"; ACTION="test"; shift; fi
 FILTER="$BUNDLE"
-if [[ -n "${1:-}" ]]; then FILTER="$BUNDLE/$1"; fi
+CLASS="${1:-}"
+if [[ -n "$CLASS" ]]; then FILTER="$BUNDLE/$CLASS"; fi
 mkdir -p .build/logs
 xcodegen generate >/dev/null
 LOG="$ROOT_DIR/.build/logs/test-$(date +%Y%m%d-%H%M%S).log"
-if /usr/bin/xcodebuild -project Commander4Mac.xcodeproj -scheme Commander4Mac -configuration UITest -destination 'platform=macOS' -derivedDataPath .build/xcode -only-testing:"$FILTER" test >"$LOG" 2>&1; then
-  tail -n 24 "$LOG"
-else
+report_failure() {
   python3 - "$LOG" <<'ERRORS'
 import sys
 from pathlib import Path
 lines=Path(sys.argv[1]).read_text().splitlines()
-selected=[line for line in lines if "error:" in line or "failed" in line.lower() or "Executed " in line]
-print("\n".join(selected[-35:] if selected else lines[-25:]))
+errors=[line for line in lines if "error:" in line or "failed" in line.lower() or "Executed " in line]
+print("\n".join(errors[-35:] if errors else lines[-25:]))
 ERRORS
   echo "Full log: $LOG" >&2
-  exit 1
+}
+if ! /usr/bin/xcodebuild -project Commander4Mac.xcodeproj -scheme "$SCHEME" -configuration UITest -destination 'platform=macOS' -derivedDataPath .build/xcode -only-testing:"$FILTER" "$ACTION" >"$LOG" 2>&1; then
+  report_failure; exit 1
 fi
+if [[ "$BUNDLE" == "CommanderCoreTests" ]]; then
+  export DYLD_FRAMEWORK_PATH="$ROOT_DIR/.build/xcode/Build/Products/UITest"
+  ARGS=()
+  if [[ -n "$CLASS" ]]; then ARGS=(-XCTest "CommanderCoreTests.$CLASS"); fi
+  if ! xcrun xctest "${ARGS[@]}" "$ROOT_DIR/.build/xcode/Build/Products/UITest/CommanderCoreTests.xctest" >>"$LOG" 2>&1; then report_failure; exit 1; fi
+fi
+tail -n 20 "$LOG"

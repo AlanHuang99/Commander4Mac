@@ -7,6 +7,7 @@ public final class WorkspaceSession: Identifiable {
     public var left: PaneSession
     public var right: PaneSession
     public var activePane: PaneID = .left
+    public var splitRatio: Double = 0.5
     public var defaultOptions = ViewOptions()
     public init(id: UUID = UUID(), left: FileLocation = .local(FileManager.default.homeDirectoryForCurrentUser),
                 right: FileLocation = .local(FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Downloads"))) {

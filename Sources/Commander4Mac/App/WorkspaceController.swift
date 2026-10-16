@@ -5,19 +5,38 @@ import CommanderCore
 
 @MainActor @Observable
 final class WorkspaceController {
-    let workspace: WorkspaceSession
-    let loader: DirectoryLoader
+    var workspace: WorkspaceSession
+    var loader: DirectoryLoader
+    let services: AppServices
+    private var started = false
     var errorMessage: String?
     var sidebarVisible = true
-    init() {
-        workspace = WorkspaceSession()
-        loader = DirectoryLoader(workspace: workspace)
+    init(services: AppServices = .shared) {
+        self.services = services
+        let initial = WorkspaceSession()
+        workspace = initial
+        loader = DirectoryLoader(workspace: initial)
     }
-    func start() async {
+    func start() async -> Int {
+        guard !started else { return 0 }; started = true
+        if let restored = services.nextRestoredWorkspace() { workspace = restored; loader = DirectoryLoader(workspace: restored) }
+        services.register(self)
+        errorMessage = services.startupDiagnostic
         await refresh(.left); await refresh(.right)
+        return services.additionalWindowsToRestore()
     }
     func refresh(_ paneID: PaneID) async {
         let tab = workspace.pane(paneID).activeTab
+        if let reference = tab.unresolvedReference {
+            switch LocationResolver().resolve(reference) {
+            case .available(let location): tab.unresolvedReference = nil; _ = tab.requestNavigation(to: location)
+            case .unavailable, .needsRelink:
+                let ticket = tab.requestNavigation(to: .local(reference.displayURL))
+                tab.unresolvedReference = reference
+                _ = tab.fail(CocoaError(.fileReadNoSuchFile), for: ticket)
+                return
+            }
+        }
         let ticket = tab.requestNavigation(to: tab.location)
         await loader.load(target: .init(paneID: paneID, tabID: tab.id, ticket: ticket), options: .init(includeHidden: tab.options.includeHidden))
     }
@@ -25,7 +44,26 @@ final class WorkspaceController {
         let destination: OpenDestination = paneID.map { $0 == .left ? .left : .right } ?? .current
         let target = workspace.open(location, destination: destination, inNewTab: newTab)
         let tab = workspace.pane(target.paneID).activeTab
-        Task { await loader.load(target: target, options: .init(includeHidden: tab.options.includeHidden)) }
+        Task { await loader.load(target: target, options: .init(includeHidden: tab.options.includeHidden)); services.saveSoon() }
+    }
+    func addFavorite() {
+        do { try services.favorites.add(name: workspace.activeTab.location.title, location: workspace.activeTab.location); services.saveSoon() }
+        catch { errorMessage = error.localizedDescription }
+    }
+    func openFavorite(_ favorite: Favorite, destination: OpenDestination? = nil, newTab: Bool = false) {
+        switch LocationResolver().resolve(favorite.reference) {
+        case .available(let location):
+            let route = destination ?? favorite.destination ?? .current
+            let pane: PaneID? = route == .current ? nil : (route == .left ? .left : .right)
+            open(location, in: pane, newTab: newTab)
+        case .unavailable(let message), .needsRelink(let message): errorMessage = message
+        }
+    }
+    func renameFavorite(_ favorite: Favorite) {
+        let alert = NSAlert(); alert.messageText = "Rename Favorite"
+        let field = NSTextField(string: favorite.name); field.frame = NSRect(x: 0, y: 0, width: 260, height: 24)
+        alert.accessoryView = field; alert.addButton(withTitle: "Rename"); alert.addButton(withTitle: "Cancel")
+        if alert.runModal() == .alertFirstButtonReturn { services.favorites.rename(id: favorite.id, to: field.stringValue); services.saveSoon() }
     }
     func activate(_ entry: FileEntry, pane: PaneID) {
         workspace.activePane = pane

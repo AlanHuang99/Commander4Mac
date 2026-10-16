@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0406B51B4C4BA1596C25137D /* FavoriteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 477C02739ACFF162E896A5A5 /* FavoriteStore.swift */; };
+		066F27A31692135CA4760E52 /* LocationReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4466212710556ED4CF5A731 /* LocationReference.swift */; };
+		0682C1354FDA92BE9C0684C1 /* LocationResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0F75DC56D4C7A86099F064 /* LocationResolver.swift */; };
+		07ED1E3A3B4D33859BE4562A /* FavoriteStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0290657D75678FBCA3197659 /* FavoriteStoreTests.swift */; };
 		0B3C0860F0A55BF132378AFE /* WorkspaceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7762B66870C3ED80E21CD4D /* WorkspaceSession.swift */; };
 		0E307CA9C3EAD245D7A8DB8A /* FileEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA26D7D2BDA7E7CFF3B5AE54 /* FileEntry.swift */; };
 		0EE5A8E9954A0E580B5F4EC9 /* LocalFileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */; };
@@ -25,20 +29,25 @@
 		7906B1BFE20270CF985B89B6 /* AccessSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8F4E656A0010825C109395 /* AccessSetupView.swift */; };
 		7A2441D58D5D07AA41BCCCD6 /* FixtureDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8C524CE10BC6C906B9DD97 /* FixtureDirectory.swift */; };
 		84DFCE92505DD54BB55C455A /* PaneSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241A480D4265AC713A6E25CB /* PaneSession.swift */; };
+		871D2983CA926FEE0B650890 /* AtomicFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613F573C5229E46D06E49A49 /* AtomicFileWriter.swift */; };
 		9864453705168F11B3EF6A6E /* WorkspaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */; };
 		9A1AF0438EF4F8D548A08122 /* LocationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FE06ACC98AE4F4B758E606A /* LocationBarView.swift */; };
 		A3077F82E274695CD284D37F /* Module.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73667F5A96BCAEDB82685389 /* Module.swift */; };
 		AF6F2F8F8F395F207C8EFD96 /* RuntimeIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EC12DBF0F1E980DC18D1D04 /* RuntimeIdentity.swift */; };
+		B24FE0DCA8CFD181D726542E /* ApplicationStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC65A623852E31652E902D9F /* ApplicationStateStore.swift */; };
 		B406D4CE13054A68C7ED243C /* BrowserInteractionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A942D3A00509227C85DD22A5 /* BrowserInteractionTests.swift */; };
 		BF62DF041338924784B6D303 /* CommanderCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C1FF19CCC00E8F7EDD587B9F /* LocalFileSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */; };
+		C215B80D9D74F92374ECCE5C /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1326CAE9FAB1780E8C440E /* AppServices.swift */; };
 		C74CCEB1D6E891C317DEF98B /* PaneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D76476D645CD4627BB18849 /* PaneView.swift */; };
+		C7C2379D20CAB28C3A671E0F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CA277B33E546F9B4EE7F5F /* AppDelegate.swift */; };
 		C9993E64CD96185F47F13DA1 /* ViewOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A775AE5AA0E5FF01255992 /* ViewOptions.swift */; };
 		CED2E9C80B5EF303B2B5165F /* WorkspaceSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB2080DAA2004B04E71CA2C /* WorkspaceSessionTests.swift */; };
 		D81F508D4222E8D7CB7A3688 /* WorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D577A7A61D119822121457AF /* WorkspaceView.swift */; };
 		E822CB5F1D287D4BCBB31D3E /* DirectoryLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A8AC653C2A184D9DB1FC77 /* DirectoryLoaderTests.swift */; };
 		E83DED4FFCFF7DDE4952BB81 /* DirectoryLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920607C712067FD37F06CBE2 /* DirectoryLoader.swift */; };
 		F57061A4DC80AE355E1B0A54 /* FileTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */; };
+		FB7144F7187A097E94101CE1 /* ApplicationStateStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20AC4924806B3954C350BF1 /* ApplicationStateStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,6 +100,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0290657D75678FBCA3197659 /* FavoriteStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteStoreTests.swift; sourceTree = "<group>"; };
 		0CB9CF0445FF554FFA2F9B0A /* Commander4MacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Commander4MacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		10D4F8EEDA34E2B33F2506C8 /* Commander4MacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commander4MacApp.swift; sourceTree = "<group>"; };
 		186F61A54D9DFDDF4852E56A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -98,12 +108,15 @@
 		2FE06ACC98AE4F4B758E606A /* LocationBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationBarView.swift; sourceTree = "<group>"; };
 		40FA1790AA7A04AA0FEE5375 /* Commander4Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Commander4Mac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4692A579CAE6CC7633842217 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		477C02739ACFF162E896A5A5 /* FavoriteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteStore.swift; sourceTree = "<group>"; };
 		49A8AC653C2A184D9DB1FC77 /* DirectoryLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryLoaderTests.swift; sourceTree = "<group>"; };
 		4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileSystemTests.swift; sourceTree = "<group>"; };
+		4D1326CAE9FAB1780E8C440E /* AppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServices.swift; sourceTree = "<group>"; };
 		5091F45F13C7D7B1177A886F /* TabSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSession.swift; sourceTree = "<group>"; };
 		51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceController.swift; sourceTree = "<group>"; };
 		5EC12DBF0F1E980DC18D1D04 /* RuntimeIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeIdentity.swift; sourceTree = "<group>"; };
 		5F8C524CE10BC6C906B9DD97 /* FixtureDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureDirectory.swift; sourceTree = "<group>"; };
+		613F573C5229E46D06E49A49 /* AtomicFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtomicFileWriter.swift; sourceTree = "<group>"; };
 		66AB4BD06DB45EA63E873D09 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		6ECDF3F821D0637370BC35C1 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		73667F5A96BCAEDB82685389 /* Module.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Module.swift; sourceTree = "<group>"; };
@@ -119,13 +132,18 @@
 		C6F5CCD008A4A5C7A27AED94 /* FileFailure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileFailure.swift; sourceTree = "<group>"; };
 		C7762B66870C3ED80E21CD4D /* WorkspaceSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceSession.swift; sourceTree = "<group>"; };
 		CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileSystem.swift; sourceTree = "<group>"; };
+		D4466212710556ED4CF5A731 /* LocationReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationReference.swift; sourceTree = "<group>"; };
 		D577A7A61D119822121457AF /* WorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceView.swift; sourceTree = "<group>"; };
 		D655885F9AC419AB3578D778 /* FileLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLocation.swift; sourceTree = "<group>"; };
 		D83959891FD967D37EE6BF54 /* FileTableCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTableCoordinator.swift; sourceTree = "<group>"; };
+		DC65A623852E31652E902D9F /* ApplicationStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationStateStore.swift; sourceTree = "<group>"; };
 		DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTableView.swift; sourceTree = "<group>"; };
+		E0CA277B33E546F9B4EE7F5F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E20AC4924806B3954C350BF1 /* ApplicationStateStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationStateStoreTests.swift; sourceTree = "<group>"; };
 		E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommanderCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E64B5548A2FA52CB28F8F83E /* CommanderCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommanderCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA26D7D2BDA7E7CFF3B5AE54 /* FileEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileEntry.swift; sourceTree = "<group>"; };
+		EC0F75DC56D4C7A86099F064 /* LocationResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationResolver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +169,8 @@
 		011BF77031FE3E0BD76B7143 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				E0CA277B33E546F9B4EE7F5F /* AppDelegate.swift */,
+				4D1326CAE9FAB1780E8C440E /* AppServices.swift */,
 				10D4F8EEDA34E2B33F2506C8 /* Commander4MacApp.swift */,
 				51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */,
 			);
@@ -215,6 +235,8 @@
 		952DF7CBD83F2C87C05AB25C /* Stores */ = {
 			isa = PBXGroup;
 			children = (
+				DC65A623852E31652E902D9F /* ApplicationStateStore.swift */,
+				477C02739ACFF162E896A5A5 /* FavoriteStore.swift */,
 				241A480D4265AC713A6E25CB /* PaneSession.swift */,
 				5091F45F13C7D7B1177A886F /* TabSession.swift */,
 				C7762B66870C3ED80E21CD4D /* WorkspaceSession.swift */,
@@ -228,6 +250,7 @@
 				920607C712067FD37F06CBE2 /* DirectoryLoader.swift */,
 				819A2BBCF203753509D5D124 /* DirectoryWatcher.swift */,
 				CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */,
+				EC0F75DC56D4C7A86099F064 /* LocationResolver.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -248,7 +271,9 @@
 			isa = PBXGroup;
 			children = (
 				6ECDF3F821D0637370BC35C1 /* .gitkeep */,
+				E20AC4924806B3954C350BF1 /* ApplicationStateStoreTests.swift */,
 				49A8AC653C2A184D9DB1FC77 /* DirectoryLoaderTests.swift */,
+				0290657D75678FBCA3197659 /* FavoriteStoreTests.swift */,
 				4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */,
 				8BB2080DAA2004B04E71CA2C /* WorkspaceSessionTests.swift */,
 			);
@@ -279,6 +304,7 @@
 		D2E837B7B3C0A1A0713D2222 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				613F573C5229E46D06E49A49 /* AtomicFileWriter.swift */,
 				AA4889C45C31B19170BF226A /* BlockingFileWorker.swift */,
 			);
 			path = Support;
@@ -300,6 +326,7 @@
 				EA26D7D2BDA7E7CFF3B5AE54 /* FileEntry.swift */,
 				C6F5CCD008A4A5C7A27AED94 /* FileFailure.swift */,
 				D655885F9AC419AB3578D778 /* FileLocation.swift */,
+				D4466212710556ED4CF5A731 /* LocationReference.swift */,
 				73667F5A96BCAEDB82685389 /* Module.swift */,
 				87A775AE5AA0E5FF01255992 /* ViewOptions.swift */,
 			);
@@ -439,13 +466,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B24FE0DCA8CFD181D726542E /* ApplicationStateStore.swift in Sources */,
+				871D2983CA926FEE0B650890 /* AtomicFileWriter.swift in Sources */,
 				0F0B50459B26862F3E6A0D23 /* BlockingFileWorker.swift in Sources */,
 				E83DED4FFCFF7DDE4952BB81 /* DirectoryLoader.swift in Sources */,
 				764FB8BEA5387D253E102C70 /* DirectoryWatcher.swift in Sources */,
+				0406B51B4C4BA1596C25137D /* FavoriteStore.swift in Sources */,
 				0E307CA9C3EAD245D7A8DB8A /* FileEntry.swift in Sources */,
 				25BCB11BE88E9BB29EBB4A07 /* FileFailure.swift in Sources */,
 				14BBAF481511B47BF320A496 /* FileLocation.swift in Sources */,
 				0EE5A8E9954A0E580B5F4EC9 /* LocalFileSystem.swift in Sources */,
+				066F27A31692135CA4760E52 /* LocationReference.swift in Sources */,
+				0682C1354FDA92BE9C0684C1 /* LocationResolver.swift in Sources */,
 				A3077F82E274695CD284D37F /* Module.swift in Sources */,
 				84DFCE92505DD54BB55C455A /* PaneSession.swift in Sources */,
 				42C5F443EB7EADEFB9F05269 /* TabSession.swift in Sources */,
@@ -458,7 +490,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB7144F7187A097E94101CE1 /* ApplicationStateStoreTests.swift in Sources */,
 				E822CB5F1D287D4BCBB31D3E /* DirectoryLoaderTests.swift in Sources */,
+				07ED1E3A3B4D33859BE4562A /* FavoriteStoreTests.swift in Sources */,
 				7A2441D58D5D07AA41BCCCD6 /* FixtureDirectory.swift in Sources */,
 				C1FF19CCC00E8F7EDD587B9F /* LocalFileSystemTests.swift in Sources */,
 				CED2E9C80B5EF303B2B5165F /* WorkspaceSessionTests.swift in Sources */,
@@ -470,6 +504,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				7906B1BFE20270CF985B89B6 /* AccessSetupView.swift in Sources */,
+				C7C2379D20CAB28C3A671E0F /* AppDelegate.swift in Sources */,
+				C215B80D9D74F92374ECCE5C /* AppServices.swift in Sources */,
 				3B986664226E2626075A95A5 /* Commander4MacApp.swift in Sources */,
 				24DA2E35AD7F6CA74FCCC317 /* FileTableCoordinator.swift in Sources */,
 				F57061A4DC80AE355E1B0A54 /* FileTableView.swift in Sources */,

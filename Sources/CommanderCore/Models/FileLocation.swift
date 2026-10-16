@@ -4,6 +4,8 @@ public enum FileLocation: Hashable, Codable, Sendable {
     case local(URL)
     public var url: URL { switch self { case .local(let url): url.standardizedFileURL } }
     public var providerID: String { "local" }
+    public static func == (lhs: FileLocation, rhs: FileLocation) -> Bool { lhs.url.path == rhs.url.path }
+    public func hash(into hasher: inout Hasher) { hasher.combine(providerID); hasher.combine(url.path) }
     public var title: String { url.lastPathComponent.isEmpty ? url.path : url.lastPathComponent }
     public var parent: FileLocation { .local(url.deletingLastPathComponent()) }
 }

@@ -48,6 +48,8 @@ struct PaneView: View {
                 Text(paneID == .left ? "Left" : "Right").foregroundStyle(.tertiary)
             }.font(.system(size: 11)).foregroundStyle(.secondary).padding(.horizontal, 11).padding(.vertical, 7)
         }
+        .onChange(of: tab.pin) { controller.services.saveSoon() }
+        .onChange(of: tab.options) { controller.services.saveSoon() }
         .task(id: tab.id.uuidString + tab.location.url.path) {
             for await _ in DirectoryWatcher().events(for: tab.location) {
                 do { try await Task.sleep(for: .milliseconds(150)) } catch { return }

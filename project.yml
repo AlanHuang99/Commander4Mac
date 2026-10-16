@@ -94,3 +94,11 @@ schemes:
       targets: [CommanderCoreTests, Commander4MacUITests]
     archive:
       config: Release
+  CommanderCore:
+    build:
+      targets:
+        CommanderCore: all
+        CommanderCoreTests: [test]
+    test:
+      config: UITest
+      targets: [CommanderCoreTests]

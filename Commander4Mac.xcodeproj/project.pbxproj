@@ -12,22 +12,33 @@
 		0EE5A8E9954A0E580B5F4EC9 /* LocalFileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */; };
 		0F0B50459B26862F3E6A0D23 /* BlockingFileWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4889C45C31B19170BF226A /* BlockingFileWorker.swift */; };
 		14BBAF481511B47BF320A496 /* FileLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655885F9AC419AB3578D778 /* FileLocation.swift */; };
+		1B079940C47AD9ADA6DECD5F /* TabStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D90429CBC11E359ECF695F /* TabStripView.swift */; };
+		21C2DFF65741F3E823154FA8 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4692A579CAE6CC7633842217 /* SidebarView.swift */; };
+		24DA2E35AD7F6CA74FCCC317 /* FileTableCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83959891FD967D37EE6BF54 /* FileTableCoordinator.swift */; };
 		25BCB11BE88E9BB29EBB4A07 /* FileFailure.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F5CCD008A4A5C7A27AED94 /* FileFailure.swift */; };
 		284B893876C799425ADE48DF /* CommanderCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		36BD1A98D32EE7492A97E2DD /* CommanderCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; };
 		3B986664226E2626075A95A5 /* Commander4MacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D4F8EEDA34E2B33F2506C8 /* Commander4MacApp.swift */; };
 		42C5F443EB7EADEFB9F05269 /* TabSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5091F45F13C7D7B1177A886F /* TabSession.swift */; };
 		50B2C7FFC09D74E3C49123DB /* CommanderCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; };
+		764FB8BEA5387D253E102C70 /* DirectoryWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819A2BBCF203753509D5D124 /* DirectoryWatcher.swift */; };
 		7906B1BFE20270CF985B89B6 /* AccessSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8F4E656A0010825C109395 /* AccessSetupView.swift */; };
 		7A2441D58D5D07AA41BCCCD6 /* FixtureDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8C524CE10BC6C906B9DD97 /* FixtureDirectory.swift */; };
 		84DFCE92505DD54BB55C455A /* PaneSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241A480D4265AC713A6E25CB /* PaneSession.swift */; };
+		9864453705168F11B3EF6A6E /* WorkspaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */; };
+		9A1AF0438EF4F8D548A08122 /* LocationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FE06ACC98AE4F4B758E606A /* LocationBarView.swift */; };
 		A3077F82E274695CD284D37F /* Module.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73667F5A96BCAEDB82685389 /* Module.swift */; };
 		AF6F2F8F8F395F207C8EFD96 /* RuntimeIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EC12DBF0F1E980DC18D1D04 /* RuntimeIdentity.swift */; };
 		B406D4CE13054A68C7ED243C /* BrowserInteractionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A942D3A00509227C85DD22A5 /* BrowserInteractionTests.swift */; };
 		BF62DF041338924784B6D303 /* CommanderCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C1FF19CCC00E8F7EDD587B9F /* LocalFileSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */; };
+		C74CCEB1D6E891C317DEF98B /* PaneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D76476D645CD4627BB18849 /* PaneView.swift */; };
 		C9993E64CD96185F47F13DA1 /* ViewOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A775AE5AA0E5FF01255992 /* ViewOptions.swift */; };
 		CED2E9C80B5EF303B2B5165F /* WorkspaceSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB2080DAA2004B04E71CA2C /* WorkspaceSessionTests.swift */; };
+		D81F508D4222E8D7CB7A3688 /* WorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D577A7A61D119822121457AF /* WorkspaceView.swift */; };
+		E822CB5F1D287D4BCBB31D3E /* DirectoryLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A8AC653C2A184D9DB1FC77 /* DirectoryLoaderTests.swift */; };
+		E83DED4FFCFF7DDE4952BB81 /* DirectoryLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920607C712067FD37F06CBE2 /* DirectoryLoader.swift */; };
+		F57061A4DC80AE355E1B0A54 /* FileTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,23 +95,34 @@
 		10D4F8EEDA34E2B33F2506C8 /* Commander4MacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commander4MacApp.swift; sourceTree = "<group>"; };
 		186F61A54D9DFDDF4852E56A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		241A480D4265AC713A6E25CB /* PaneSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneSession.swift; sourceTree = "<group>"; };
+		2FE06ACC98AE4F4B758E606A /* LocationBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationBarView.swift; sourceTree = "<group>"; };
 		40FA1790AA7A04AA0FEE5375 /* Commander4Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Commander4Mac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4692A579CAE6CC7633842217 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		49A8AC653C2A184D9DB1FC77 /* DirectoryLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryLoaderTests.swift; sourceTree = "<group>"; };
 		4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileSystemTests.swift; sourceTree = "<group>"; };
 		5091F45F13C7D7B1177A886F /* TabSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSession.swift; sourceTree = "<group>"; };
+		51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceController.swift; sourceTree = "<group>"; };
 		5EC12DBF0F1E980DC18D1D04 /* RuntimeIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeIdentity.swift; sourceTree = "<group>"; };
 		5F8C524CE10BC6C906B9DD97 /* FixtureDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureDirectory.swift; sourceTree = "<group>"; };
 		66AB4BD06DB45EA63E873D09 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		6ECDF3F821D0637370BC35C1 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		73667F5A96BCAEDB82685389 /* Module.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Module.swift; sourceTree = "<group>"; };
+		819A2BBCF203753509D5D124 /* DirectoryWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryWatcher.swift; sourceTree = "<group>"; };
 		87A775AE5AA0E5FF01255992 /* ViewOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewOptions.swift; sourceTree = "<group>"; };
 		8BB2080DAA2004B04E71CA2C /* WorkspaceSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceSessionTests.swift; sourceTree = "<group>"; };
+		920607C712067FD37F06CBE2 /* DirectoryLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryLoader.swift; sourceTree = "<group>"; };
+		9D76476D645CD4627BB18849 /* PaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneView.swift; sourceTree = "<group>"; };
 		A942D3A00509227C85DD22A5 /* BrowserInteractionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserInteractionTests.swift; sourceTree = "<group>"; };
 		AA4889C45C31B19170BF226A /* BlockingFileWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockingFileWorker.swift; sourceTree = "<group>"; };
+		B2D90429CBC11E359ECF695F /* TabStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabStripView.swift; sourceTree = "<group>"; };
 		BB8F4E656A0010825C109395 /* AccessSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessSetupView.swift; sourceTree = "<group>"; };
 		C6F5CCD008A4A5C7A27AED94 /* FileFailure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileFailure.swift; sourceTree = "<group>"; };
 		C7762B66870C3ED80E21CD4D /* WorkspaceSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceSession.swift; sourceTree = "<group>"; };
 		CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileSystem.swift; sourceTree = "<group>"; };
+		D577A7A61D119822121457AF /* WorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceView.swift; sourceTree = "<group>"; };
 		D655885F9AC419AB3578D778 /* FileLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLocation.swift; sourceTree = "<group>"; };
+		D83959891FD967D37EE6BF54 /* FileTableCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTableCoordinator.swift; sourceTree = "<group>"; };
+		DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTableView.swift; sourceTree = "<group>"; };
 		E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommanderCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E64B5548A2FA52CB28F8F83E /* CommanderCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommanderCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA26D7D2BDA7E7CFF3B5AE54 /* FileEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileEntry.swift; sourceTree = "<group>"; };
@@ -130,14 +152,30 @@
 			isa = PBXGroup;
 			children = (
 				10D4F8EEDA34E2B33F2506C8 /* Commander4MacApp.swift */,
+				51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		15CAB319D5F5458D693E4DDD /* FileTable */ = {
+			isa = PBXGroup;
+			children = (
+				D83959891FD967D37EE6BF54 /* FileTableCoordinator.swift */,
+				DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */,
+			);
+			path = FileTable;
 			sourceTree = "<group>";
 		};
 		2BF3B34EE91406F12A09BBA1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				BB8F4E656A0010825C109395 /* AccessSetupView.swift */,
+				2FE06ACC98AE4F4B758E606A /* LocationBarView.swift */,
+				9D76476D645CD4627BB18849 /* PaneView.swift */,
+				4692A579CAE6CC7633842217 /* SidebarView.swift */,
+				B2D90429CBC11E359ECF695F /* TabStripView.swift */,
+				D577A7A61D119822121457AF /* WorkspaceView.swift */,
+				15CAB319D5F5458D693E4DDD /* FileTable */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -187,6 +225,8 @@
 		ADBC774E1DF427B69B178CAB /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				920607C712067FD37F06CBE2 /* DirectoryLoader.swift */,
+				819A2BBCF203753509D5D124 /* DirectoryWatcher.swift */,
 				CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */,
 			);
 			path = Services;
@@ -208,6 +248,7 @@
 			isa = PBXGroup;
 			children = (
 				6ECDF3F821D0637370BC35C1 /* .gitkeep */,
+				49A8AC653C2A184D9DB1FC77 /* DirectoryLoaderTests.swift */,
 				4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */,
 				8BB2080DAA2004B04E71CA2C /* WorkspaceSessionTests.swift */,
 			);
@@ -399,6 +440,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				0F0B50459B26862F3E6A0D23 /* BlockingFileWorker.swift in Sources */,
+				E83DED4FFCFF7DDE4952BB81 /* DirectoryLoader.swift in Sources */,
+				764FB8BEA5387D253E102C70 /* DirectoryWatcher.swift in Sources */,
 				0E307CA9C3EAD245D7A8DB8A /* FileEntry.swift in Sources */,
 				25BCB11BE88E9BB29EBB4A07 /* FileFailure.swift in Sources */,
 				14BBAF481511B47BF320A496 /* FileLocation.swift in Sources */,
@@ -415,6 +458,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E822CB5F1D287D4BCBB31D3E /* DirectoryLoaderTests.swift in Sources */,
 				7A2441D58D5D07AA41BCCCD6 /* FixtureDirectory.swift in Sources */,
 				C1FF19CCC00E8F7EDD587B9F /* LocalFileSystemTests.swift in Sources */,
 				CED2E9C80B5EF303B2B5165F /* WorkspaceSessionTests.swift in Sources */,
@@ -427,7 +471,15 @@
 			files = (
 				7906B1BFE20270CF985B89B6 /* AccessSetupView.swift in Sources */,
 				3B986664226E2626075A95A5 /* Commander4MacApp.swift in Sources */,
+				24DA2E35AD7F6CA74FCCC317 /* FileTableCoordinator.swift in Sources */,
+				F57061A4DC80AE355E1B0A54 /* FileTableView.swift in Sources */,
+				9A1AF0438EF4F8D548A08122 /* LocationBarView.swift in Sources */,
+				C74CCEB1D6E891C317DEF98B /* PaneView.swift in Sources */,
 				AF6F2F8F8F395F207C8EFD96 /* RuntimeIdentity.swift in Sources */,
+				21C2DFF65741F3E823154FA8 /* SidebarView.swift in Sources */,
+				1B079940C47AD9ADA6DECD5F /* TabStripView.swift in Sources */,
+				9864453705168F11B3EF6A6E /* WorkspaceController.swift in Sources */,
+				D81F508D4222E8D7CB7A3688 /* WorkspaceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

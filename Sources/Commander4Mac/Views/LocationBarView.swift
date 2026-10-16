@@ -1,0 +1,26 @@
+import SwiftUI
+import CommanderCore
+
+struct LocationBarView: View {
+    var controller: WorkspaceController
+    var paneID: PaneID
+    @State private var path = ""
+    var body: some View {
+        let tab = controller.workspace.pane(paneID).activeTab
+        HStack(spacing: 6) {
+            Button { controller.history(paneID, forward: false) } label: { Image(systemName: "chevron.left") }.disabled(!tab.canGoBack).help("Back")
+            Button { controller.history(paneID, forward: true) } label: { Image(systemName: "chevron.right") }.disabled(!tab.canGoForward).help("Forward")
+            Button { controller.open(tab.location.parent, in: paneID) } label: { Image(systemName: "arrow.up") }.help("Parent Folder")
+            TextField("Folder path", text: $path)
+                .font(.system(size: 12, design: .monospaced))
+                .textFieldStyle(.plain).accessibilityIdentifier(paneID.rawValue + ".path")
+                .onSubmit {
+                    let expanded = (path as NSString).expandingTildeInPath
+                    let url = expanded.hasPrefix("/") ? URL(fileURLWithPath: expanded) : tab.location.url.appendingPathComponent(expanded)
+                    controller.open(.local(url), in: paneID)
+                }
+        }
+        .buttonStyle(.borderless).padding(.horizontal, 10).padding(.vertical, 8)
+        .onChange(of: tab.location, initial: true) { _, value in path = value.url.path }
+    }
+}

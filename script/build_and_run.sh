@@ -23,7 +23,16 @@ CHECK
 mkdir -p .build/logs
 xcodegen generate >/dev/null
 LOG="$ROOT_DIR/.build/logs/build.log"
-if ! /usr/bin/xcodebuild -project Commander4Mac.xcodeproj -scheme Commander4Mac -configuration Debug -derivedDataPath .build/xcode build >"$LOG" 2>&1; then tail -n 90 "$LOG"; exit 1; fi
+if ! /usr/bin/xcodebuild -project Commander4Mac.xcodeproj -scheme Commander4Mac -configuration Debug -derivedDataPath .build/xcode build >"$LOG" 2>&1; then
+  python3 - "$LOG" <<'ERRORS'
+import sys
+from pathlib import Path
+lines=Path(sys.argv[1]).read_text().splitlines()
+errors=[line for line in lines if "error:" in line or "failed" in line.lower()]
+print("\n".join(errors[-30:] if errors else lines[-25:]))
+ERRORS
+  exit 1
+fi
 BUILT="$ROOT_DIR/.build/xcode/Build/Products/Debug/$APP_NAME.app"
 /usr/bin/codesign --verify --deep --strict "$BUILT"
 # Stop only this development executable after a successful build.

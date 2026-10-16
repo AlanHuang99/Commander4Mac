@@ -1,0 +1,44 @@
+import SwiftUI
+import CommanderCore
+
+struct TabStripView: View {
+    var controller: WorkspaceController
+    var paneID: PaneID
+    var body: some View {
+        let pane = controller.workspace.pane(paneID)
+        HStack(spacing: 2) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 3) {
+                    ForEach(pane.tabs) { tab in
+                        HStack(spacing: 4) {
+                            Button { controller.selectTab(tab, pane: paneID) } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: tab.pin.isLocked ? "lock.fill" : (tab.pin.isPinned ? "pin.fill" : "folder"))
+                                        .font(.system(size: 10)).foregroundStyle(tab.pin.isPinned ? Color.accentColor : .secondary)
+                                    Text(tab.title).lineLimit(1)
+                                    if let home = tab.pin.home, home != tab.location { Image(systemName: "arrow.uturn.backward").font(.caption2) }
+                                }.padding(.leading, 9).padding(.vertical, 8)
+                            }.buttonStyle(.plain)
+                            if !tab.pin.isPinned && pane.tabs.count > 1 {
+                                Button { _ = pane.close(tabID: tab.id); Task { await controller.refresh(paneID) } } label: { Image(systemName: "xmark").font(.system(size: 9)) }.buttonStyle(.plain).padding(.trailing, 7)
+                            }
+                        }
+                        .padding(.trailing, tab.pin.isPinned || pane.tabs.count == 1 ? 9 : 0)
+                        .background(pane.activeTabID == tab.id ? Color.primary.opacity(0.09) : .clear, in: RoundedRectangle(cornerRadius: 5))
+                        .contextMenu {
+                            Button("Pin Folder (Locked)") { tab.pin = .locked(home: tab.location) }
+                            Button("Pin Folder (Allow Navigation)") { tab.pin = .navigable(home: tab.location) }
+                            if tab.pin.isPinned {
+                                Button("Return to Pinned Folder") { controller.selectTab(tab, pane: paneID) }
+                                Button("Use Current Folder as Pin Home") { tab.pin = tab.pin.isLocked ? .locked(home: tab.location) : .navigable(home: tab.location) }
+                                Button("Unpin") { tab.pin = .none }
+                            }
+                            Button("Duplicate Tab") { controller.open(tab.location, in: paneID, newTab: true) }
+                        }
+                    }
+                }
+            }
+            Button { controller.open(pane.activeTab.location, in: paneID, newTab: true) } label: { Image(systemName: "plus") }.buttonStyle(.borderless).help("New Tab")
+        }.font(.system(size: 12)).padding(.horizontal, 7).padding(.vertical, 5)
+    }
+}

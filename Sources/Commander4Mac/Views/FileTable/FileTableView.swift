@@ -32,7 +32,7 @@ struct FileTableView: NSViewRepresentable {
         table.target = context.coordinator; table.doubleAction = #selector(FileTableCoordinator.activate)
         table.onFocus = onFocus; table.onCommand = onCommand
         let menu = NSMenu()
-        for (title, command) in [("Open", TableCommand.open), ("Quick Look", .preview), ("Copy Path", .copyPath)] {
+        for (title, command) in [("Open", TableCommand.open), ("Quick Look", .preview), ("Copy Path", .copyPath), ("Add to Shelf", .stage), ("Copy to Other Pane", .copy), ("Move to Other Pane", .move)] {
             let item = NSMenuItem(title: title, action: #selector(FileTableCoordinator.contextAction(_:)), keyEquivalent: "")
             item.target = context.coordinator; item.representedObject = CommandBox(command); menu.addItem(item)
         }

@@ -3,7 +3,6 @@ import AppKit
 
 struct AccessSetupView: View {
     var onContinue: () -> Void
-    private let identity = RuntimeIdentity.current()
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Label("Full Disk Access", systemImage: "externaldrive.badge.checkmark")
@@ -11,7 +10,7 @@ struct AccessSetupView: View {
             Text("Give Commander4Mac access to your files")
                 .font(.headline)
             Text("In System Settings, open Privacy & Security, then Full Disk Access. Add this installed app and enable its switch.")
-            Text(identity.bundleURL.path).font(.callout.monospaced())
+            Text(RuntimeIdentity.bundleURL.path).font(.callout.monospaced())
                 .textSelection(.enabled).padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))

@@ -7,6 +7,7 @@ struct WorkspaceView: View {
     @AppStorage("accessSetupAcknowledged") private var acknowledged = false
     @State private var showAccessSetup = false
     var body: some View {
+        VStack(spacing: 0) {
         HStack(spacing: 0) {
             if controller.sidebarVisible {
                 SidebarView(controller: controller).frame(width: 190)
@@ -26,6 +27,9 @@ struct WorkspaceView: View {
                 }.coordinateSpace(name: "panes")
             }
         }
+            if controller.shelfVisible { Divider(); ShelfView(controller: controller) }
+            if controller.activityVisible { Divider(); ActivityView(services: controller.services) }
+        }
         .frame(minWidth: 980, minHeight: 620)
         .preferredColorScheme(controller.services.preferences.appearance.colorScheme)
         .toolbar {
@@ -33,6 +37,10 @@ struct WorkspaceView: View {
                 Button { controller.sidebarVisible.toggle() } label: { Image(systemName: "sidebar.left") }.help("Toggle Sidebar")
             }
             ToolbarItemGroup {
+                Button { controller.shelfVisible.toggle() } label: { Image(systemName: "tray.full") }.help("Toggle Shelf")
+                Button { controller.activityVisible.toggle() } label: {
+                    Label("Activity \(controller.services.activeJobCount)", systemImage: "arrow.left.arrow.right")
+                }.help("Show File Operations")
                 Button { controller.addFavorite() } label: { Image(systemName: "star.badge.plus") }.help("Favorite Current Folder")
                 Button { Task { await controller.refresh(.left); await controller.refresh(.right) } } label: { Image(systemName: "arrow.clockwise") }.help("Refresh")
                 Button { showAccessSetup = true } label: { Image(systemName: "externaldrive.badge.checkmark") }.help("Full Disk Access Setup")
@@ -40,6 +48,11 @@ struct WorkspaceView: View {
         }
         .sheet(isPresented: $showAccessSetup) {
             AccessSetupView { acknowledged = true; showAccessSetup = false }
+        }
+        .sheet(item: Binding(get: {
+            controller.services.conflictPresenter == controller.workspace.id ? controller.services.pendingConflict : nil
+        }, set: { _ in })) { conflict in
+            ConflictSheet(conflict: conflict) { controller.services.resolve(conflict, $0) }
         }
         .task {
             showAccessSetup = !acknowledged

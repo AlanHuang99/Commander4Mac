@@ -1,0 +1,76 @@
+import SwiftUI
+import AppKit
+import CommanderCore
+
+struct ActivityView: View {
+    var services: AppServices
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label("Activity", systemImage: "arrow.left.arrow.right").fontWeight(.semibold)
+                Spacer()
+                Button("Clear Finished") { Task { await services.transferQueue.dismissFinished() } }.font(.caption)
+            }
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 10) {
+                    if services.jobs.isEmpty && services.recoveryRecords.isEmpty { Text("No file operations yet").foregroundStyle(.secondary) }
+                    ForEach(services.jobs.reversed()) { job in
+                        VStack(alignment: .leading, spacing: 5) {
+                            HStack {
+                                Text("\(job.request.kind == .copy ? "Copy" : "Move") \(job.request.sources.count) item\(job.request.sources.count == 1 ? "" : "s")").fontWeight(.medium)
+                                Text(stateLabel(job.state)).foregroundStyle(.secondary)
+                                Spacer()
+                                if !job.state.isTerminal {
+                                    Button("Cancel") { Task { await services.transferQueue.cancel(jobID: job.id) } }.disabled(job.state == .cancelRequested)
+                                }
+                            }
+                            Text(job.request.destinationDirectory.url.path).lineLimit(1).truncationMode(.middle).foregroundStyle(.secondary)
+                            if !job.state.isTerminal {
+                                HStack {
+                                    ProgressView().controlSize(.small)
+                                    Text("\(ByteCountFormatter.string(fromByteCount: job.progress.bytesCopied, countStyle: .file)) in current copy · \(job.outcomes.count) roots finished")
+                                }
+                            }
+                            ForEach(job.outcomes) { outcome in
+                                HStack(alignment: .top) {
+                                    Image(systemName: outcome.state == .completed ? "checkmark.circle" : "info.circle")
+                                    VStack(alignment: .leading) {
+                                        Text("\(outcome.source.url.lastPathComponent): \(outcome.state.rawValue)")
+                                        if let detail = outcome.detail { Text(detail).foregroundStyle(.secondary).textSelection(.enabled) }
+                                    }
+                                    Spacer()
+                                    if let destination = outcome.destination { Button("Reveal") { NSWorkspace.shared.activateFileViewerSelecting([destination.url]) } }
+                                }
+                            }
+                        }.padding(9).background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6))
+                    }
+                    ForEach(services.recoveryRecords, id: \.itemID) { record in
+                        VStack(alignment: .leading, spacing: 5) {
+                            Label("Interrupted operation requires review", systemImage: "exclamationmark.triangle")
+                            Text(record.detail ?? "Review both locations before moving or removing any remaining files.")
+                            Text("Source: \(record.source.url.path)\nDestination: \(record.destination.path)").textSelection(.enabled)
+                            if let staging = record.staging { Text("Recovery file: \(staging.path)").textSelection(.enabled) }
+                            HStack {
+                                Button("Show Source") { NSWorkspace.shared.activateFileViewerSelecting([record.source.url]) }
+                                Button("Show Destination") { NSWorkspace.shared.activateFileViewerSelecting([record.destination]) }
+                                if let staging = record.staging { Button("Show Recovery File") { NSWorkspace.shared.activateFileViewerSelecting([staging]) } }
+                            }
+                        }.padding(9).background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
+                    }
+                }.font(.system(size: 11))
+            }.frame(maxHeight: 200)
+        }.padding(12).frame(minHeight: 70)
+    }
+    private func stateLabel(_ state: JobState) -> String {
+        switch state {
+        case .queued: "Queued"
+        case .planning: "Checking files"
+        case .running: "Running"
+        case .awaitingConflict: "Needs a decision"
+        case .cancelRequested: "Stopping safely"
+        case .completed: "Completed"
+        case .failed: "Review results"
+        case .canceled: "Canceled"
+        }
+    }
+}

@@ -10,14 +10,18 @@ APP_BUNDLE="/Applications/Commander4Mac Dev.app"
 export COMMANDER_APP_BUNDLE="$APP_BUNDLE"
 python3 - <<'CHECK'
 from pathlib import Path
-import json,os
+import json,os,subprocess
 p=Path.home()/'Library/Application Support/com.alanhuang.Commander4Mac.dev/active-operation.json'
 try:
     m=json.loads(p.read_text())
     if m.get('activeJobs',0)>0:
         os.kill(int(m['pid']),0)
-        raise SystemExit('A development file operation is active. Wait for it to finish before rebuilding.')
-except (FileNotFoundError,ProcessLookupError,ValueError,KeyError,json.JSONDecodeError):
+        executable=m.get('executablePath','')
+        running=subprocess.check_output(['ps','-p',str(int(m['pid'])),'-o','comm='],text=True).strip()
+        uuids=subprocess.check_output(['/usr/bin/dwarfdump','--uuid',executable],text=True)
+        if running==executable and m.get('executableUUID') and m['executableUUID'] in uuids:
+            raise SystemExit('A development file operation is active. Wait for it to finish before rebuilding.')
+except (FileNotFoundError,ProcessLookupError,ValueError,KeyError,json.JSONDecodeError,subprocess.CalledProcessError):
     pass
 CHECK
 mkdir -p .build/logs

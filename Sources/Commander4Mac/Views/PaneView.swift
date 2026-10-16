@@ -48,6 +48,15 @@ struct PaneView: View {
                 }
             }
             Divider()
+            HStack(spacing: 10) {
+                Button("Copy to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.copy, from: paneID) }
+                Button("Move to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.move, from: paneID) }
+                Button("Stage") { workspace.activePane = paneID; controller.stageSelection() }
+                Spacer()
+            }.font(.system(size: 11)).buttonStyle(.borderless).padding(.horizontal, 11).padding(.vertical, 6)
+                .disabled(tab.selection.isEmpty)
+                .help("Destination: " + workspace.pane(paneID.opposite).activeTab.location.url.path)
+            Divider()
             HStack {
                 Text(tab.selection.isEmpty ? "\(tab.visibleEntries.count) items" : "\(tab.selection.count) selected")
                 Spacer()

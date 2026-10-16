@@ -17,7 +17,7 @@ public struct Favorite: Identifiable, Codable, Sendable {
 }
 public struct StagedItem: Identifiable, Codable, Sendable {
     public let id: UUID
-    public let reference: LocationReference
+    public var reference: LocationReference
     public let displayName: String
     public init(id: UUID = UUID(), reference: LocationReference, displayName: String) {
         self.id = id; self.reference = reference; self.displayName = displayName

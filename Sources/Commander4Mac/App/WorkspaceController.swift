@@ -11,6 +11,8 @@ final class WorkspaceController {
     private var started = false
     var errorMessage: String?
     var sidebarVisible = true
+    var shelfVisible = true
+    var activityVisible = false
     init(services: AppServices = .shared) {
         self.services = services
         let initial = WorkspaceSession()
@@ -96,9 +98,38 @@ final class WorkspaceController {
         guard let ticket = forward ? tab.goForward() : tab.goBack() else { return }
         Task { await loader.load(target: .init(paneID: paneID, tabID: tab.id, ticket: ticket), options: .init(includeHidden: tab.options.includeHidden)) }
     }
+    func stageSelection() {
+        let locations = workspace.activeTab.selectedEntries.map(\.location)
+        guard !locations.isEmpty else { return }
+        Task {
+            do { try await services.shelf.stage(locations); services.saveSoon(); shelfVisible = true }
+            catch { errorMessage = error.localizedDescription }
+        }
+    }
+    func transferSelection(_ kind: TransferKind, from pane: PaneID) {
+        let sources = workspace.pane(pane).activeTab.selectedEntries.map(\.location)
+        guard !sources.isEmpty else { return }
+        let request = TransferRequest(kind: kind, sources: sources, destinationDirectory: workspace.pane(pane.opposite).activeTab.location)
+        services.enqueue(request, owner: workspace.id); activityVisible = true
+    }
+    func transferShelf(_ kind: TransferKind, to pane: PaneID) {
+        let destination = workspace.pane(pane).activeTab.location
+        let ids = Set(services.shelf.items.map(\.id))
+        Task {
+            do {
+                let sources = try await services.shelf.resolvedLocations(ids: ids)
+                guard !sources.isEmpty else { return }
+                services.enqueue(.init(kind: kind, sources: sources, destinationDirectory: destination), owner: workspace.id, shelfIDs: ids)
+                services.saveSoon(); activityVisible = true
+            } catch { errorMessage = error.localizedDescription }
+        }
+    }
     func tableCommand(_ command: TableCommand, pane: PaneID) {
         workspace.activePane = pane
         switch command {
+        case .stage: stageSelection()
+        case .copy: transferSelection(.copy, from: pane)
+        case .move: transferSelection(.move, from: pane)
         case .focusOther: workspace.activePane = pane.opposite
         case .parent: open(workspace.pane(pane).activeTab.location.parent, in: pane)
         case .open: if let entry = workspace.activeTab.selectedEntries.first { activate(entry, pane: pane) }

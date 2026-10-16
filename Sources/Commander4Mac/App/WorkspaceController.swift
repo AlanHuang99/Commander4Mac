@@ -37,7 +37,7 @@ final class WorkspaceController {
     func previewSelection() { quickLook.present(CommandRouter.previewItems(in: workspace)) }
     func chooseFolder() {
         let panel = NSOpenPanel(); panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.allowsMultipleSelection = false
-        panel.directoryURL = workspace.activeTab.location.url
+        panel.directoryURL = workspace.activeTab.location.isLocal ? workspace.activeTab.location.url : FileManager.default.homeDirectoryForCurrentUser
         if panel.runModal() == .OK, let url = panel.url { open(.local(url)) }
     }
     @ObservationIgnored weak var undoManager: UndoManager?
@@ -45,12 +45,12 @@ final class WorkspaceController {
         self.services = services
         let initial = WorkspaceSession()
         workspace = initial
-        loader = DirectoryLoader(workspace: initial)
+        loader = DirectoryLoader(workspace: initial, provider: ProviderRouter(remote: services.remote))
     }
     func start() async -> Int {
         guard !started else { return 0 }; started = true
         let restored = services.nextRestoredWorkspace()
-        if let restored { workspace = restored; loader = DirectoryLoader(workspace: restored) }
+        if let restored { workspace = restored; loader = DirectoryLoader(workspace: restored, provider: ProviderRouter(remote: services.remote)) }
         workspace.defaultOptions = services.preferences.view.validated()
         if restored == nil {
             workspace.left.activeTab.options = services.preferences.view
@@ -81,6 +81,10 @@ final class WorkspaceController {
         let ticket = tab.requestNavigation(to: tab.location)
         await loader.load(target: .init(paneID: paneID, tabID: tab.id, ticket: ticket), options: .init(includeHidden: tab.options.includeHidden))
     }
+    func openPath(_ text: String, in pane: PaneID) {
+        do { open(try PathNavigation.resolve(text, from: workspace.pane(pane).activeTab.location), in: pane) }
+        catch { errorMessage = error.localizedDescription }
+    }
     func open(_ location: FileLocation, in paneID: PaneID? = nil, newTab: Bool = false) {
         let destination: OpenDestination = paneID.map { $0 == .left ? .left : .right } ?? .current
         let target = workspace.open(location, destination: destination, inNewTab: newTab)
@@ -89,6 +93,7 @@ final class WorkspaceController {
         Task { await loader.load(target: target, options: .init(includeHidden: tab.options.includeHidden)); services.saveSoon() }
     }
     func addFavorite() {
+        guard workspace.activeTab.location.isLocal else { errorMessage = "Save remote folders through Connections."; return }
         let location = workspace.activeTab.location
         Task {
             do { try await services.favorites.add(name: location.title, location: location); services.saveSoon() }
@@ -137,6 +142,11 @@ final class WorkspaceController {
         if alert.runModal() == .alertFirstButtonReturn { services.favorites.rename(id: favorite.id, to: field.stringValue); services.saveSoon() }
     }
     func activate(_ entry: FileEntry, pane: PaneID) {
+        if !entry.location.isLocal {
+            if entry.kind == .directory { open(entry.location, in: pane) }
+            else { errorMessage = "Copy this remote file to a local pane to open or preview it." }
+            return
+        }
         workspace.activePane = pane
         if CommandRouter.openDisposition(kind: entry.kind) == .browse { open(entry.location, in: pane) }
         else if entry.kind == .symbolicLink {
@@ -209,6 +219,7 @@ final class WorkspaceController {
         undoManager?.setActionName(name)
     }
     func trashSelection() {
+        guard workspace.activeTab.location.isLocal else { errorMessage = "Remote Trash is not available. No files were deleted."; return }
         let locations = workspace.activeTab.selectedEntries.map(\.location)
         guard !locations.isEmpty else { return }
         Task {
@@ -227,6 +238,7 @@ final class WorkspaceController {
     }
     func acceptDrop(_ request: TransferRequest) { services.enqueue(request, owner: workspace.id); activityVisible = true }
     func stageSelection() {
+        guard workspace.activeTab.location.isLocal else { errorMessage = "The shelf currently holds local file references. Use Copy to Other Pane for SFTP files."; return }
         let locations = workspace.activeTab.selectedEntries.map(\.location)
         guard !locations.isEmpty else { return }
         Task {
@@ -260,7 +272,9 @@ final class WorkspaceController {
         case .rename: if workspace.activeTab.selection.count == 1 { renamePane = pane; renameRequest = UUID() }
         case .newFolder: newFolder()
         case .trash: trashSelection()
-        case .copyClipboard: FilePasteboard.write(workspace.activeTab.selectedEntries.map(\.location))
+        case .copyClipboard:
+            guard workspace.activeTab.location.isLocal else { errorMessage = "Use Copy to Other Pane to download remote files."; return }
+            FilePasteboard.write(workspace.activeTab.selectedEntries.map(\.location))
         case .pasteClipboard: paste(.copy)
         case .moveClipboard: paste(.move)
         case .copyPath:

@@ -7,6 +7,7 @@ import CommanderCore
         return FileDropRequest.locations(from: urls.map(\.absoluteString))
     }
     static func write(_ locations: [FileLocation]) {
+        guard !locations.isEmpty, locations.allSatisfy(\.isLocal) else { return }
         NSPasteboard.general.clearContents()
         NSPasteboard.general.writeObjects(locations.map { $0.url as NSURL })
     }

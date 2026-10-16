@@ -94,7 +94,7 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
         if !canceled && name != entry.name { owner.onRename(entry, name) }
     }
     func tableView(_ tableView: NSTableView, pasteboardWriterForRow row: Int) -> (any NSPasteboardWriting)? {
-        guard entries.indices.contains(row) else { return nil }
+        guard entries.indices.contains(row), entries[row].location.isLocal else { return nil }
         return entries[row].location.url as NSURL
     }
     private func dropDestination(row: Int, operation: NSTableView.DropOperation) -> FileLocation? {

@@ -8,7 +8,7 @@ import Foundation
         guard !sources.isEmpty else { return nil }
         return .init(kind: kind, sources: sources, destinationDirectory: workspace.pane(workspace.activePane.opposite).activeTab.location)
     }
-    public static func previewItems(in workspace: WorkspaceSession) -> [FileLocation] { workspace.activeTab.selectedEntries.map(\.location) }
+    public static func previewItems(in workspace: WorkspaceSession) -> [FileLocation] { workspace.activeTab.selectedEntries.map(\.location).filter(\.isLocal) }
     public static func openDisposition(kind: FileKind) -> OpenDisposition { kind == .directory ? .browse : .systemApplication }
     public static func packageContents(_ location: FileLocation) -> FileLocation { location }
 }

@@ -18,9 +18,7 @@ struct LocationBarView: View {
                 .accessibilityLabel(paneID == .left ? "Left folder path" : "Right folder path")
                 .textFieldStyle(.plain).accessibilityIdentifier(paneID.rawValue + ".path")
                 .onSubmit {
-                    let expanded = (path as NSString).expandingTildeInPath
-                    let url = expanded.hasPrefix("/") ? URL(fileURLWithPath: expanded) : tab.location.url.appendingPathComponent(expanded)
-                    controller.open(.local(url), in: paneID)
+                    controller.openPath(path, in: paneID)
                 }
         }
         .buttonStyle(.borderless).padding(.horizontal, 10).padding(.vertical, 8)

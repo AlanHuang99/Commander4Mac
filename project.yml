@@ -17,6 +17,11 @@ settings:
     ENABLE_APP_SANDBOX: NO
     ENABLE_HARDENED_RUNTIME: YES
     GENERATE_INFOPLIST_FILE: YES
+  configs:
+    Debug:
+      ONLY_ACTIVE_ARCH: YES
+    UITest:
+      ONLY_ACTIVE_ARCH: YES
 packages:
   Citadel:
     url: https://github.com/orlandos-nl/Citadel.git

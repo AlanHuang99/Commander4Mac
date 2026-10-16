@@ -133,7 +133,7 @@ struct FileGridView: NSViewRepresentable {
         editingEntry = nil; field.isEditable = false; field.isSelectable = false; field.delegate = nil; field.stringValue = entry.name
         if !canceled && name != entry.name { owner.onRename(entry, name) }
     }
-    func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? { entries[indexPath.item].location.url as NSURL }
+    func collectionView(_ collectionView: NSCollectionView, pasteboardWriterForItemAt indexPath: IndexPath) -> (any NSPasteboardWriting)? { entries[indexPath.item].location.isLocal ? entries[indexPath.item].location.url as NSURL : nil }
     private func target(_ index: Int, operation: NSCollectionView.DropOperation) -> FileLocation? {
         if operation == .on && entries.indices.contains(index) { return entries[index].isDirectory ? entries[index].location : nil }
         return owner.tab.location

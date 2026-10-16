@@ -78,8 +78,8 @@ struct PaneView: View {
             Divider()
             HStack(spacing: 10) {
                 Button("Copy to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.copy, from: paneID) }
-                Button("Move to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.move, from: paneID) }
-                Button("Stage") { workspace.activePane = paneID; controller.stageSelection() }
+                Button("Move to \(paneID == .left ? "Right" : "Left")") { controller.transferSelection(.move, from: paneID) }.disabled(!tab.location.isLocal || !workspace.pane(paneID.opposite).activeTab.location.isLocal)
+                Button("Stage") { workspace.activePane = paneID; controller.stageSelection() }.disabled(!tab.location.isLocal)
                 Spacer()
             }.font(.system(size: 11)).buttonStyle(.borderless).padding(.horizontal, 11).padding(.vertical, 6)
                 .disabled(tab.selection.isEmpty)

@@ -18,10 +18,15 @@ public struct ViewOptions: Codable, Equatable, Sendable {
     public var textSize: Double = 13
     public var listIconSize: Double = 20
     public var gridIconSize: Double = 64
+    public var font: FontChoice = .system
+    public var navigationFont: FontChoice = .system
+    public var navigationTextSize: Double = 13
+    public var navigationIconSize: Double = 16
     public var mode: BrowserViewMode = .list
     public init() {}
     private enum CodingKeys: String, CodingKey {
         case sortColumn, ascending, foldersFirst, includeHidden, visibleColumns, textSize, listIconSize, gridIconSize, mode
+        case font, navigationFont, navigationTextSize, navigationIconSize
     }
     public init(from decoder: any Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -30,19 +35,34 @@ public struct ViewOptions: Codable, Equatable, Sendable {
         foldersFirst = try values.decodeIfPresent(Bool.self, forKey: .foldersFirst) ?? true
         includeHidden = try values.decodeIfPresent(Bool.self, forKey: .includeHidden) ?? false
         visibleColumns = try values.decodeIfPresent([String].self, forKey: .visibleColumns) ?? ["name", "size", "modified"]
-        textSize = try values.decodeIfPresent(Double.self, forKey: .textSize) ?? 13
-        listIconSize = try values.decodeIfPresent(Double.self, forKey: .listIconSize) ?? 20
-        gridIconSize = try values.decodeIfPresent(Double.self, forKey: .gridIconSize) ?? 64
+        textSize = (try? values.decodeIfPresent(Double.self, forKey: .textSize)) ?? 13
+        listIconSize = (try? values.decodeIfPresent(Double.self, forKey: .listIconSize)) ?? 20
+        gridIconSize = (try? values.decodeIfPresent(Double.self, forKey: .gridIconSize)) ?? 64
+        font = (try? values.decodeIfPresent(FontChoice.self, forKey: .font)) ?? .system
+        navigationFont = (try? values.decodeIfPresent(FontChoice.self, forKey: .navigationFont)) ?? .system
+        navigationTextSize = (try? values.decodeIfPresent(Double.self, forKey: .navigationTextSize)) ?? 13
+        navigationIconSize = (try? values.decodeIfPresent(Double.self, forKey: .navigationIconSize)) ?? 16
         mode = try values.decodeIfPresent(BrowserViewMode.self, forKey: .mode) ?? .list
         self = validated()
     }
     public func validated() -> ViewOptions {
         var result = self
-        result.textSize = min(20, max(11, textSize.isFinite ? textSize : 13))
-        result.listIconSize = min(32, max(16, listIconSize.isFinite ? listIconSize : 20))
-        result.gridIconSize = min(128, max(32, gridIconSize.isFinite ? gridIconSize : 64))
+        result.viewAppearance = viewAppearance
         if !result.visibleColumns.contains("name") { result.visibleColumns.insert("name", at: 0) }
         return result
+    }
+    public var viewAppearance: ViewAppearance {
+        get {
+            var value = ViewAppearance()
+            value.font = font; value.textSize = textSize; value.listIconSize = listIconSize; value.gridIconSize = gridIconSize
+            value.navigationFont = navigationFont; value.navigationTextSize = navigationTextSize; value.navigationIconSize = navigationIconSize
+            return value
+        }
+        set {
+            let value = newValue.validated()
+            font = value.font; textSize = value.textSize; listIconSize = value.listIconSize; gridIconSize = value.gridIconSize
+            navigationFont = value.navigationFont; navigationTextSize = value.navigationTextSize; navigationIconSize = value.navigationIconSize
+        }
     }
 }
 public enum TabPin: Codable, Equatable, Sendable {

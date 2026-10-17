@@ -38,6 +38,7 @@
 		2478A17E5B901A5E2D7734EC /* OperationGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DA5CEFEB9AEA3C38FCECCA /* OperationGate.swift */; };
 		24DA2E35AD7F6CA74FCCC317 /* FileTableCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83959891FD967D37EE6BF54 /* FileTableCoordinator.swift */; };
 		25BCB11BE88E9BB29EBB4A07 /* FileFailure.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F5CCD008A4A5C7A27AED94 /* FileFailure.swift */; };
+		260705573E43D68061AAB53F /* AppearanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3A7A3BB5A0C4C11D790009 /* AppearanceTests.swift */; };
 		284B893876C799425ADE48DF /* CommanderCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		29616E564A2D72ECFF174116 /* ConnectionProfileCommit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A16316BE7E596BECD0C16F /* ConnectionProfileCommit.swift */; };
 		29EDCFF91C6A03A33E994ABE /* SMBIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 637909C376F6ACBE205A241E /* SMBIntegrationTests.swift */; };
@@ -110,6 +111,8 @@
 		99F2028F933983C6CDD810DE /* MetadataPreservationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A025CF0CC560BB2375AB9B3 /* MetadataPreservationTests.swift */; };
 		9A1AF0438EF4F8D548A08122 /* LocationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FE06ACC98AE4F4B758E606A /* LocationBarView.swift */; };
 		9D167E5475D085F2A9EDBCDD /* RemotePathRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D8636B0BAACC8DAC6DE2FF /* RemotePathRules.swift */; };
+		9DCCE2F371DC3C07582A4846 /* AppearanceSharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189084E3203DF4DDD282ADE0 /* AppearanceSharing.swift */; };
+		9E1F6D3F156126CC4C2089AD /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F03CA4A754F0E8AFBC8CDF /* Theme.swift */; };
 		9ED946146C0A45F621765673 /* HostKeyVerification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36844EF27E5DD25BC36F9367 /* HostKeyVerification.swift */; };
 		A232ADE4B13798AC2C048C4B /* ActiveOperationMarkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1114B030AA3D1C2873A4E696 /* ActiveOperationMarkerTests.swift */; };
 		A3077F82E274695CD284D37F /* Module.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73667F5A96BCAEDB82685389 /* Module.swift */; };
@@ -144,6 +147,7 @@
 		C215B80D9D74F92374ECCE5C /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1326CAE9FAB1780E8C440E /* AppServices.swift */; };
 		C4045CE4E3FEEFD53976D0FD /* RemoteTransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4F68758672A5715B949B52 /* RemoteTransferTests.swift */; };
 		C6915211A5F4DA0C31DBF8D1 /* AppCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03A93CBE191A28460271BEC7 /* AppCommands.swift */; };
+		C6BD20FA5F0A844868B94FE9 /* ViewAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B644AB7057EF621C88DDA /* ViewAppearance.swift */; };
 		C74CCEB1D6E891C317DEF98B /* PaneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D76476D645CD4627BB18849 /* PaneView.swift */; };
 		C7C2379D20CAB28C3A671E0F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CA277B33E546F9B4EE7F5F /* AppDelegate.swift */; };
 		C8DAB1012B27C3133781FCFD /* ConnectionUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A142C7616652B49B68F350 /* ConnectionUITests.swift */; };
@@ -240,6 +244,7 @@
 		176AAC8A2C1693E92A6229B0 /* RemoteTreeTransferExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTreeTransferExecutor.swift; sourceTree = "<group>"; };
 		1858ADADCF22EA7CD6859835 /* KeychainCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCredentialStore.swift; sourceTree = "<group>"; };
 		186F61A54D9DFDDF4852E56A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		189084E3203DF4DDD282ADE0 /* AppearanceSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSharing.swift; sourceTree = "<group>"; };
 		20EF1F852FC06879A903CCF2 /* ShelfTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfTransferTests.swift; sourceTree = "<group>"; };
 		22F549471CB7B639C7B174F5 /* Credits.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		241A480D4265AC713A6E25CB /* PaneSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneSession.swift; sourceTree = "<group>"; };
@@ -318,6 +323,8 @@
 		8A4EC09E88706CA2A476494F /* ConnectionProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionProfile.swift; sourceTree = "<group>"; };
 		8BB2080DAA2004B04E71CA2C /* WorkspaceSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceSessionTests.swift; sourceTree = "<group>"; };
 		8F09FB44A7FF94910A49EAEA /* NetworkRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRecoveryTests.swift; sourceTree = "<group>"; };
+		8F3A7A3BB5A0C4C11D790009 /* AppearanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceTests.swift; sourceTree = "<group>"; };
+		90F03CA4A754F0E8AFBC8CDF /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		920607C712067FD37F06CBE2 /* DirectoryLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryLoader.swift; sourceTree = "<group>"; };
 		93B3B3A30AFD74C96629C12B /* WebDAVHTTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVHTTPTransport.swift; sourceTree = "<group>"; };
 		93D8636B0BAACC8DAC6DE2FF /* RemotePathRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemotePathRules.swift; sourceTree = "<group>"; };
@@ -348,6 +355,7 @@
 		C97C21D3897D53EC091F57E9 /* RuntimeMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeMetrics.swift; sourceTree = "<group>"; };
 		C9BCFD19677246801F3C2460 /* PreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesStore.swift; sourceTree = "<group>"; };
 		CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileSystem.swift; sourceTree = "<group>"; };
+		D40B644AB7057EF621C88DDA /* ViewAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewAppearance.swift; sourceTree = "<group>"; };
 		D4466212710556ED4CF5A731 /* LocationReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationReference.swift; sourceTree = "<group>"; };
 		D577A7A61D119822121457AF /* WorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceView.swift; sourceTree = "<group>"; };
 		D655885F9AC419AB3578D778 /* FileLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLocation.swift; sourceTree = "<group>"; };
@@ -526,6 +534,7 @@
 			isa = PBXGroup;
 			children = (
 				F3BB16E2F33F70B1771058CA /* ActiveOperationMarker.swift */,
+				189084E3203DF4DDD282ADE0 /* AppearanceSharing.swift */,
 				6CDBB08D94AEE4169D9CEA41 /* CommandRouter.swift */,
 				09729B608D972D8A6258F3B3 /* ConflictPresentationRouter.swift */,
 				49A16316BE7E596BECD0C16F /* ConnectionProfileCommit.swift */,
@@ -569,6 +578,7 @@
 			children = (
 				6ECDF3F821D0637370BC35C1 /* .gitkeep */,
 				1114B030AA3D1C2873A4E696 /* ActiveOperationMarkerTests.swift */,
+				8F3A7A3BB5A0C4C11D790009 /* AppearanceTests.swift */,
 				E20AC4924806B3954C350BF1 /* ApplicationStateStoreTests.swift */,
 				9F8E740FC8815EED27AC44E6 /* CitadelEncodingTests.swift */,
 				C07E695C1C7E1165B3907B96 /* CitadelPacketFixture.swift */,
@@ -726,7 +736,9 @@
 				73667F5A96BCAEDB82685389 /* Module.swift */,
 				2FA103E78FD38FCA081683D9 /* OperationModels.swift */,
 				33B1E27DBC0814D3A0EF4C6D /* RemoteEndpointSnapshot.swift */,
+				90F03CA4A754F0E8AFBC8CDF /* Theme.swift */,
 				F8ECF77A78B4E44AF019ACEA /* TransferModels.swift */,
+				D40B644AB7057EF621C88DDA /* ViewAppearance.swift */,
 				87A775AE5AA0E5FF01255992 /* ViewOptions.swift */,
 			);
 			path = Models;
@@ -911,6 +923,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AE65D5D30CC1A7AE2D47AB7D /* ActiveOperationMarker.swift in Sources */,
+				9DCCE2F371DC3C07582A4846 /* AppearanceSharing.swift in Sources */,
 				B24FE0DCA8CFD181D726542E /* ApplicationStateStore.swift in Sources */,
 				871D2983CA926FEE0B650890 /* AtomicFileWriter.swift in Sources */,
 				0F0B50459B26862F3E6A0D23 /* BlockingFileWorker.swift in Sources */,
@@ -960,9 +973,11 @@
 				5445CB563EF7DB67DDA72980 /* SMBProtocolDriver.swift in Sources */,
 				D6C13C93BE428FB5D6CC5393 /* ShelfStore.swift in Sources */,
 				42C5F443EB7EADEFB9F05269 /* TabSession.swift in Sources */,
+				9E1F6D3F156126CC4C2089AD /* Theme.swift in Sources */,
 				4DE4142CE27DC180008346AE /* TransferModels.swift in Sources */,
 				7F602809067702F7D42EDF72 /* TransferQueue.swift in Sources */,
 				2B95B82EC298EDC778635E85 /* TransferTreeManifest.swift in Sources */,
+				C6BD20FA5F0A844868B94FE9 /* ViewAppearance.swift in Sources */,
 				C9993E64CD96185F47F13DA1 /* ViewOptions.swift in Sources */,
 				AD03696D5702E2A6431D15E6 /* WebDAVConnectionManager.swift in Sources */,
 				B2AFC2887D1F783111E9F446 /* WebDAVFileChannel.swift in Sources */,
@@ -977,6 +992,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A232ADE4B13798AC2C048C4B /* ActiveOperationMarkerTests.swift in Sources */,
+				260705573E43D68061AAB53F /* AppearanceTests.swift in Sources */,
 				FB7144F7187A097E94101CE1 /* ApplicationStateStoreTests.swift in Sources */,
 				89BA07F64E55F96203FD6AF5 /* CitadelEncodingTests.swift in Sources */,
 				D5FD3E100EAEB6C13A4A2DF1 /* CitadelPacketFixture.swift in Sources */,

@@ -15,8 +15,8 @@ final class PreferencesStoreTests: XCTestCase {
         let restored = store.load()
         XCTAssertEqual(restored.appearance, .dark)
         XCTAssertEqual(restored.defaultDestination, .left)
-        XCTAssertEqual(restored.view.textSize, 20)
-        XCTAssertEqual(restored.view.listIconSize, 16)
+        XCTAssertEqual(restored.view.textSize, 28)
+        XCTAssertEqual(restored.view.listIconSize, 12)
     }
     func testCorruptPreferencesFallBackToUsefulDefaults() throws {
         let fixture = try FixtureDirectory()

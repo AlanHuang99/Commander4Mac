@@ -18,6 +18,13 @@ public final class WorkspaceSession: Identifiable {
     }
     public func pane(_ id: PaneID) -> PaneSession { id == .left ? left : right }
     public var activeTab: TabSession { pane(activePane).activeTab }
+    public func applyAppearance(_ appearance: ViewAppearance) {
+        let valid = appearance.validated()
+        defaultOptions.viewAppearance = valid
+        for pane in [left, right] {
+            for tab in pane.tabs where tab.options.viewAppearance != valid { tab.options.viewAppearance = valid }
+        }
+    }
     @discardableResult public func open(_ location: FileLocation, destination: OpenDestination = .current, inNewTab: Bool = false) -> NavigationTarget {
         let target: PaneID = destination == .current ? activePane : (destination == .left ? .left : .right)
         activePane = target

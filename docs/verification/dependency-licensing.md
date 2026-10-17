@@ -34,3 +34,9 @@ The BSD advertising acknowledgement appears in About, the combined notices, inst
 - The validator checked 13 component records and 471 source-file hashes. A deliberately corrupted source archive was rejected. The actual production bundle passed source/license validation, dynamic linkage inspection, nested deep strict signature checks and runtime-entitlement checks. The final app and DMG were accepted by Apple and passed stapling, Gatekeeper and mounted-app validation; see [distribution acceptance](distribution-release.md).
 
 Ignored logs under `.build/logs`: `lgpl-rebuild-final.log`, `lgpl-replacement-proof.log`, `lgpl-personal-sign.log`, `lgpl-personal-runtime.log`, and `release-verification.log`. The generated source kit and inventory are committed with the app resources. Re-run preparation and validation after any dependency, source, notice or build-script change.
+
+## Public source license
+
+The public Commander4Mac source is GPLv3 with the additional permission in [LICENSE-EXCEPTION](../../LICENSE-EXCEPTION) for linking/combining with Citadel and CCitadelBcrypt. The original four-clause BSD advertising requirement in the vendored Blowfish implementation is retained. A plain GPL grant alone would conflict with that condition; the original-code permission addresses that combination without changing upstream terms. Both the GPL text and permission ship as app resources, and the release verifier requires byte-identical copies. Contributions to original code are accepted on those same terms. The vendored Citadel/CCitadelBcrypt source is published in the release tag.
+
+References: [GNU original BSD explanation](https://www.gnu.org/licenses/gpl-faq.en.html#OrigBSD), [GNU section 7 permission guidance](https://www.gnu.org/licenses/gpl-faq.en.html#GPLIncompatibleLibs).

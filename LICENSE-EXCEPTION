@@ -1,0 +1,25 @@
+Commander4Mac Citadel linking permission
+
+Copyright (C) 2026 Alan Huang and Commander4Mac contributors
+
+Additional permission under GNU GPL version 3 section 7
+
+The copyright holders of Commander4Mac's original code grant additional
+permission to link or combine that code, including modified versions, with
+Citadel and its CCitadelBcrypt component, including modified versions of
+those libraries, containing code under the original four-clause BSD license.
+You may convey the resulting combination under GNU GPL version 3 while
+complying with the licenses of Citadel and CCitadelBcrypt, including their
+copyright notices, disclaimers and advertising acknowledgement.
+
+Corresponding Source for a non-source form of the combination must include
+the source code for the parts of Citadel and CCitadelBcrypt used, as well as
+the source code for the covered work.
+
+This permission applies to Commander4Mac's original code in this repository.
+It does not change any third-party license. The required acknowledgement is:
+This product includes software developed by Niels Provos.
+
+Modified versions may retain or remove this additional permission as allowed
+by GNU GPL version 3 section 7. Removing it does not remove the separate
+license obligations of libraries included in a distribution.

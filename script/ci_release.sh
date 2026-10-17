@@ -42,7 +42,7 @@ See the repository README and CHANGELOG for features and current transfer limita
 
 ### Source and licenses
 
-Commander4Mac's original code is GPLv3. Dependencies retain their own licenses. The app includes corresponding LGPL source and rebuild/replacement instructions under Commander4Mac → Open Source Components…. The same LGPL source kit and third-party notices are attached to this release. The tagged repository supplies Commander4Mac's source and build instructions.
+Commander4Mac's original code is GPLv3 with the additional Citadel/CCitadelBcrypt linking permission in LICENSE-EXCEPTION. Dependencies retain their own licenses. The app includes corresponding LGPL source and rebuild/replacement instructions under Commander4Mac → Open Source Components…. The same LGPL source kit and third-party notices are attached to this release. The tagged repository supplies Commander4Mac's source and build instructions.
 
 This product includes software developed by Niels Provos.
 '''

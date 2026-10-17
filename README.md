@@ -18,6 +18,11 @@ Tabs, pinned folders, a shared shelf and direct server connections, with your fi
 
 </div>
 
+<p align="center">
+<img src="docs/images/workspace.png" alt="Commander4Mac showing two panes, pinned tabs and the shelf with demonstration files" width="1000">
+<br><em>The real app, showing demonstration files.</em>
+</p>
+
 ## Your workspace, side by side
 
 - **Two independent panes:** tabs, folder history, list and icon views, sorting and filtering.
@@ -95,7 +100,7 @@ CI runs native core tests on Apple Silicon and Intel, integration checks against
 
 ## License and acknowledgements
 
-Commander4Mac's original code is licensed under [GNU GPL v3](LICENSE). Bundled dependencies retain their own licenses, including MIT, Apache 2.0 and LGPL 2.1 or later. See [third-party notices](Resources/ThirdPartyNotices.txt) and the [dependency review](docs/verification/dependency-licensing.md).
+Commander4Mac's original code is licensed under [GNU GPL v3](LICENSE), with an explicit [additional linking permission](LICENSE-EXCEPTION) for Citadel and its CCitadelBcrypt component. Bundled dependencies retain their own licenses, including MIT, Apache 2.0 and LGPL 2.1 or later. See [third-party notices](Resources/ThirdPartyNotices.txt) and the [dependency review](docs/verification/dependency-licensing.md).
 
 The app includes corresponding LGPL source, exact revisions, licenses, and rebuild/replacement instructions under **Commander4Mac → Open Source Components…**. The source kit is also available in [Resources/OpenSource](Resources/OpenSource).
 

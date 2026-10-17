@@ -1,10 +1,19 @@
 """Release requirements must remain active under optimized Python."""
 import re
+from pathlib import Path
 
 
 def require(condition, message="Release verification failed"):
     if not condition:
         raise ValueError(message)
+
+
+def verify_project_license(resources, root):
+    for source, target in [("LICENSE", "Commander4MacLicense.txt"),
+                           ("LICENSE-EXCEPTION", "Commander4MacLicenseException.txt")]:
+        destination = Path(resources) / target
+        require(destination.is_file() and destination.read_bytes() == (Path(root) / source).read_bytes(),
+                f"App must include the unchanged project license and linking permission: {target}")
 
 
 def verify_signature_policy(details, entitlements, *, main):

@@ -16,14 +16,27 @@ class PublicationTests(unittest.TestCase):
                                "--project", str(project), *arguments], capture_output=True, text=True)
 
     def test_current_tag_produces_matching_metadata(self):
-        result = self.metadata(ROOT / "project.yml", "--tag", "v1.0")
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "project.yml"
+            project.write_text('MARKETING_VERSION: "2.7.1"\nCURRENT_PROJECT_VERSION: "8"\n')
+            result = self.metadata(project, "--tag", "v2.7.1")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), {"version": "2.7.1", "build": "8", "tag": "v2.7.1"})
+
+    def test_real_project_metadata_is_internally_consistent(self):
+        result = self.metadata(ROOT / "project.yml")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(json.loads(result.stdout), {"version": "1.0", "build": "1", "tag": "v1.0"})
+        value = json.loads(result.stdout)
+        self.assertEqual(value["tag"], "v" + value["version"])
+        self.assertEqual(self.metadata(ROOT / "project.yml", "--tag", value["tag"]).returncode, 0)
 
     def test_other_tag_is_rejected_before_building(self):
         for tag in ["v1.0.1", "main", "v1.0; touch bad", "v1.0\nextra"]:
             with self.subTest(tag=tag):
-                result = self.metadata(ROOT / "project.yml", "--tag", tag)
+                with tempfile.TemporaryDirectory() as directory:
+                    project = Path(directory) / "project.yml"
+                    project.write_text('MARKETING_VERSION: "1.0"\nCURRENT_PROJECT_VERSION: "1"\n')
+                    result = self.metadata(project, "--tag", tag)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn("Tag does not match", result.stderr)
 
@@ -50,11 +63,15 @@ class PublicationTests(unittest.TestCase):
             fake = fixture / "xcrun"
             fake.write_text('#!' + sys.executable + '\nimport json,os,sys\n'
                             'from pathlib import Path\n'
-                            'Path(os.environ["WAIT_ARGS"]).write_text(json.dumps(sys.argv[1:]))\n'
-                            'print(json.dumps({"status": os.environ["WAIT_STATUS"]}))\n')
+                            'if sys.argv[1:3] == ["notarytool", "wait"]:\n'
+                            ' Path(os.environ["WAIT_ARGS"]).write_text(json.dumps(sys.argv[1:]))\n'
+                            ' print(json.dumps({"status": os.environ["WAIT_STATUS"]}))\n'
+                            ' sys.exit(75 if os.environ["WAIT_STATUS"] == "In Progress" else 0)\n'
+                            'elif sys.argv[1:3] == ["notarytool", "log"]:\n'
+                            ' Path(sys.argv[-1]).write_text(json.dumps({"status": os.environ["WAIT_STATUS"], "issues": ["fixture diagnostic"]}))\n')
             fake.chmod(0o755)
             arguments = fixture / "arguments.json"
-            result = subprocess.run([str(ROOT / "script/notarize.sh"), "app-wait", "fixture-profile"],
+            result = subprocess.run(["/bin/bash", str(ROOT / "script/notarize.sh"), "app-wait", "fixture-profile"],
                 env={**os.environ, "PATH": str(fixture) + os.pathsep + os.environ["PATH"],
                      "COMMANDER_DISTRIBUTION_DIR": str(output), "WAIT_ARGS": str(arguments), "WAIT_STATUS": status},
                 capture_output=True, text=True)
@@ -64,6 +81,8 @@ class PublicationTests(unittest.TestCase):
             self.assertEqual(invocation[invocation.index("--timeout") + 1], "25m")
             self.assertEqual(invocation[invocation.index("--keychain-profile") + 1], "fixture-profile")
             self.assertEqual(json.loads((records / "app-wait.json").read_text())["status"], status)
+            if status != "Accepted":
+                self.assertEqual(json.loads((records / "app-log.json").read_text())["issues"], ["fixture diagnostic"])
             return result
 
     def test_notary_wait_uses_saved_id_and_deadline(self):
@@ -74,6 +93,28 @@ class PublicationTests(unittest.TestCase):
         result = self.run_wait("Invalid")
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Notarization was not accepted", result.stderr)
+
+    def test_notary_wait_retains_nonzero_timeout(self):
+        result = self.run_wait("In Progress")
+        self.assertEqual(result.returncode, 75)
+
+    def test_packaged_license_requires_linking_permission(self):
+        sys.path.insert(0, str(ROOT / "script"))
+        from release_checks import verify_project_license
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            resources = root / "Resources"
+            resources.mkdir()
+            (root / "LICENSE").write_text("Owned GPL fixture")
+            (root / "LICENSE-EXCEPTION").write_text("Owned Citadel linking permission")
+            (resources / "Commander4MacLicense.txt").write_text("Owned GPL fixture")
+            with self.assertRaises(ValueError):
+                verify_project_license(resources, root)
+            (resources / "Commander4MacLicenseException.txt").write_text("Owned Citadel linking permission")
+            verify_project_license(resources, root)
+            (resources / "Commander4MacLicenseException.txt").write_text("Changed permission")
+            with self.assertRaises(ValueError):
+                verify_project_license(resources, root)
 
 
 if __name__ == "__main__":

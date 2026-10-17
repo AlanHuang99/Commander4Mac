@@ -4,7 +4,7 @@ The user requests publishing Commander4Mac and setting up CI, release automation
 
 ## Outcome
 
-- Public `AlanHuang99/Commander4Mac`, default branch `main`, GPL-3.0 following Sonance. Upstream licenses retain their own terms.
+- Public `AlanHuang99/Commander4Mac`, default branch `main`, GPL-3.0 following Sonance, with the additional Citadel/CCitadelBcrypt linking permission in LICENSE-EXCEPTION. Upstream licenses retain their own terms.
 - A user-facing README with the selected icon, download link, installation and Full Disk Access instructions, features, keyboard shortcuts and accurate limitations. Contributor, security, release and issue guidance accompany it.
 - CI runs without distribution credentials on pushes and pull requests. Native Apple Silicon and Intel jobs build and run core tests. Owned loopback SMB/WebDAV fixtures exercise integration; SFTP and cross-volume fixtures run where supported. Release validation and unsigned universal Release builds also run.
 - A protected release path runs on version tags and manual dispatch of an existing version tag. The tag must match checked-in marketing metadata. Only this repository's trusted version tags receive release secrets.

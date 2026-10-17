@@ -5,7 +5,7 @@ import plistlib
 import re
 import subprocess
 import sys
-from release_checks import require, verify_signature_policy
+from release_checks import require, verify_signature_policy, verify_project_license
 from release_metadata import release_metadata
 
 root = Path(__file__).resolve().parent.parent
@@ -17,7 +17,7 @@ require(info["CFBundleExecutable"] == "Commander4Mac", 'Release verification fai
 require(info["CFBundleShortVersionString"] == metadata["version"] and info["CFBundleVersion"] == metadata["build"], "Bundle version/build does not match checked-in release metadata")
 require(info["LSMinimumSystemVersion"] == "15.0", 'Release verification failed: info["LSMinimumSystemVersion"] == "15.0"')
 subprocess.run([sys.executable, str(root / "script/verify_licenses.py"), str(app / "Contents/Resources")], check=True)
-require((app / "Contents/Resources/Commander4MacLicense.txt").read_bytes() == (root / "LICENSE").read_bytes(), "App must include its GPL license")
+verify_project_license(app / "Contents/Resources", root)
 subprocess.run(["codesign", "--verify", "--deep", "--strict", "--all-architectures", str(app)], check=True)
 main = app / "Contents/MacOS" / info["CFBundleExecutable"]
 magic = {bytes.fromhex(v) for v in ["cffaedfe", "cefaedfe", "cafebabe", "bebafeca", "cafebabf"]}

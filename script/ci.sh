@@ -23,6 +23,7 @@ xcodebuild -project Commander4Mac.xcodeproj -scheme Commander4Mac -configuration
 APP=.build/xcode/Build/Products/Release/Commander4Mac.app
 python3 script/verify_licenses.py "$APP/Contents/Resources"
 cmp LICENSE "$APP/Contents/Resources/Commander4MacLicense.txt"
+cmp LICENSE-EXCEPTION "$APP/Contents/Resources/Commander4MacLicenseException.txt"
 python3 - "$APP" <<'PY'
 from pathlib import Path
 import subprocess,sys

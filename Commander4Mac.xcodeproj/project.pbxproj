@@ -101,6 +101,7 @@
 		8DEC0C2AA0053AFC93E1BA08 /* CitadelSFTPTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0C77CF218B353BED26175C /* CitadelSFTPTransport.swift */; };
 		8F06E640915A898367A6191E /* OperationJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FF63973599C1EE3534FDC79 /* OperationJournal.swift */; };
 		92B5A07F4C25A95CC9883D18 /* ViewModeStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51BC80F2D2D1B4D69B2A662 /* ViewModeStateTests.swift */; };
+		96D826A8CC6BD7E28FB01033 /* Commander4MacLicenseException.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4D9AB7514445163552D36F4D /* Commander4MacLicenseException.txt */; };
 		9741CEB51C3268B497576410 /* ShelfStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53A0AC989F55938371025FD /* ShelfStoreTests.swift */; };
 		976FD3DD53E33FAA54EA533B /* ConnectionSubmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5BC82ACABE5BE7138A77E2 /* ConnectionSubmission.swift */; };
 		9864453705168F11B3EF6A6E /* WorkspaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51FBE196D0F2782DA28B1990 /* WorkspaceController.swift */; };
@@ -272,6 +273,7 @@
 		4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileSystemTests.swift; sourceTree = "<group>"; };
 		4D1326CAE9FAB1780E8C440E /* AppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServices.swift; sourceTree = "<group>"; };
 		4D5BC82ACABE5BE7138A77E2 /* ConnectionSubmission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionSubmission.swift; sourceTree = "<group>"; };
+		4D9AB7514445163552D36F4D /* Commander4MacLicenseException.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Commander4MacLicenseException.txt; sourceTree = "<group>"; };
 		4E7A6C85B6DD56E5ACF62745 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		5091F45F13C7D7B1177A886F /* TabSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSession.swift; sourceTree = "<group>"; };
 		51EA6E49CA0853326B71E203 /* NetworkConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkConnectionTests.swift; sourceTree = "<group>"; };
@@ -662,6 +664,7 @@
 			children = (
 				4362668036252AF881104E19 /* AppIcon.icns */,
 				5FC1A697908A90EAECAE9A81 /* Commander4MacLicense.txt */,
+				4D9AB7514445163552D36F4D /* Commander4MacLicenseException.txt */,
 				22F549471CB7B639C7B174F5 /* Credits.rtf */,
 				F90CBBE4E0ECF72BFFE0A0A9 /* ThirdPartyNotices.txt */,
 			);
@@ -876,6 +879,7 @@
 			files = (
 				79274BD795A5BC3AB71C516F /* AppIcon.icns in Resources */,
 				B44A3D518C33F53521B031D1 /* Commander4MacLicense.txt in Resources */,
+				96D826A8CC6BD7E28FB01033 /* Commander4MacLicenseException.txt in Resources */,
 				5678525B24B187ABD6691627 /* Credits.rtf in Resources */,
 				DAF4162C644D64DCF2F4B6CB /* OpenSource in Resources */,
 				5D64675E0AC6ED720D385C1C /* ThirdPartyNotices.txt in Resources */,

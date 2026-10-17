@@ -57,22 +57,9 @@ struct SidebarView: View {
                 Button { controller.addFavorite() } label: { Label("Add Current Folder", systemImage: "plus").frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }
                     .buttonStyle(.plain).foregroundStyle(.secondary)
             }
-            Section("Connections") {
+            Section("Saved Connections") {
                 ForEach(controller.services.connections.profiles) { profile in
-                    Button { controller.connectSaved(profile) } label: {
-                        Label(profile.name, systemImage: "network")
-                            .frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
-                    }.buttonStyle(.plain)
-                        .accessibilityLabel(profile.name + ", " + (controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected"))
-                        .help("\(profile.username)@\(profile.host):\(profile.port) · \(controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected")")
-                        .contextMenu {
-                            Button("Open in Current Pane") { controller.connectSaved(profile, destination: .current) }
-                            Button("Open in Left Pane") { controller.connectSaved(profile, destination: .left) }
-                            Button("Open in Right Pane") { controller.connectSaved(profile, destination: .right) }
-                            Button("Edit Connection…") { controller.manageConnection(profile) }
-                            Button("Disconnect") { Task { await controller.services.remote.disconnect(profile.id); await controller.refresh(.left); await controller.refresh(.right) } }
-                            Button("Remove Connection") { Task { do { try await controller.services.connections.remove(profile) } catch { controller.errorMessage = error.localizedDescription } } }
-                        }
+                    SavedConnectionRow(controller: controller, profile: profile, options: options, palette: palette)
                 }
                 Button { controller.manageConnection() } label: { Label("New Connection…", systemImage: "plus").frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle()) }.buttonStyle(.plain)
                 if let diagnostic = controller.services.connections.diagnostic { Text(diagnostic).font(.caption).foregroundStyle(.secondary) }
@@ -104,5 +91,35 @@ private struct SidebarNavigationLabelStyle: LabelStyle {
             configuration.icon.font(.system(size: iconSize)).frame(width: iconSize + 3)
             configuration.title.lineLimit(1)
         }
+    }
+}
+
+private struct SavedConnectionRow: View {
+    let controller: WorkspaceController
+    let profile: ConnectionProfile
+    let options: ViewOptions
+    let palette: ThemePalette?
+    var body: some View {
+                    Button { controller.connectSaved(profile) } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(profile.name)
+                                Text(profile.endpointSummary)
+                                    .font(Font(AppearanceFont.resolve(options.navigationFont, size: max(10, options.navigationTextSize - 2))))
+                                    .foregroundStyle(palette?.secondaryText.color ?? .secondary)
+                            }
+                        } icon: { Image(systemName: "network") }
+                            .frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
+                    }.buttonStyle(.plain)
+                        .accessibilityLabel(profile.name + ", " + profile.endpointSummary + ", " + (controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected"))
+                        .help("\(profile.username)@\(profile.host):\(profile.port) · \(controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected")")
+                        .contextMenu {
+                            Button("Open in Current Pane") { controller.connectSaved(profile, destination: .current) }
+                            Button("Open in Left Pane") { controller.connectSaved(profile, destination: .left) }
+                            Button("Open in Right Pane") { controller.connectSaved(profile, destination: .right) }
+                            Button("Edit Connection…") { controller.manageConnection(profile) }
+                            Button("Disconnect") { Task { await controller.services.remote.disconnect(profile.id); await controller.refresh(.left); await controller.refresh(.right) } }
+                            Button("Remove Connection") { Task { do { try await controller.services.connections.remove(profile) } catch { controller.errorMessage = error.localizedDescription } } }
+                        }
     }
 }

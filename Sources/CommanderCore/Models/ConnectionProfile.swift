@@ -53,6 +53,18 @@ public struct ConnectionProfile: Identifiable, Codable, Sendable, Equatable {
     public var basePath = "/"
     public var secure = true
     public var isLoopback: Bool { ["127.0.0.1", "::1"].contains(host.lowercased()) }
+    public var endpointSummary: String {
+        let server = host.contains(":") ? "[\(host)]" : host
+        let account = username.isEmpty || authentication == .guest ? "" : username + "@"
+        let root: String
+        switch protocolKind {
+        case .sftp: root = ""
+        case .smb: root = "/" + share
+        case .webdav: root = basePath == "/" ? "" : basePath
+        }
+        let folder = initialPath == "/" ? "" : initialPath
+        return "\(protocolKind.title) · \(account)\(server):\(port)\(root)\(folder)"
+    }
     enum CodingKeys: String, CodingKey { case id, name, host, port, username, initialPath, authentication, keyReference, serverKey, destination, protocolKind, share, domain, basePath, secure }
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)

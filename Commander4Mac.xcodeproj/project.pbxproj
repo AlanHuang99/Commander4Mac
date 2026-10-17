@@ -104,6 +104,7 @@
 		8DEC0C2AA0053AFC93E1BA08 /* CitadelSFTPTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0C77CF218B353BED26175C /* CitadelSFTPTransport.swift */; };
 		8F06E640915A898367A6191E /* OperationJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FF63973599C1EE3534FDC79 /* OperationJournal.swift */; };
 		92B5A07F4C25A95CC9883D18 /* ViewModeStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51BC80F2D2D1B4D69B2A662 /* ViewModeStateTests.swift */; };
+		93155F8EFD9B6C5746F0C011 /* ConnectionDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E6568FD2EAABA702D6552E /* ConnectionDraftTests.swift */; };
 		96D826A8CC6BD7E28FB01033 /* Commander4MacLicenseException.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4D9AB7514445163552D36F4D /* Commander4MacLicenseException.txt */; };
 		9741CEB51C3268B497576410 /* ShelfStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53A0AC989F55938371025FD /* ShelfStoreTests.swift */; };
 		976FD3DD53E33FAA54EA533B /* ConnectionSubmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5BC82ACABE5BE7138A77E2 /* ConnectionSubmission.swift */; };
@@ -172,6 +173,7 @@
 		E83DED4FFCFF7DDE4952BB81 /* DirectoryLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 920607C712067FD37F06CBE2 /* DirectoryLoader.swift */; };
 		EF6599C28B484A011BEBA7B4 /* Citadel in Frameworks */ = {isa = PBXBuildFile; productRef = 91AF30F306E324F5DE6565DE /* Citadel */; };
 		F57061A4DC80AE355E1B0A54 /* FileTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */; };
+		F6E89080BF741D85F99A0D87 /* ConnectionDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 996C438A3AF3434C1EB53308 /* ConnectionDraft.swift */; };
 		F75BF0EB825CBC5A1DAC1F7C /* AppearanceControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7238CA0FA9D842DE4E173D2C /* AppearanceControls.swift */; };
 		FB38AE1F35BF371780B929A0 /* OwnedUIWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8ADC87F2E0084BA353DAEC /* OwnedUIWorkspace.swift */; };
 		FB7144F7187A097E94101CE1 /* ApplicationStateStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20AC4924806B3954C350BF1 /* ApplicationStateStoreTests.swift */; };
@@ -235,6 +237,7 @@
 		0509EFDC14331854A502BABB /* RemoteConnectionStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteConnectionStateTests.swift; sourceTree = "<group>"; };
 		05A142C7616652B49B68F350 /* ConnectionUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionUITests.swift; sourceTree = "<group>"; };
 		0744CF4239F12173748ED6BD /* FileIconCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIconCache.swift; sourceTree = "<group>"; };
+		07E6568FD2EAABA702D6552E /* ConnectionDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDraftTests.swift; sourceTree = "<group>"; };
 		0821AF46A0D62BDD5C76B479 /* CommandRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRoutingTests.swift; sourceTree = "<group>"; };
 		09729B608D972D8A6258F3B3 /* ConflictPresentationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictPresentationRouter.swift; sourceTree = "<group>"; };
 		0A8B311961D1DA03AAD72E8D /* WindowCommandContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowCommandContext.swift; sourceTree = "<group>"; };
@@ -339,6 +342,7 @@
 		93D8636B0BAACC8DAC6DE2FF /* RemotePathRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemotePathRules.swift; sourceTree = "<group>"; };
 		94942DC724D739D1A980A2B0 /* TreeMemoryRemote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeMemoryRemote.swift; sourceTree = "<group>"; };
 		98818A61F4EE0F00538D3157 /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
+		996C438A3AF3434C1EB53308 /* ConnectionDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionDraft.swift; sourceTree = "<group>"; };
 		9D76476D645CD4627BB18849 /* PaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneView.swift; sourceTree = "<group>"; };
 		9E864C93BDF18401490D033C /* TransferQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferQueue.swift; sourceTree = "<group>"; };
 		9F8E740FC8815EED27AC44E6 /* CitadelEncodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitadelEncodingTests.swift; sourceTree = "<group>"; };
@@ -608,6 +612,7 @@
 				E9A91F0991F966D47EFD75C3 /* ClipboardRequestTests.swift */,
 				0821AF46A0D62BDD5C76B479 /* CommandRoutingTests.swift */,
 				5C50675A28B586D2B33F6A57 /* ConflictPresentationTests.swift */,
+				07E6568FD2EAABA702D6552E /* ConnectionDraftTests.swift */,
 				55D337B50FD0555BC4CFA309 /* ConnectionFixTests.swift */,
 				75013AFAA41241CA682C65D7 /* ConnectionProfileTests.swift */,
 				827BC5B654DBB99FF420B552 /* ConnectionWorkflowTests.swift */,
@@ -752,6 +757,7 @@
 		E7B01B7CE5C34A743BE3E052 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				996C438A3AF3434C1EB53308 /* ConnectionDraft.swift */,
 				8A4EC09E88706CA2A476494F /* ConnectionProfile.swift */,
 				124C0022482DB323C15F4697 /* ConnectionWorkflow.swift */,
 				EA26D7D2BDA7E7CFF3B5AE54 /* FileEntry.swift */,
@@ -956,6 +962,7 @@
 				8DEC0C2AA0053AFC93E1BA08 /* CitadelSFTPTransport.swift in Sources */,
 				B8E7563AC88AC00CA88ECC40 /* CommandRouter.swift in Sources */,
 				6C9FCC3BD9277DFC5511028A /* ConflictPresentationRouter.swift in Sources */,
+				F6E89080BF741D85F99A0D87 /* ConnectionDraft.swift in Sources */,
 				AB94D3AE1528E67E18EF9984 /* ConnectionProfile.swift in Sources */,
 				29616E564A2D72ECFF174116 /* ConnectionProfileCommit.swift in Sources */,
 				6EC18E2866F82328E0460D6A /* ConnectionStore.swift in Sources */,
@@ -1025,6 +1032,7 @@
 				C957E5517EC279ED25DDF452 /* ClipboardRequestTests.swift in Sources */,
 				3305A436BB586ED17F8FBB2A /* CommandRoutingTests.swift in Sources */,
 				792FFCE1DD1B7898E2B159D0 /* ConflictPresentationTests.swift in Sources */,
+				93155F8EFD9B6C5746F0C011 /* ConnectionDraftTests.swift in Sources */,
 				A93215DE8B2A919DE85ACB11 /* ConnectionFixTests.swift in Sources */,
 				5E2C86A0BE67026D33142690 /* ConnectionProfileTests.swift in Sources */,
 				FEE6056A23ADCC670BC0A913 /* ConnectionWorkflowTests.swift in Sources */,

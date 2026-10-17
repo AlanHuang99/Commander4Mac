@@ -22,7 +22,7 @@ Assets: `Commander4Mac-VERSION.dmg`, its portable `.sha256`, `LGPL-Sources.tar.g
 
 ## Signing setup
 
-Repository Actions secrets use the same names as Sonance:
+Encrypted secrets in the repository's `release` environment use the same names as Sonance:
 
 | Secret | Value |
 | --- | --- |
@@ -34,7 +34,7 @@ Repository Actions secrets use the same names as Sonance:
 | `MACOS_NOTARY_ISSUER_ID` | Its issuer UUID. |
 | `MACOS_TEAM_ID` | The production team `66LBY954DT`. |
 
-Upload these through GitHub encrypted secrets or `gh secret set` using stdin. Never put secret values in commands, Git, issue reports or logs. Pull-request CI does not use them. The `release` environment permits version tags only; do not grant release credentials to an untrusted branch or PR workflow. Rotate/revoke leaked credentials in Apple's portal and GitHub, rather than removing a file and assuming the leak is repaired.
+Upload these through the environment's GitHub encrypted secrets settings or `gh secret set --env release` using stdin. Never put secret values in commands, Git, issue reports or logs. Pull-request CI does not use them. The `release` environment permits version tags only; do not grant release credentials to an untrusted branch or PR workflow. Rotate/revoke leaked credentials in Apple's portal and GitHub, rather than removing a file and assuming the leak is repaired.
 
 `script/ci_signing.sh cleanup` runs even on failure and removes the temporary keychain and key files. Diagnostic uploads are restricted to build logs, notary JSON and checksums; credential directories are never uploaded. The local installed development identity is unaffected.
 

@@ -32,10 +32,10 @@
 
 **Interfaces:** Metadata comes from checked-in `project.yml`, producing validated version, build and tag. Public documentation points to GitHub's latest release and existing detailed acceptance records.
 
-- [ ] Write negative tests for mismatched tags, malformed versions and missing/duplicate metadata; watch them fail.
-- [ ] Implement metadata validation and remove hard-coded version assumptions from release/notary scripts. Preserve optional local output isolation.
-- [ ] Add GPL text to root and app resources, user documentation, issue templates and contribution guidance. Check links and avoid unsupported claims.
-- [ ] Run Python release/publication tests and license checks. Commit the publication foundation.
+- [x] Write negative tests for mismatched tags, malformed versions and missing/duplicate metadata; watch them fail.
+- [x] Implement metadata validation and remove hard-coded version assumptions from release/notary scripts. Preserve optional local output isolation.
+- [x] Add GPL text to root and app resources, user documentation, issue templates and contribution guidance. Check links and avoid unsupported claims.
+- [x] Run Python release/publication tests and license checks. Commit the publication foundation.
 
 ### Task 2: CI and release automation
 
@@ -43,10 +43,10 @@
 
 **Interfaces:** CI uses `COMMANDER_CI=1` for unsigned builds; release uses existing signing and notarization verifiers with metadata from Task 1. Keychain cleanup is a separate `always()` step. Notary wait is bounded and saved IDs are reused.
 
-- [ ] Add a failing bounded-wait behavior test against an owned fake notary executable, then implement wait support.
-- [ ] Add secret-free native CI and trusted tag release workflows with pinned official actions, timeouts and minimal permissions.
-- [ ] Verify shell syntax, actionlint, Python regressions, actual local native tests and an unsigned build. Commit automation.
-- [ ] One fresh read-only whole-change review, followed by one substantive correction pass with tests.
+- [x] Add a failing bounded-wait behavior test against an owned fake notary executable, then implement wait support.
+- [x] Add secret-free native CI and trusted tag release workflows with pinned official actions, timeouts and minimal permissions.
+- [x] Verify shell syntax, actionlint, Python regressions, actual local native tests and an unsigned build. Commit automation.
+- [x] One fresh read-only whole-change review, followed by one substantive correction pass with tests.
 
 ### Task 3: Publish and verify the GitHub release
 
@@ -54,7 +54,7 @@
 
 **Interfaces:** Task 2's trusted workflow consumes encrypted signing/API-key secrets. The release is `v1.0` matching existing app metadata, with a final notarized DMG and checksum.
 
-- [ ] Audit tracked history for secret material. Create the public repository, configure metadata, labels, Actions permissions and encrypted release secrets. Preserve Sonance unchanged.
-- [ ] Push `main`, run and inspect hosted CI on Apple Silicon and Intel; fix actual failures before tagging.
-- [ ] Push the validated version tag, inspect the release workflow and finish notarization/publishing.
-- [ ] Download the public DMG/checksum, compare bytes and validate signature, ticket, Gatekeeper and mounted app. Record actual outcomes and residual limitations.
+- [x] Audit tracked history for secret material. Create the public repository, configure metadata, labels, Actions permissions and encrypted release secrets. Preserve Sonance unchanged.
+- [x] Push `main`, run and inspect hosted CI on Apple Silicon and Intel; fix actual failures before tagging.
+- [x] Push the validated version tag, inspect the release workflow and finish notarization/publishing.
+- [x] Download the public DMG/checksum, compare bytes and validate signature, ticket, Gatekeeper and mounted app. Record actual outcomes and residual limitations.

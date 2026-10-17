@@ -13,6 +13,9 @@ struct WorkspaceView: View {
     @Environment(\.colorScheme) private var scheme
     var body: some View {
         VStack(spacing: 0) {
+        if controller.services.updateRelaunch.phase != .idle {
+            UpdateStatusBanner(services: controller.services)
+        }
         HStack(spacing: 0) {
             if controller.sidebarVisible {
                 SidebarView(controller: controller).frame(width: controller.services.preferences.sidebarWidth)
@@ -31,7 +34,7 @@ struct WorkspaceView: View {
                     PaneView(controller: controller, paneID: .right).frame(maxWidth: .infinity)
                 }.coordinateSpace(name: "panes")
             }
-        }
+        }.disabled(controller.services.updateRelaunch.blocksNewOperations)
             if controller.shelfVisible { Divider(); ShelfView(controller: controller) }
             if controller.activityVisible { Divider(); ActivityView(services: controller.services) }
         }
@@ -79,5 +82,24 @@ struct WorkspaceView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             Task { await controller.refresh(.left); await controller.refresh(.right) }
         }
+    }
+}
+
+private struct UpdateStatusBanner: View {
+    let services: AppServices
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "arrow.triangle.2.circlepath")
+            switch services.updateRelaunch.phase {
+            case .waitingForOperations: Text("Update ready. File operations will finish before Commander4Mac restarts.")
+            case .savingWorkspace: Text("Saving your workspace before installing the update…")
+            case .saveFailed:
+                Text("Your workspace could not be saved. Commander4Mac will stay open.")
+                Button("Retry") { services.updateRelaunch.retryStateSave() }
+            case .installing: Text("Restarting to install the update…")
+            case .idle: EmptyView()
+            }
+            Spacer()
+        }.font(.callout).padding(10).background(.bar)
     }
 }

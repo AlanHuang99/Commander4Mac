@@ -8,7 +8,7 @@ AUTH=(--keychain-profile "$PROFILE")
 if [[ -n "${COMMANDER_NOTARY_KEYCHAIN:-}" ]]; then AUTH+=(--keychain "$COMMANDER_NOTARY_KEYCHAIN"); fi
 OUT="${COMMANDER_DISTRIBUTION_DIR:-$TASK_ROOT/.build/distribution}"
 VERSION="$(python3 script/release_metadata.py --field version)"
-APP="$OUT/Commander4Mac.xcarchive/Products/Applications/Commander4Mac.app"
+APP="$OUT/export/Commander4Mac.app"
 DMG="$OUT/Commander4Mac-$VERSION.dmg"
 mkdir -p "$OUT/notarization"
 collect_wait_diagnostic() {

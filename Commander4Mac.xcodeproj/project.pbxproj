@@ -21,6 +21,8 @@
 		0923CF1A40F44184527AF318 /* PreferencesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7EFD7CA47259DE8BF69EC4F /* PreferencesStoreTests.swift */; };
 		0AA928408F7D4E49B0A019C2 /* AMSMB2 in Frameworks */ = {isa = PBXBuildFile; productRef = 32E798FF7C7123FDBB736977 /* AMSMB2 */; };
 		0B3C0860F0A55BF132378AFE /* WorkspaceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7762B66870C3ED80E21CD4D /* WorkspaceSession.swift */; };
+		0CE5D2A4526C7B648D6F2CEF /* UpdaterController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D4C5FB8DF4AA8AF8AEE4DF /* UpdaterController.swift */; };
+		0D18D50E4BD1F874E463E67B /* UpdateSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC4457C5BA2A80F8E765ED6 /* UpdateSettingsView.swift */; };
 		0D19B25F83B552E255592C03 /* TransferQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEAA6915E4C1CE22B561552B /* TransferQueueTests.swift */; };
 		0E307CA9C3EAD245D7A8DB8A /* FileEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA26D7D2BDA7E7CFF3B5AE54 /* FileEntry.swift */; };
 		0EE5A8E9954A0E580B5F4EC9 /* LocalFileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC28B76987C1557BDE3C919B /* LocalFileSystem.swift */; };
@@ -30,6 +32,7 @@
 		14BBAF481511B47BF320A496 /* FileLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655885F9AC419AB3578D778 /* FileLocation.swift */; };
 		19A37553BF36B4119C2849FF /* RemoteConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48150E3D1860A90482B0270D /* RemoteConnectionManager.swift */; };
 		1B079940C47AD9ADA6DECD5F /* TabStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D90429CBC11E359ECF695F /* TabStripView.swift */; };
+		1BE1C175067A6603F732455B /* AMSMB2 in Frameworks */ = {isa = PBXBuildFile; productRef = A599BDC2D476B8C3F861B893 /* AMSMB2 */; };
 		1E8C9BD522A31F18AAF88BC8 /* OperationCancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E44A7A7437A069F6220F435 /* OperationCancellation.swift */; };
 		216DC1A376CC56059AA13B9D /* InstallationLocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413AD2678A23577B998CB207 /* InstallationLocationTests.swift */; };
 		21C2DFF65741F3E823154FA8 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4692A579CAE6CC7633842217 /* SidebarView.swift */; };
@@ -43,6 +46,7 @@
 		29616E564A2D72ECFF174116 /* ConnectionProfileCommit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A16316BE7E596BECD0C16F /* ConnectionProfileCommit.swift */; };
 		29EDCFF91C6A03A33E994ABE /* SMBIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 637909C376F6ACBE205A241E /* SMBIntegrationTests.swift */; };
 		2B95B82EC298EDC778635E85 /* TransferTreeManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEFBEF79A9C05E68935B39E /* TransferTreeManifest.swift */; };
+		2FBBEA72111666166E891FB2 /* UpdateRelaunchCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 696D1DC0B2880262FC5E4A69 /* UpdateRelaunchCoordinatorTests.swift */; };
 		30DBB1CEB9BA0A1A2EC27011 /* NetworkTreeRoundTrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDF0783F8894433BFE3AC86 /* NetworkTreeRoundTrip.swift */; };
 		30DEE52392C7F8D9EF0C6F79 /* InstallationLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D9850D77EC5368166750508 /* InstallationLocation.swift */; };
 		31BCAD05D6AC2595B5158A68 /* webdav_fixture.py in Resources */ = {isa = PBXBuildFile; fileRef = A9C48A3A1610AC97C59D6245 /* webdav_fixture.py */; };
@@ -81,6 +85,7 @@
 		6C9FCC3BD9277DFC5511028A /* ConflictPresentationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09729B608D972D8A6258F3B3 /* ConflictPresentationRouter.swift */; };
 		6EC18E2866F82328E0460D6A /* ConnectionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE7E088C591AD37759FB52E /* ConnectionStore.swift */; };
 		6F5A69561EACB554A79479D8 /* SessionPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A6CC266B9C15CA13197AF8 /* SessionPersistenceTests.swift */; };
+		72FBE005CE5566CB0E39AD23 /* UpdateRelaunchCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9805AB87FD9A2D18A9379AB /* UpdateRelaunchCoordinator.swift */; };
 		7401DC036054E57B95B94DE3 /* ProviderRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65881F4DB7D25A189205336C /* ProviderRouterTests.swift */; };
 		7424C382BFB12D584C4F1956 /* RemoteTreeTransferExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 176AAC8A2C1693E92A6229B0 /* RemoteTreeTransferExecutor.swift */; };
 		74F80C876F136427D368389A /* WindowCommandContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A8B311961D1DA03AAD72E8D /* WindowCommandContext.swift */; };
@@ -143,7 +148,7 @@
 		BB46C850A3AD0201CC956269 /* TreeMemoryRemote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94942DC724D739D1A980A2B0 /* TreeMemoryRemote.swift */; };
 		BE4624D0E918E44E83B404FE /* FileIconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0744CF4239F12173748ED6BD /* FileIconCache.swift */; };
 		BF62DF041338924784B6D303 /* CommanderCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		BFB3449FD88815835D32CBAC /* AMSMB2 in Frameworks */ = {isa = PBXBuildFile; productRef = A599BDC2D476B8C3F861B893 /* AMSMB2 */; };
+		BFB3449FD88815835D32CBAC /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B99FC2B705562636CB52D7F6 /* Sparkle */; };
 		C17C5929028F89CFD315FC4D /* RemoteLocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E035804223C3F357F6CD1817 /* RemoteLocationTests.swift */; };
 		C1CEB9A553DBB1BFFEA87882 /* NetworkRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F09FB44A7FF94910A49EAEA /* NetworkRecoveryTests.swift */; };
 		C1FF19CCC00E8F7EDD587B9F /* LocalFileSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B379DED7E414E108B809C /* LocalFileSystemTests.swift */; };
@@ -255,12 +260,14 @@
 		186F61A54D9DFDDF4852E56A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		189084E3203DF4DDD282ADE0 /* AppearanceSharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSharing.swift; sourceTree = "<group>"; };
 		20EF1F852FC06879A903CCF2 /* ShelfTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfTransferTests.swift; sourceTree = "<group>"; };
+		21D4C5FB8DF4AA8AF8AEE4DF /* UpdaterController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterController.swift; sourceTree = "<group>"; };
 		22F549471CB7B639C7B174F5 /* Credits.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
 		241A480D4265AC713A6E25CB /* PaneSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneSession.swift; sourceTree = "<group>"; };
 		247D989E506298E7253F787C /* LocalPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPerformanceTests.swift; sourceTree = "<group>"; };
 		24CA871E6D8C1ED93244913C /* PaneViewOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneViewOptions.swift; sourceTree = "<group>"; };
 		258E9BBEF58E75A90BD1A426 /* Citadel */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Citadel; path = Vendor/Citadel; sourceTree = SOURCE_ROOT; };
 		261BAC57B0275ABE03D120CC /* ConnectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionController.swift; sourceTree = "<group>"; };
+		2AC4457C5BA2A80F8E765ED6 /* UpdateSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateSettingsView.swift; sourceTree = "<group>"; };
 		2B0C77CF218B353BED26175C /* CitadelSFTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitadelSFTPTransport.swift; sourceTree = "<group>"; };
 		2C37E971E468B34209FE2FF5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2C4F68758672A5715B949B52 /* RemoteTransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteTransferTests.swift; sourceTree = "<group>"; };
@@ -315,6 +322,7 @@
 		65881F4DB7D25A189205336C /* ProviderRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderRouterTests.swift; sourceTree = "<group>"; };
 		66886281855B3D3CF35CDB52 /* FileGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileGridView.swift; sourceTree = "<group>"; };
 		66AB4BD06DB45EA63E873D09 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		696D1DC0B2880262FC5E4A69 /* UpdateRelaunchCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateRelaunchCoordinatorTests.swift; sourceTree = "<group>"; };
 		6CDBB08D94AEE4169D9CEA41 /* CommandRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRouter.swift; sourceTree = "<group>"; };
 		6D7C4DCABECD7EE78D842E98 /* OpenSource */ = {isa = PBXFileReference; lastKnownFileType = folder; name = OpenSource; path = Resources/OpenSource; sourceTree = SOURCE_ROOT; };
 		6D9850D77EC5368166750508 /* InstallationLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallationLocation.swift; sourceTree = "<group>"; };
@@ -388,6 +396,7 @@
 		E2748F0EEC8F41375EDA8BAF /* smb_fixture.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = smb_fixture.py; sourceTree = "<group>"; };
 		E5D1738E5BA54BC2C0E3030D /* CommanderCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommanderCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E64B5548A2FA52CB28F8F83E /* CommanderCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommanderCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9805AB87FD9A2D18A9379AB /* UpdateRelaunchCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateRelaunchCoordinator.swift; sourceTree = "<group>"; };
 		E9A91F0991F966D47EFD75C3 /* ClipboardRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardRequestTests.swift; sourceTree = "<group>"; };
 		EA26D7D2BDA7E7CFF3B5AE54 /* FileEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileEntry.swift; sourceTree = "<group>"; };
 		EA8A61A7F7BBD4B7A45C904F /* SFTPIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFTPIntegrationTests.swift; sourceTree = "<group>"; };
@@ -410,7 +419,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				50B2C7FFC09D74E3C49123DB /* CommanderCore.framework in Frameworks */,
-				BFB3449FD88815835D32CBAC /* AMSMB2 in Frameworks */,
+				BFB3449FD88815835D32CBAC /* Sparkle in Frameworks */,
+				1BE1C175067A6603F732455B /* AMSMB2 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,6 +502,15 @@
 			path = Tests/Support;
 			sourceTree = "<group>";
 		};
+		378FBA6703B1BB4D9A152831 /* Updates */ = {
+			isa = PBXGroup;
+			children = (
+				21D4C5FB8DF4AA8AF8AEE4DF /* UpdaterController.swift */,
+				2AC4457C5BA2A80F8E765ED6 /* UpdateSettingsView.swift */,
+			);
+			path = Updates;
+			sourceTree = "<group>";
+		};
 		423518B89A649D5350331E25 /* Connections */ = {
 			isa = PBXGroup;
 			children = (
@@ -505,6 +524,7 @@
 			children = (
 				011BF77031FE3E0BD76B7143 /* App */,
 				CAF0A28E46DDE2E9CDD02827 /* Support */,
+				378FBA6703B1BB4D9A152831 /* Updates */,
 				2BF3B34EE91406F12A09BBA1 /* Views */,
 			);
 			name = Commander4Mac;
@@ -581,6 +601,7 @@
 				6FF63973599C1EE3534FDC79 /* OperationJournal.swift */,
 				48679DE71936313CF95F1DFC /* ProviderRouter.swift */,
 				9E864C93BDF18401490D033C /* TransferQueue.swift */,
+				E9805AB87FD9A2D18A9379AB /* UpdateRelaunchCoordinator.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -644,6 +665,7 @@
 				B53A0AC989F55938371025FD /* ShelfStoreTests.swift */,
 				637909C376F6ACBE205A241E /* SMBIntegrationTests.swift */,
 				FEAA6915E4C1CE22B561552B /* TransferQueueTests.swift */,
+				696D1DC0B2880262FC5E4A69 /* UpdateRelaunchCoordinatorTests.swift */,
 				B51BC80F2D2D1B4D69B2A662 /* ViewModeStateTests.swift */,
 				FE4911584B04BAA678BFC11F /* WebDAVIntegrationTests.swift */,
 				5E8C028CD31875E827F4EAD5 /* WebDAVTests.swift */,
@@ -803,6 +825,7 @@
 			);
 			name = Commander4Mac;
 			packageProductDependencies = (
+				B99FC2B705562636CB52D7F6 /* Sparkle */,
 				A599BDC2D476B8C3F861B893 /* AMSMB2 */,
 			);
 			productName = Commander4Mac;
@@ -907,6 +930,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				C0FE76E9D701D89CF72B8AAE /* XCRemoteSwiftPackageReference "AMSMB2" */,
+				6E390AA39190E434DAA99CF9 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				A334B31E3D2BE489BBF47056 /* XCLocalSwiftPackageReference "Vendor/Citadel" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -1010,6 +1034,7 @@
 				4DE4142CE27DC180008346AE /* TransferModels.swift in Sources */,
 				7F602809067702F7D42EDF72 /* TransferQueue.swift in Sources */,
 				2B95B82EC298EDC778635E85 /* TransferTreeManifest.swift in Sources */,
+				72FBE005CE5566CB0E39AD23 /* UpdateRelaunchCoordinator.swift in Sources */,
 				C6BD20FA5F0A844868B94FE9 /* ViewAppearance.swift in Sources */,
 				C9993E64CD96185F47F13DA1 /* ViewOptions.swift in Sources */,
 				AD03696D5702E2A6431D15E6 /* WebDAVConnectionManager.swift in Sources */,
@@ -1069,6 +1094,7 @@
 				9741CEB51C3268B497576410 /* ShelfStoreTests.swift in Sources */,
 				0D19B25F83B552E255592C03 /* TransferQueueTests.swift in Sources */,
 				BB46C850A3AD0201CC956269 /* TreeMemoryRemote.swift in Sources */,
+				2FBBEA72111666166E891FB2 /* UpdateRelaunchCoordinatorTests.swift in Sources */,
 				92B5A07F4C25A95CC9883D18 /* ViewModeStateTests.swift in Sources */,
 				B3C5B57F6F2EFB82911ABBBD /* WebDAVIntegrationTests.swift in Sources */,
 				81392B7FECC2C0C52581093E /* WebDAVTests.swift in Sources */,
@@ -1110,6 +1136,8 @@
 				21C2DFF65741F3E823154FA8 /* SidebarView.swift in Sources */,
 				2272A2E89A0832D3DD6B0AB2 /* SystemFileActions.swift in Sources */,
 				1B079940C47AD9ADA6DECD5F /* TabStripView.swift in Sources */,
+				0D18D50E4BD1F874E463E67B /* UpdateSettingsView.swift in Sources */,
+				0CE5D2A4526C7B648D6F2CEF /* UpdaterController.swift in Sources */,
 				74F80C876F136427D368389A /* WindowCommandContext.swift in Sources */,
 				87D04560A2AA764D5D1B7986 /* WindowRegistration.swift in Sources */,
 				9864453705168F11B3EF6A6E /* WorkspaceController.swift in Sources */,
@@ -1638,6 +1666,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		6E390AA39190E434DAA99CF9 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle.git";
+			requirement = {
+				kind = revision;
+				revision = eef1a539a373c1f1a320624b1130fc5de7b2e100;
+			};
+		};
 		C0FE76E9D701D89CF72B8AAE /* XCRemoteSwiftPackageReference "AMSMB2" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/amosavian/AMSMB2.git";
@@ -1662,6 +1698,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C0FE76E9D701D89CF72B8AAE /* XCRemoteSwiftPackageReference "AMSMB2" */;
 			productName = AMSMB2;
+		};
+		B99FC2B705562636CB52D7F6 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6E390AA39190E434DAA99CF9 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

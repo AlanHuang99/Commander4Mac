@@ -57,11 +57,17 @@ final class AppServices {
     private var finishedJobs: Set<UUID> = []
     private var observationTask: Task<Void, Never>?
     private var shortActionCount = 0
+    private var pendingJobIDs: Set<UUID> = []
+    let updateRelaunch = UpdateRelaunchCoordinator()
     private var lastPublishedActivityCount: Int?
-    var activeJobCount: Int { jobs.filter { !$0.state.isTerminal }.count + shortActionCount }
-    func beginFileAction() { shortActionCount += 1; updateMarker() }
+    var activeJobCount: Int { Set(jobs.filter { !$0.state.isTerminal }.map(\.id)).union(pendingJobIDs).count + shortActionCount }
+    @discardableResult func beginFileAction() -> Bool {
+        guard !updateRelaunch.blocksNewOperations else { startupDiagnostic = "Commander4Mac is saving your workspace and restarting for an update. Try the file operation after it reopens."; return false }
+        shortActionCount += 1; updateMarker(); return true
+    }
     func endFileAction() { shortActionCount = max(0, shortActionCount - 1); updateMarker() }
     private func updateMarker() {
+        updateRelaunch.updateActiveOperationCount(activeJobCount)
         guard lastPublishedActivityCount != activeJobCount else { return }
         do {
             try marker.publish(pid: ProcessInfo.processInfo.processIdentifier,
@@ -99,7 +105,7 @@ final class AppServices {
     private var pendingWindows: [WorkspaceSnapshot]
     private var controllers: [UUID: WeakController] = [:]
     private var saveTask: Task<Void, Never>?
-    private var persistenceTask: Task<Void, Never>?
+    private var persistenceTask: Task<Bool, Never>?
     private var saveRevision: UInt64 = 0
     private var restoredAdditionalWindows = false
     init() {
@@ -131,6 +137,7 @@ final class AppServices {
             for await snapshots in await transferQueue.snapshots() {
                 guard let self else { return }
                 self.jobs = snapshots
+                self.pendingJobIDs.subtract(snapshots.map(\.id))
                 for job in snapshots where self.jobStates[job.id] != job.state {
                     self.jobStates[job.id] = job.state
                     Self.operationsLog.info("job=\(job.id.uuidString, privacy: .public) state=\(job.state.rawValue, privacy: .public)")
@@ -163,6 +170,9 @@ final class AppServices {
         }
     }
     func enqueue(_ request: TransferRequest, owner: UUID, shelfIDs: Set<UUID>? = nil) {
+        guard !updateRelaunch.blocksNewOperations else { startupDiagnostic = "Commander4Mac is restarting for an update. Try the transfer after it reopens."; return }
+        guard !pendingJobIDs.contains(request.id), !jobs.contains(where: { $0.id == request.id }) else { return }
+        pendingJobIDs.insert(request.id); updateMarker()
         jobOwners[request.id] = owner
         if let shelfIDs { shelfJobs[request.id] = shelfIDs }
         Task { await transferQueue.enqueue(request) }
@@ -195,7 +205,7 @@ final class AppServices {
             self?.saveNow()
         }
     }
-    func saveNow() {
+    @discardableResult func saveNow() -> Bool {
         saveTask?.cancel()
         do {
             let windows = try controllers.values.compactMap(\.value).map { try WorkspaceSnapshot($0.workspace) }
@@ -205,18 +215,23 @@ final class AppServices {
             let previous = persistenceTask
             persistenceTask = Task { [weak self] in
                 // Preserve capture order even if tasks are scheduled out of order.
-                await previous?.value
+                _ = await previous?.value
                 do {
                     if let saved = try await persistence.save(captured, revision: revision), let self {
                         for window in saved.windows {
                             for controller in self.controllers.values.compactMap(\.value) { window.applyReferences(to: controller.workspace) }
                         }
                     }
-                } catch { self?.startupDiagnostic = "Could not save the workspace: \(error.localizedDescription)" }
+                    return true
+                } catch { self?.startupDiagnostic = "Could not save the workspace: \(error.localizedDescription)"; return false }
             }
-        } catch { startupDiagnostic = "Could not save the workspace: \(error.localizedDescription)" }
+            return true
+        } catch { startupDiagnostic = "Could not save the workspace: \(error.localizedDescription)"; return false }
     }
-    func flushState() async { saveNow(); await persistenceTask?.value }
+    @discardableResult func flushState() async -> Bool {
+        guard saveNow() else { return false }
+        return await persistenceTask?.value ?? false
+    }
 }
 @MainActor private final class WeakController {
     weak var value: WorkspaceController?

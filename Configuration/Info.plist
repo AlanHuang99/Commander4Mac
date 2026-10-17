@@ -43,5 +43,19 @@
 	<string>Browse and organize files on mounted network drives.</string>
 	<key>NSRemovableVolumesUsageDescription</key>
 	<string>Browse and organize files on removable drives.</string>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableSystemProfiling</key>
+	<false/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/AlanHuang99/Commander4Mac/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>HPADmzOe5rseBmB+tpY/UNz0UrXKNLg0tnxBJIaSB7g=</string>
+	<key>SURequireSignedFeed</key>
+	<true/>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
 </dict>
 </plist>

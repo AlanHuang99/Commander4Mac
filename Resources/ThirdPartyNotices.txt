@@ -2387,6 +2387,2026 @@ ColorizeSwift / Sources/ColorizeSwift/ColorizeSwift.swift
 //
 
 
+Sparkle
+Source: https://github.com/sparkle-project/Sparkle.git
+Revision: eef1a539a373c1f1a320624b1130fc5de7b2e100
+
+
+Sparkle / Autoupdate/AgentConnection.h
+
+//
+//  AgentConnection.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/17/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/AppInstaller.h
+
+//
+//  AppInstaller.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/7/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SPUDeltaArchive.h
+
+//
+//  SPUDeltaArchive.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/29/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SPUDeltaArchiveProtocol.h
+
+//
+//  SPUDeltaArchiveProtocol.h
+//  Autoupdate
+//
+//  Created by Mayur Pawashe on 12/28/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SPUDeltaCompressionMode.h
+
+//
+//  SPUDeltaCompressionMode.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 1/3/22.
+//  Copyright © 2022 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SPUInstallationInfo.h
+
+//
+//  SPUInstallationInfo.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SPUInstallationInputData.h
+
+//
+//  SPUInstallationInputData.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/24/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SPUMessageTypes.h
+
+//
+//  SPUMessageTypes.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/11/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SPUSparkleDeltaArchive.h
+
+//
+//  SPUSparkleDeltaArchive.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/30/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SPUXarDeltaArchive.h
+
+//
+//  SPUXarDeltaArchive.h
+//  Autoupdate
+//
+//  Created by Mayur Pawashe on 12/28/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUBinaryDeltaApply.h
+
+//
+//  SUBinaryDeltaApply.h
+//  Sparkle
+//
+//  Created by Mark Rowe on 2009-06-01.
+//  Copyright 2009 Mark Rowe. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUBinaryDeltaCommon.h
+
+//
+//  SUBinaryDeltaCommon.h
+//  Sparkle
+//
+//  Created by Mark Rowe on 2009-06-01.
+//  Copyright 2009 Mark Rowe. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUBinaryDeltaCreate.h
+
+//
+//  SUBinaryDeltaCreate.m
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/9/15.
+//  Copyright (c) 2015 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUBinaryDeltaUnarchiver.h
+
+//
+//  SUBinaryDeltaUnarchiver.h
+//  Sparkle
+//
+//  Created by Mark Rowe on 2009-06-03.
+//  Copyright 2009 Mark Rowe. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUDiskImageUnarchiver.h
+
+//
+//  SUDiskImageUnarchiver.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 6/16/08.
+//  Copyright 2008 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUFlatPackageUnarchiver.h
+
+//
+//  SUFlatPackageUnarchiver.h
+//  Autoupdate
+//
+//  Created by Mayur Pawashe on 1/30/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUGuidedPackageInstaller.h
+
+//
+//  SUGuidedPackageInstaller.h
+//  Sparkle
+//
+//  Created by Graham Miln on 14/05/2010.
+//  Copyright 2010 Dragon Systems Software Limited. All rights reserved.
+//
+
+/**
+# Sparkle Guided Installations
+
+A guided installation allows Sparkle to download and install a package (pkg) or multi-package (mpkg) without user interaction.
+
+The installer package is installed using macOS's built-in command line installer, `/usr/sbin/installer`. No installation interface is shown to the user.
+
+A guided installation can be started by applications other than the application being replaced. This is particularly useful where helper applications or agents are used.
+*/
+
+
+Sparkle / Autoupdate/SUInstaller.h
+
+//
+//  SUInstaller.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 4/10/08.
+//  Copyright 2008 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUInstallerProtocol.h
+
+//
+//  SUInstallerProtocol.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/12/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUPipedUnarchiver.h
+
+//
+//  SUPipedUnarchiver.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 6/16/08.
+//  Copyright 2008 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUPlainInstaller.h
+
+//
+//  SUPlainInstaller.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 4/10/08.
+//  Copyright 2008 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUSignatureVerifier.h
+
+//
+//  SUSignatureVerifier.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 3/16/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+//  Includes code by Zach Waldowski on 10/18/13.
+//  Copyright 2014 Big Nerd Ranch. Licensed under MIT.
+//
+//  Includes code from Plop by Mark Hamlin.
+//  Copyright 2011 Mark Hamlin. Licensed under BSD.
+//
+
+
+Sparkle / Autoupdate/SUStatusInfoProtocol.h
+
+//
+//  SUStatusInfoProtocol.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUUnarchiver.h
+
+//
+//  SUUnarchiver.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 3/16/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUUnarchiverNotifier.h
+
+//
+//  SUUnarchiverNotifier.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/21/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/SUUnarchiverProtocol.h
+
+//
+//  SUUnarchiverProtocol.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/26/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Autoupdate/StatusInfo.h
+
+//
+//  StatusInfo.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / BinaryDelta/main.swift
+
+//
+//  main.swift
+//  BinaryDelta
+//
+//  Created by Mayur Pawashe on 1/3/22.
+//  Copyright © 2022 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Downloader/SPUDownloader.h
+
+//
+//  SPUDownloader.h
+//  Downloader
+//
+//  Created by Mayur Pawashe on 4/1/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Downloader/SPUDownloaderDelegate.h
+
+//
+//  SPUDownloaderDelegate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/1/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Downloader/SPUDownloaderProtocol.h
+
+//
+//  SPUDownloaderProtocol.h
+//  PersistentDownloader
+//
+//  Created by Mayur Pawashe on 4/1/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerConnection/SUInstallerCommunicationProtocol.h
+
+//
+//  SUInstallerCommunicationProtocol.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/9/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerConnection/SUInstallerConnection.h
+
+//
+//  SUInstallerConnection.h
+//  InstallerConnection
+//
+//  Created by Mayur Pawashe on 7/9/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerConnection/SUInstallerConnectionProtocol.h
+
+//
+//  SUInstallerConnectionProtocol.h
+//  InstallerConnection
+//
+//  Created by Mayur Pawashe on 7/9/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerConnection/SUXPCInstallerConnection.h
+
+//
+//  SUXPCInstallerConnection.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerLauncher/SUInstallerLauncher+Private.h
+
+//
+//  SUInstallerLauncher+Private.h
+//  SUInstallerLauncher+Private
+//
+//  Created by Mayur Pawashe on 8/21/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerLauncher/SUInstallerLauncher.h
+
+//
+//  SUInstallerLauncher.h
+//  InstallerLauncher
+//
+//  Created by Mayur Pawashe on 4/1/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerLauncher/SUInstallerLauncherProtocol.h
+
+//
+//  SUInstallerLauncherProtocol.h
+//  InstallerLauncher
+//
+//  Created by Mayur Pawashe on 4/1/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerLauncher/SUInstallerLauncherStatus.h
+
+//
+//  SUInstallerLauncherStatus.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerStatus/SUInstallerStatus.h
+
+//
+//  SUInstallerStatus.h
+//  InstallerStatus
+//
+//  Created by Mayur Pawashe on 7/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerStatus/SUInstallerStatusProtocol.h
+
+//
+//  SUInstallerStatusProtocol.h
+//  InstallerStatus
+//
+//  Created by Mayur Pawashe on 7/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / InstallerStatus/SUXPCInstallerStatus.h
+
+//
+//  SUXPCInstallerStatus.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / LICENSE
+
+Copyright (c) 2006-2013 Andy Matuschak.
+Copyright (c) 2009-2013 Elgato Systems GmbH.
+Copyright (c) 2011-2014 Kornel Lesiński.
+Copyright (c) 2015-2017 Mayur Pawashe.
+Copyright (c) 2014 C.W. Betts.
+Copyright (c) 2014 Petroules Corporation.
+Copyright (c) 2014 Big Nerd Ranch.
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+=================
+EXTERNAL LICENSES
+=================
+
+bspatch.c and bsdiff.c, from bsdiff 4.3 <http://www.daemonology.net/bsdiff/>:
+
+Copyright 2003-2005 Colin Percival
+All rights reserved
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted providing that the following conditions 
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+--
+
+sais.c and sais.h, from sais-lite (2010/08/07) <https://sites.google.com/site/yuta256/sais>:
+
+The sais-lite copyright is as follows:
+
+Copyright (c) 2008-2010 Yuta Mori All Rights Reserved.
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+--
+
+Portable C implementation of Ed25519, from https://github.com/orlp/ed25519
+
+Copyright (c) 2015 Orson Peters <orsonpeters@gmail.com>
+
+This software is provided 'as-is', without any express or implied warranty. In no event will the
+authors be held liable for any damages arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose, including commercial
+applications, and to alter it and redistribute it freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the
+   original software. If you use this software in a product, an acknowledgment in the product
+   documentation would be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as
+   being the original software.
+
+3. This notice may not be removed or altered from any source distribution.
+
+--
+
+SUSignatureVerifier.m:
+
+Copyright (c) 2011 Mark Hamlin.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted providing that the following conditions
+are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+
+Sparkle / Sparkle/AppKitPrevention.h
+
+//
+//  AppKitPrevention.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 1/17/17.
+//  Copyright © 2017 Sparkle Project. All rights reserved.
+//
+
+// #include (not #import) this header to prevent AppKit from being imported
+// Note this should be your LAST #include in your implementation file
+
+// If this error is triggered, you can have Xcode indicate to you which source file including this header caused the issue
+
+
+Sparkle / Sparkle/Autoupdate/TerminationListener.h
+
+//
+//  TerminationListener.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/7/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/InstallerProgress/InstallerProgressAppController.h
+
+//
+//  InstallerProgressAppController.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/InstallerProgress/InstallerProgressDelegate.h
+
+//
+//  InstallerProgressDelegate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/InstallerProgress/SPUInstallerAgentProtocol.h
+
+//
+//  SPUInstallerAgentProtocol.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/17/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/InstallerProgress/SUInstallerAgentInitiationProtocol.h
+
+//
+//  SUInstallerAgentInitiationProtocol.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/17/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/InstallerProgress/ShowInstallerProgress.h
+
+//
+//  ShowInstallerProgress.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUAppcastItemState.h
+
+//
+//  SPUAppcastItemState.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 5/31/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUAppcastItemStateResolver+Private.h
+
+//
+//  SPUAppcastItemStateResolver+Private.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 6/20/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUAppcastItemStateResolver.h
+
+//
+//  SPUAppcastItemStateResolver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 5/31/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUAppcastSigningValidationStatus.h
+
+//
+//  SPUAppcastSigningValidationStatus.h
+//  Sparkle
+//
+//  Created on 12/30/25.
+//  Copyright © 2025 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUAutomaticUpdateDriver.h
+
+//
+//  SPUAutomaticUpdateDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUBasicUpdateDriver.h
+
+//
+//  SPUBasicUpdateDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUCoreBasedUpdateDriver.h
+
+//
+//  SPUCoreBasedUpdateDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUDownloadData.h
+
+//
+//  SPUDownloadData.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 8/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUDownloadDataPrivate.h
+
+//
+//  SPUDownloadDataPrivate.h
+//  SPUDownloadDataPrivate
+//
+//  Created by Mayur Pawashe on 8/13/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUDownloadDriver.h
+
+//
+//  SPUDownloadDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/15/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUDownloadedUpdate.h
+
+//
+//  SPUDownloadedUpdate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 1/8/17.
+//  Copyright © 2017 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUExtractSignedFeed.h
+
+//
+//  SPUExtractSignedFeed.h
+//  Sparkle
+//
+//  Created on 12/25/25.
+//  Copyright © 2025 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUGentleUserDriverReminders.h
+
+//
+//  SPUGentleUserDriverReminders.h
+//  Sparkle
+//
+//  Copyright © 2022 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUInformationalUpdate.h
+
+//
+//  SPUInformationalUpdate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 1/8/17.
+//  Copyright © 2017 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUInstallationType.h
+
+//
+//  SPUInstallationType.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/24/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUInstallerDriver.h
+
+//
+//  SPUInstallerDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/17/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPULocalCacheDirectory.h
+
+//
+//  SULocalCacheDirectory.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 6/23/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUNoUpdateFoundInfo.h
+
+//
+//  SPUNoUpdateFoundInfo.h
+//  Sparkle
+//
+//  Created on 2/18/23.
+//  Copyright © 2023 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUProbeInstallStatus.h
+
+//
+//  SPUProbeInstallStatus.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/20/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUProbingUpdateDriver.h
+
+//
+//  SPUProbingUpdateDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUResumableUpdate.h
+
+//
+//  SPUResumableUpdate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUScheduledUpdateDriver.h
+
+//
+//  SPUScheduledUpdateDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/15/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUSecureCoding.h
+
+//
+//  SPUSecureCoding.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/24/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUSkippedUpdate.h
+
+//
+//  SPUSkippedUpdate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 5/8/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUStandardUpdaterController.h
+
+//
+//  SPUStandardUpdaterController.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 2/28/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUStandardUserDriver+Private.h
+
+//
+//  SPUStandardUserDriver+Private.h
+//  Sparkle
+//
+//  Copyright © 2022 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUStandardUserDriver.h
+
+//
+//  SPUStandardUserDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 2/14/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUStandardUserDriverDelegate.h
+
+//
+//  SPUStandardUserDriverDelegate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/3/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUStandardVersionDisplay.h
+
+//
+//  SPUStandardVersionDisplay.h
+//  Sparkle
+//
+//  Created on 2/18/23.
+//  Copyright © 2023 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUIBasedUpdateDriver.h
+
+//
+//  SPUUIBasedUpdateDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdateCheck.h
+
+//
+//  SPUUpdateCheck.h
+//  SPUUpdateCheck
+//
+//  Created by Mayur Pawashe on 8/28/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdateDriver.h
+
+//
+//  SPUUpdateDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/15/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdatePermissionRequest.h
+
+//
+//  SPUUpdatePermissionRequest.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 8/14/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdater.h
+
+//
+//  SPUUpdater.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 1/4/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdaterCycle.h
+
+//
+//  SPUUpdaterCycle.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 6/11/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdaterDelegate.h
+
+//
+//  SPUUpdaterDelegate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 8/12/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdaterSettings+Debug.h
+
+//
+//  SPUUpdaterSettings+Debug.h
+//  Sparkle
+//
+//  Created on 11/16/25.
+//  Copyright © 2025 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdaterSettings.h
+
+//
+//  SPUUpdaterSettings.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/27/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUpdaterTimer.h
+
+//
+//  SPUUpdaterTimer.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 8/12/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUserAgent+Private.h
+
+//
+//  SPUUserAgent+Private.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 11/12/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUserDriver.h
+
+//
+//  SPUUserDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 2/14/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUserInitiatedUpdateDriver.h
+
+//
+//  SPUUserInitiatedUpdateDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUserUpdateState+Private.h
+
+//
+//  SPUUserUpdateState+Private.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 5/9/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUUserUpdateState.h
+
+//
+//  SPUUserUpdateState.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 2/29/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUVerifierInformation.h
+
+//
+//  SPUVerifierInformation.h
+//  Autoupdate
+//
+//  Copyright © 2023 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SPUXPCServiceInfo.h
+
+//
+//  SPUXPCServiceInfo.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/17/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUAppcast+Private.h
+
+//
+//  SUAppcast+Private.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/30/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUAppcast.h
+
+//
+//  SUAppcast.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 3/12/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUAppcastDriver.h
+
+//
+//  SUAppcastDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/17/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUAppcastItem+Private.h
+
+//
+//  SUAppcastItem+Private.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/30/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUAppcastItem.h
+
+//
+//  SUAppcastItem.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 3/12/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUApplicationInfo.h
+
+//
+//  SUApplicationInfo.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 2/28/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUConstants.h
+
+//
+//  SUConstants.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 3/16/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUErrors.h
+
+//
+//  SUErrors.h
+//  Sparkle
+//
+//  Created by C.W. Betts on 10/13/14.
+//  Copyright (c) 2014 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUExport.h
+
+//
+//  SUExport.h
+//  Sparkle
+//
+//  Created by Jake Petroules on 2014-08-23.
+//  Copyright (c) 2014 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUFileManager.h
+
+//
+//  SUFileManager.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/18/15.
+//  Copyright (c) 2015 zgcoder. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUHost.h
+
+//
+//  SUHost.h
+//  Sparkle
+//
+//  Copyright 2008 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUInstallerProtocol.h
+
+//
+//  SUInstallerProtocol.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/26/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SULegacyWebView.h
+
+//
+//  SULegacyWebView.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/30/20.
+//  Copyright © 2020 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SULocalizations.h
+
+//
+//  SULocalizations.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 2/28/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SULog+NSError.h
+
+//
+//  SULog+NSError.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/19/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SULog.h
+
+//
+//  SULog.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 5/18/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUNormalization.h
+
+//
+//  SUNormalization.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/26/21.
+//  Copyright © 2021 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUOperatingSystem.h
+
+//
+//  SUOperatingSystem.h
+//  Sparkle
+//
+//  Copyright © 2015 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUPhasedUpdateGroupInfo.h
+
+//
+//  SUPhasedUpdateGroupInfo.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 01/24/21.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUReleaseNotesCommon.h
+
+//
+//  SUReleaseNotesCommon.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/31/20.
+//  Copyright © 2020 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUReleaseNotesView.h
+
+//
+//  SUReleaseNotesView.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/30/20.
+//  Copyright © 2020 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUSignatures.h
+
+//
+//  SUSignatures.h
+//  Sparkle
+//
+//  Created by Kornel on 15/09/2018.
+//  Copyright © 2018 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUStandardVersionComparator.h
+
+//
+//  SUStandardVersionComparator.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 12/21/07.
+//  Copyright 2007 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUStatusController.h
+
+//
+//  SUStatusController.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 3/14/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUSystemProfiler.h
+
+//
+//  SUSystemProfiler.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 12/22/07.
+//  Copyright 2007 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUTextViewReleaseNotesView.h
+
+//
+//  SUTextViewReleaseNotesView.h
+//  Sparkle
+//
+//  Created on 9/11/22.
+//  Copyright © 2022 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUTouchBarButtonGroup.h
+
+//
+//  SUTouchBarButtonGroup.h
+//  Sparkle
+//
+//  Created by Yuxin Wang on 05/01/2017.
+//  Copyright © 2017 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUUpdateAlert.h
+
+//
+//  SUUpdateAlert.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 3/12/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUUpdatePermissionPrompt.h
+
+//
+//  SUUpdatePermissionPrompt.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 1/24/08.
+//  Copyright 2008 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUUpdatePermissionResponse.h
+
+//
+//  SUUpdatePermissionResponse.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 2/8/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUUpdateValidator.h
+
+//
+//  SUUpdateValidator.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/3/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUUpdater.h
+
+//
+//  SUUpdater.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 1/4/06.
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUUpdaterDelegate.h
+
+//
+//  SUUpdaterDelegate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/12/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUVersionComparisonProtocol.h
+
+//
+//  SUVersionComparisonProtocol.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 12/21/07.
+//  Copyright 2007 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUVersionDisplayProtocol.h
+
+//
+//  SUVersionDisplayProtocol.h
+//  EyeTV
+//
+//  Created by Uli Kusterer on 08.12.09.
+//  Copyright 2009 Elgato Systems GmbH. All rights reserved.
+//
+
+
+Sparkle / Sparkle/SUWKWebView.h
+
+//
+//  SUWKWebView.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 12/30/20.
+//  Copyright © 2020 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Sparkle/Sparkle.h
+
+//
+//  Sparkle.h
+//  Sparkle
+//
+//  Created by Andy Matuschak on 3/16/06. (Modified by CDHW on 23/12/07)
+//  Copyright 2006 Andy Matuschak. All rights reserved.
+//
+
+
+Sparkle / TestAppHelper/TestAppHelper.h
+
+//
+//  TestAppHelper.h
+//  TestAppHelper
+//
+//  Created by Mayur Pawashe on 3/2/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / TestAppHelper/TestAppHelperProtocol.h
+
+//
+//  TestAppHelperProtocol.h
+//  TestAppHelper
+//
+//  Created by Mayur Pawashe on 3/2/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / TestApplication/SUAdHocCodeSigning.h
+
+//
+//  SUAdHocCodeSigning.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/4/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / TestApplication/SUInstallUpdateViewController.h
+
+//
+//  SUInstallUpdateViewController.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/5/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / TestApplication/SUPopUpTitlebarUserDriver.h
+
+//
+//  SUPopUpTitlebarUserDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 3/5/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / TestApplication/SUTestApplicationDelegate.h
+
+//
+//  SUTestApplicationDelegate.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/25/15.
+//  Copyright (c) 2015 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / TestApplication/SUTestWebServer.h
+
+//
+//  SUTestWebServer.h
+//  Sparkle
+//
+//  Created by Kevin Wojniak on 10/8/15.
+//  Copyright © 2015 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / TestApplication/SUUpdateSettingsWindowController.h
+
+//
+//  SUUpdateSettingsWindowController.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 7/25/15.
+//  Copyright (c) 2015 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Tests/SUAppcastTest.swift
+
+//
+//  SUAppcastTest.swift
+//  Sparkle
+//
+//  Created by Kornel on 17/02/2016.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Tests/SUFeedSignatureVerifierTest.swift
+
+//
+//  SUFeedSignatureVerifierTest.swift
+//  Sparkle Unit Tests
+//
+//  Created on 12/30/25.
+//  Copyright © 2025 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Tests/SUFileManagerTest.swift
+
+//
+//  SUFileManagerTest.swift
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 9/26/15.
+//  Copyright © 2015 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Tests/SUUnarchiverTest.swift
+
+//
+//  SUUnarchiverTest.swift
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 9/4/15.
+//  Copyright © 2015 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Tests/SUUpdateValidatorTest.swift
+
+//
+//  SUUpdateValidatorTest.swift
+//  Sparkle
+//
+//  Created by Jordan Rose on 2020-06-13.
+//  Copyright © 2020 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / UITests/SUTestApplicationTest.swift
+
+//
+//  SUTestApplicationTest.swift
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 8/27/15.
+//  Copyright © 2015 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / Vendor/bsdiff/bsdiff.c
+
+/*-
+ * Copyright 2003 - 2005 Colin Percival
+ * All rights reserved
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted providing that the following conditions 
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
+Sparkle / Vendor/bsdiff/bspatch.c
+
+/*-
+ * Copyright 2003-2005 Colin Percival
+ * All rights reserved
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted providing that the following conditions 
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
+Sparkle / Vendor/bsdiff/bspatch.h
+
+/*
+ *  bspatch.h
+ *  Sparkle
+ *
+ *  Created by Andy Matuschak on 1/11/10.
+ *  Copyright 2010 Andy Matuschak. All rights reserved.
+ *
+ */
+
+// So that we can use this method in SUBinaryDeltaApply.m.
+// Silences the GCC warning that the prototype doesn't exist.
+
+
+Sparkle / Vendor/bsdiff/sais.c
+
+/*
+ * sais.c for sais-lite
+ * Copyright (c) 2008-2010 Yuta Mori All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+
+Sparkle / Vendor/bsdiff/sais.h
+
+/*
+ * sais.h for sais-lite
+ * Copyright (c) 2008-2010 Yuta Mori All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+
+Sparkle / Vendor/ed25519-sparkle/license.txt
+
+Copyright (c) 2015 Orson Peters <orsonpeters@gmail.com>
+
+This software is provided 'as-is', without any express or implied warranty. In no event will the
+authors be held liable for any damages arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose, including commercial
+applications, and to alter it and redistribute it freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the
+   original software. If you use this software in a product, an acknowledgment in the product
+   documentation would be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as
+   being the original software.
+
+3. This notice may not be removed or altered from any source distribution.
+
+
+Sparkle / common_cli/Secret.swift
+
+//
+//  secret.swift
+//  Sparkle
+//
+//  Created on 11/19/23.
+//  Copyright © 2023 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / common_cli/Signing.swift
+
+//
+//  signing.swift
+//  Sparkle
+//
+//  Created on 12/26/25.
+//  Copyright © 2025 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / generate_appcast/Appcast.swift
+
+//
+//  Created by Kornel on 23/12/2016.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / generate_appcast/ArchiveItem.swift
+
+//
+//  Created by Kornel on 22/12/2016.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / generate_appcast/URL+Hashing.swift
+
+//
+//  URL+Hashing.swift
+//  generate_appcast
+//
+//  Created by Nate Weaver on 2020-05-01.
+//  Copyright © 2020 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / generate_appcast/main.swift
+
+//
+//  main.swift
+//  Appcast
+//
+//  Created by Kornel on 20/12/2016.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / generate_keys/main.swift
+
+//
+//  main.swift
+//  generate_keys
+//
+//  Created by Kornel on 15/09/2018.
+//  Copyright © 2018 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / sign_update/main.swift
+
+//
+//  main.swift
+//  sign_update
+//
+//  Created by Kornel on 16/09/2018.
+//  Copyright © 2018 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / sparkle-cli/SPUCommandLineDriver.h
+
+//
+//  SUCommandLineDriver.h
+//  sparkle-cli
+//
+//  Created by Mayur Pawashe on 4/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
+Sparkle / sparkle-cli/SPUCommandLineUserDriver.h
+
+//
+//  SUCommandLineUserDriver.h
+//  Sparkle
+//
+//  Created by Mayur Pawashe on 4/10/16.
+//  Copyright © 2016 Sparkle Project. All rights reserved.
+//
+
+
 swift-asn1
 Source: https://github.com/apple/swift-asn1.git
 Revision: 3b6410f7dee09eb33cdd26260c5fd47fda19b0e2

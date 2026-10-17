@@ -22,6 +22,7 @@ struct SettingsView: View {
                 Button("Full Disk Access Setup…") { showAccess = true }
             }.padding(24).tabItem { Label("General", systemImage: "gearshape") }
             AppearanceSettingsView().tabItem { Label("Appearance", systemImage: "circle.lefthalf.filled") }
+            UpdateSettingsView().tabItem { Label("Updates", systemImage: "arrow.triangle.2.circlepath") }
             Form {
                 ForEach([("Open", "⌘O"), ("Rename", "Return"), ("Quick Look", "Space"), ("Switch Pane", "Tab"),
                          ("Copy to Other Pane", "F5"), ("Move to Other Pane", "F6"), ("New Folder", "F7"),

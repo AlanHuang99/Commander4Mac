@@ -6,6 +6,7 @@ import CommanderCore
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) { UpdaterController.shared.startIfEligible() }
     func application(_ application: NSApplication, open urls: [URL]) {
         guard !RuntimeIdentity.needsInstallation else { return }
         Task {
@@ -25,7 +26,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard !RuntimeIdentity.needsInstallation else { return .terminateNow }
         let services = AppServices.shared
         guard services.activeJobCount > 0 else {
-            Task { await services.flushState(); await services.remote.disconnectAll(); sender.reply(toApplicationShouldTerminate: true) }
+            Task {
+                guard await services.flushState() else { services.updateRelaunch.cancel(); sender.reply(toApplicationShouldTerminate: false); return }
+                await services.remote.disconnectAll(); sender.reply(toApplicationShouldTerminate: true)
+            }
             return .terminateLater
         }
         let alert = NSAlert()
@@ -37,7 +41,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task {
             for job in services.jobs where !job.state.isTerminal { await services.transferQueue.cancel(jobID: job.id) }
             while services.activeJobCount > 0 { try? await Task.sleep(for: .milliseconds(100)) }
-            await services.flushState()
+            guard await services.flushState() else { services.updateRelaunch.cancel(); sender.reply(toApplicationShouldTerminate: false); return }
             await services.remote.disconnectAll()
             sender.reply(toApplicationShouldTerminate: true)
         }

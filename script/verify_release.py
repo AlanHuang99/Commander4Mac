@@ -16,6 +16,11 @@ require(info["CFBundleIdentifier"] == "com.alanhuang.Commander4Mac", "Not a prod
 require(info["CFBundleExecutable"] == "Commander4Mac", 'Release verification failed: info["CFBundleExecutable"] == "Commander4Mac"')
 require(info["CFBundleShortVersionString"] == metadata["version"] and info["CFBundleVersion"] == metadata["build"], "Bundle version/build does not match checked-in release metadata")
 require(info["LSMinimumSystemVersion"] == "15.0", 'Release verification failed: info["LSMinimumSystemVersion"] == "15.0"')
+expected_info = plistlib.loads((root / "Configuration/Info.plist").read_bytes())
+for key in ["SUFeedURL", "SUPublicEDKey"]:
+    require(info.get(key) == expected_info[key], f"Unexpected updater configuration: {key}")
+for key in ["SURequireSignedFeed", "SUVerifyUpdateBeforeExtraction"]:
+    require(info.get(key) is True, f"Missing updater verification requirement: {key}")
 subprocess.run([sys.executable, str(root / "script/verify_licenses.py"), str(app / "Contents/Resources")], check=True)
 verify_project_license(app / "Contents/Resources", root)
 subprocess.run(["codesign", "--verify", "--deep", "--strict", "--all-architectures", str(app)], check=True)
@@ -44,6 +49,9 @@ for candidate in (app / "Contents").rglob("*"):
     require(len(identifiers) == len(architectures) and len(set(identifiers)) == len(identifiers), binary)
     require("00000000-0000-0000-0000-000000000000" not in identifiers, binary)
 core = app / "Contents/Frameworks/CommanderCore.framework/CommanderCore"
+require("@rpath/Sparkle.framework/Versions/B/Sparkle" in subprocess.check_output(["otool", "-L", str(main)], text=True), "Production app does not link Sparkle")
+for helper in ["Updater.app", "Autoupdate", "XPCServices/Installer.xpc", "XPCServices/Downloader.xpc"]:
+    require((app / "Contents/Frameworks/Sparkle.framework/Versions/B" / helper).exists(), f"Missing Sparkle helper: {helper}")
 library = app / "Contents/Frameworks/AMSMB2.framework/AMSMB2"
 linked = subprocess.check_output(["otool", "-L", str(core)], text=True)
 require("@rpath/AMSMB2.framework/Versions/A/AMSMB2" in linked, 'Release verification failed: "@rpath/AMSMB2.framework/Versions/A/AMSMB2" in linked')

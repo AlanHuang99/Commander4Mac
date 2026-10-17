@@ -6,9 +6,10 @@ import AppKit
 import CommanderCore
 
 struct AppCommands: Commands {
+    @Bindable private var updater = UpdaterController.shared
     @Bindable private var commandContext = WindowCommandContext.shared
     private var controller: WorkspaceController? {
-        guard !RuntimeIdentity.needsInstallation, let target = commandContext.controller else { return nil }
+        guard !RuntimeIdentity.needsInstallation, let target = commandContext.controller, !target.services.updateRelaunch.blocksNewOperations else { return nil }
         return target.services.commandController(for: NSApp.keyWindow)
     }
     @Environment(\.openWindow) private var openWindow
@@ -20,6 +21,8 @@ struct AppCommands: Commands {
     }
     var body: some Commands {
         CommandGroup(after: .appInfo) {
+            Button("Check for Updates…") { updater.checkForUpdates() }.disabled(!updater.canCheckForUpdates)
+            Divider()
             Button("Open Source Components…") {
                 if let url = Bundle.main.url(forResource: "OpenSource", withExtension: nil) { NSWorkspace.shared.open(url) }
             }

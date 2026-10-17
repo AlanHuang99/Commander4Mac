@@ -242,7 +242,7 @@ final class WorkspaceController {
         guard name != entry.name else { return }
         Task {
             do {
-                services.beginFileAction(); defer { services.endFileAction() }
+                guard services.beginFileAction() else { return }; defer { services.endFileAction() }
                 if !entry.location.isLocal {
                     let target = try entry.location.parent.appending(try FileNameRules.validateComponent(name))
                     await services.operationGate.acquire()
@@ -275,7 +275,7 @@ final class WorkspaceController {
         let name = field.stringValue
         Task {
             do {
-                services.beginFileAction(); defer { services.endFileAction() }
+                guard services.beginFileAction() else { return }; defer { services.endFileAction() }
                 if !parent.isLocal {
                     let target = try parent.appending(try FileNameRules.validateComponent(name))
                     await services.operationGate.acquire()
@@ -297,7 +297,7 @@ final class WorkspaceController {
         undoManager?.registerUndo(withTarget: self) { target in
             Task { @MainActor in
                 do {
-                    target.services.beginFileAction(); defer { target.services.endFileAction() }
+                    guard target.services.beginFileAction() else { return }; defer { target.services.endFileAction() }
                     try await target.services.fileActions.undo(mutation)
                     await target.refresh(.left); await target.refresh(.right)
                 } catch { target.errorMessage = error.localizedDescription }
@@ -310,7 +310,7 @@ final class WorkspaceController {
         let locations = workspace.activeTab.selectedEntries.map(\.location)
         guard !locations.isEmpty else { return }
         Task {
-            services.beginFileAction(); defer { services.endFileAction() }
+            guard services.beginFileAction() else { return }; defer { services.endFileAction() }
             let results = await services.fileActions.trash(locations)
             let failures = results.filter { $0.state != .completed }
             if !failures.isEmpty { errorMessage = failures.map { $0.source.url.lastPathComponent + ": " + ($0.detail ?? "Could not move to Trash") }.joined(separator: "\n") }

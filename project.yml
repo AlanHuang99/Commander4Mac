@@ -25,6 +25,9 @@ settings:
     UITest:
       ONLY_ACTIVE_ARCH: YES
 packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle.git
+    revision: eef1a539a373c1f1a320624b1130fc5de7b2e100
   AMSMB2:
     url: https://github.com/amosavian/AMSMB2.git
     revision: 90737c486c9d1a6ed1c1d4307060587c7bb0dfec
@@ -55,6 +58,7 @@ targets:
     dependencies:
       - target: CommanderCore
         embed: true
+      - package: Sparkle
       - package: AMSMB2
         embed: true
     info:
@@ -74,6 +78,13 @@ targets:
           NSAllowsLocalNetworking: true
         NSLocalNetworkUsageDescription: Connect to file servers on your local network.
         NSNetworkVolumesUsageDescription: Browse and organize files on mounted network drives.
+        SUFeedURL: https://github.com/AlanHuang99/Commander4Mac/releases/latest/download/appcast.xml
+        SUPublicEDKey: HPADmzOe5rseBmB+tpY/UNz0UrXKNLg0tnxBJIaSB7g=
+        SUEnableAutomaticChecks: true
+        SUAutomaticallyUpdate: false
+        SUEnableSystemProfiling: false
+        SURequireSignedFeed: true
+        SUVerifyUpdateBeforeExtraction: true
     entitlements:
       path: Configuration/Commander4Mac.entitlements
       properties: {}

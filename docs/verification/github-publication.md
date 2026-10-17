@@ -16,3 +16,7 @@ The `release` environment accepts `v*` tags only. Seven encrypted environment se
 - Fresh independent review identified Bash 3.2 empty-array failures and the original BSD/GPL linking conflict, plus future-version test brittleness and missing rejected-notary diagnostics. One correction pass addressed all four with negative/positive tests. Core and wait scripts are exercised with the system `/bin/bash`; no second review was dispatched.
 
 Hosted CI and public downloadable release verification are recorded below after execution. Local tests do not establish clean-machine onboarding acceptance.
+
+## First hosted-run finding
+
+CI run `38984297958` caught a real Citadel buffer-capacity trap in SFTP on Apple Silicon. A deterministic local boundary test reproduced the exact writer-index 257/capacity 256 failure. Four unreserved prefix writers now write initialized placeholders that grow the buffer before encoding data. Four boundary tests verify SSH strings, composite strings, SFTP framing and an AES encrypted packet round trip. The AES test also reproduced its original 258/capacity 256 trap before the fix. Local core now passes 164 tests (20 opt-in skips), and all six real OpenSSH fixture tests pass. Test fixture cleanup restores owner permissions before removing deliberately denied test directories after a crash. The hosted checks must pass again before tagging.

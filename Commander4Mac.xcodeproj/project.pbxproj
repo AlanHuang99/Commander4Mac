@@ -96,6 +96,7 @@
 		84DFCE92505DD54BB55C455A /* PaneSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 241A480D4265AC713A6E25CB /* PaneSession.swift */; };
 		871D2983CA926FEE0B650890 /* AtomicFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613F573C5229E46D06E49A49 /* AtomicFileWriter.swift */; };
 		87D04560A2AA764D5D1B7986 /* WindowRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8B89A3B5CB2B5640D9985E /* WindowRegistration.swift */; };
+		89BA07F64E55F96203FD6AF5 /* CitadelEncodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F8E740FC8815EED27AC44E6 /* CitadelEncodingTests.swift */; };
 		8BE20E51982083E328E1EA8C /* SMBConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1160A69DD895ACD7E8DCAD /* SMBConnectionManager.swift */; };
 		8C16F787FAFAADE1A9A6A9CE /* HostKeyVerificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D89B82894663940920DADBED /* HostKeyVerificationTests.swift */; };
 		8DEC0C2AA0053AFC93E1BA08 /* CitadelSFTPTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0C77CF218B353BED26175C /* CitadelSFTPTransport.swift */; };
@@ -153,6 +154,7 @@
 		D28600E34F40517EE32E5DFB /* LocalFileActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455376E03CE555A9E9195F01 /* LocalFileActionsTests.swift */; };
 		D3D3E0DC647EA6F6227A786E /* requirements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 98818A61F4EE0F00538D3157 /* requirements.txt */; };
 		D4154CF2C7E9427850D107B6 /* LocalOperationExecutorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6521A02F3E8B54DDFA417B40 /* LocalOperationExecutorTests.swift */; };
+		D5FD3E100EAEB6C13A4A2DF1 /* CitadelPacketFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = C07E695C1C7E1165B3907B96 /* CitadelPacketFixture.swift */; };
 		D6C13C93BE428FB5D6CC5393 /* ShelfStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F5DAB797FCE75088E0E5B3 /* ShelfStore.swift */; };
 		D81F508D4222E8D7CB7A3688 /* WorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D577A7A61D119822121457AF /* WorkspaceView.swift */; };
 		DAF4162C644D64DCF2F4B6CB /* OpenSource in Resources */ = {isa = PBXBuildFile; fileRef = 6D7C4DCABECD7EE78D842E98 /* OpenSource */; };
@@ -323,6 +325,7 @@
 		98818A61F4EE0F00538D3157 /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
 		9D76476D645CD4627BB18849 /* PaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneView.swift; sourceTree = "<group>"; };
 		9E864C93BDF18401490D033C /* TransferQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferQueue.swift; sourceTree = "<group>"; };
+		9F8E740FC8815EED27AC44E6 /* CitadelEncodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitadelEncodingTests.swift; sourceTree = "<group>"; };
 		A4066ABB17A10AA18079E81C /* KeychainIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainIntegrationTests.swift; sourceTree = "<group>"; };
 		A66F2E7DC02C2D3BEBE9BD8E /* LocalFileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFileActions.swift; sourceTree = "<group>"; };
 		A6F5DAB797FCE75088E0E5B3 /* ShelfStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfStore.swift; sourceTree = "<group>"; };
@@ -337,6 +340,7 @@
 		B51BC80F2D2D1B4D69B2A662 /* ViewModeStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModeStateTests.swift; sourceTree = "<group>"; };
 		B53A0AC989F55938371025FD /* ShelfStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfStoreTests.swift; sourceTree = "<group>"; };
 		BB8F4E656A0010825C109395 /* AccessSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessSetupView.swift; sourceTree = "<group>"; };
+		C07E695C1C7E1165B3907B96 /* CitadelPacketFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitadelPacketFixture.swift; sourceTree = "<group>"; };
 		C0A4664A4B58D53C5566AA9C /* LocalTransferPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTransferPlanner.swift; sourceTree = "<group>"; };
 		C0D92C4AC0810FA70FE5894F /* ConnectionEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionEditor.swift; sourceTree = "<group>"; };
 		C6F5CCD008A4A5C7A27AED94 /* FileFailure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileFailure.swift; sourceTree = "<group>"; };
@@ -566,6 +570,8 @@
 				6ECDF3F821D0637370BC35C1 /* .gitkeep */,
 				1114B030AA3D1C2873A4E696 /* ActiveOperationMarkerTests.swift */,
 				E20AC4924806B3954C350BF1 /* ApplicationStateStoreTests.swift */,
+				9F8E740FC8815EED27AC44E6 /* CitadelEncodingTests.swift */,
+				C07E695C1C7E1165B3907B96 /* CitadelPacketFixture.swift */,
 				E9A91F0991F966D47EFD75C3 /* ClipboardRequestTests.swift */,
 				0821AF46A0D62BDD5C76B479 /* CommandRoutingTests.swift */,
 				5C50675A28B586D2B33F6A57 /* ConflictPresentationTests.swift */,
@@ -972,6 +978,8 @@
 			files = (
 				A232ADE4B13798AC2C048C4B /* ActiveOperationMarkerTests.swift in Sources */,
 				FB7144F7187A097E94101CE1 /* ApplicationStateStoreTests.swift in Sources */,
+				89BA07F64E55F96203FD6AF5 /* CitadelEncodingTests.swift in Sources */,
+				D5FD3E100EAEB6C13A4A2DF1 /* CitadelPacketFixture.swift in Sources */,
 				C957E5517EC279ED25DDF452 /* ClipboardRequestTests.swift in Sources */,
 				3305A436BB586ED17F8FBB2A /* CommandRoutingTests.swift in Sources */,
 				792FFCE1DD1B7898E2B159D0 /* ConflictPresentationTests.swift in Sources */,

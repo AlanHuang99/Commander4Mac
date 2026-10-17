@@ -7,7 +7,10 @@ FIXTURE_ROOT="$(mktemp -d "$TASK_ROOT/.build/sftp-fixture.XXXXXX")"
 SERVER_PID=""
 cleanup() {
   if [[ -n "$SERVER_PID" ]]; then kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true; fi
-  if [[ "${COMMANDER_KEEP_SFTP_FIXTURE:-0}" != 1 ]]; then rm -rf "$FIXTURE_ROOT"; fi
+  if [[ "${COMMANDER_KEEP_SFTP_FIXTURE:-0}" != 1 ]]; then
+    /bin/chmod -RP u+rwx "$FIXTURE_ROOT" 2>/dev/null || true
+    rm -rf "$FIXTURE_ROOT"
+  fi
 }
 trap cleanup EXIT
 /usr/bin/ssh-keygen -q -t ed25519 -N '' -f "$FIXTURE_ROOT/host_key"

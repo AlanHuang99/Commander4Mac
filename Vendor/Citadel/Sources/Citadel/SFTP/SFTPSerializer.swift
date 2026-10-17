@@ -5,7 +5,7 @@ final class SFTPMessageSerializer: MessageToByteEncoder {
     
     func encode(data: SFTPMessage, out: inout ByteBuffer) throws {
         let lengthIndex = out.writerIndex
-        out.moveWriterIndex(forwardBy: 4)
+        out.writeInteger(UInt32(0))
         
         switch data {
         case .initialize(let initialize):

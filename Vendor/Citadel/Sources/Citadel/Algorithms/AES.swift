@@ -286,7 +286,8 @@ public final class AES128CTR: NIOSSHTransportProtection {
         let packetPaddingIndex = outboundBuffer.writerIndex + packetLengthLength
         let packetPaddingLength = MemoryLayout<UInt8>.size
 
-        outboundBuffer.moveWriterIndex(forwardBy: packetLengthLength + packetPaddingLength)
+        outboundBuffer.writeInteger(UInt32(0))
+        outboundBuffer.writeInteger(UInt8(0))
 
         // First, we write the packet.
         let payloadBytes = outboundBuffer.writeEncryptablePayload(packet)

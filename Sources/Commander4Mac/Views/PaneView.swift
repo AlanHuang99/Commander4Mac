@@ -16,6 +16,18 @@ struct PaneView: View {
 
     var body: some View {
         let tab = self.tab
+        styledContent
+            .onChange(of: controller.focusRequest?.id) {
+                if let request = controller.focusRequest, request.pane == paneID, request.field == .filter { filterFocused = true }
+            }
+            .onChange(of: tab.pin) { controller.services.saveSoon() }
+            .onChange(of: tab.options) { controller.services.saveSoon() }
+            .task(id: tab.id.uuidString + tab.location.providerID + tab.location.url.path) {
+                await watchDirectory(tab)
+            }
+    }
+
+    private var content: some View {
         VStack(spacing: 0) {
             TabStripView(controller: controller, paneID: paneID)
             Rectangle().fill(workspace.activePane == paneID ? (palette?.accent.color ?? Color.accentColor) : Color.primary.opacity(0.07)).frame(height: 2)
@@ -28,19 +40,18 @@ struct PaneView: View {
             Divider()
             statusBar
         }
-        .background(palette?.chrome.color ?? .clear)
-        .foregroundStyle(palette?.text.color ?? .primary)
-        .onChange(of: controller.focusRequest?.id) {
-            if let request = controller.focusRequest, request.pane == paneID, request.field == .filter { filterFocused = true }
-        }
-        .onChange(of: tab.pin) { controller.services.saveSoon() }
-        .onChange(of: tab.options) { controller.services.saveSoon() }
-        .task(id: tab.id.uuidString + tab.location.providerID + tab.location.url.path) {
-            for await _ in DirectoryWatcher().events(for: tab.location) {
-                do { try await Task.sleep(for: .milliseconds(150)) } catch { return }
-                if Task.isCancelled { return }
-                await controller.refresh(paneID)
-            }
+    }
+
+    private var styledContent: some View {
+        content.background(palette?.chrome.color ?? Color.clear)
+            .foregroundStyle(palette?.text.color ?? Color.primary)
+    }
+
+    private func watchDirectory(_ tab: TabSession) async {
+        for await _ in DirectoryWatcher().events(for: tab.location) {
+            do { try await Task.sleep(for: .milliseconds(150)) } catch { return }
+            if Task.isCancelled { return }
+            await controller.refresh(paneID)
         }
     }
 

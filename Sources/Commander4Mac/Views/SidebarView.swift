@@ -99,27 +99,36 @@ private struct SavedConnectionRow: View {
     let profile: ConnectionProfile
     let options: ViewOptions
     let palette: ThemePalette?
+    private var status: String { controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected" }
+    private var captionFont: Font { Font(AppearanceFont.resolve(options.navigationFont, size: max(10, options.navigationTextSize - 2))) }
     var body: some View {
-                    Button { controller.connectSaved(profile) } label: {
-                        Label {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(profile.name)
-                                Text(profile.endpointSummary)
-                                    .font(Font(AppearanceFont.resolve(options.navigationFont, size: max(10, options.navigationTextSize - 2))))
-                                    .foregroundStyle(palette?.secondaryText.color ?? .secondary)
-                            }
-                        } icon: { Image(systemName: "network") }
-                            .frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
-                    }.buttonStyle(.plain)
-                        .accessibilityLabel(profile.name + ", " + profile.endpointSummary + ", " + (controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected"))
-                        .help("\(profile.username)@\(profile.host):\(profile.port) · \(controller.services.connections.states[profile.id]?.rawValue ?? "Disconnected")")
-                        .contextMenu {
-                            Button("Open in Current Pane") { controller.connectSaved(profile, destination: .current) }
-                            Button("Open in Left Pane") { controller.connectSaved(profile, destination: .left) }
-                            Button("Open in Right Pane") { controller.connectSaved(profile, destination: .right) }
-                            Button("Edit Connection…") { controller.manageConnection(profile) }
-                            Button("Disconnect") { Task { await controller.services.remote.disconnect(profile.id); await controller.refresh(.left); await controller.refresh(.right) } }
-                            Button("Remove Connection") { Task { do { try await controller.services.connections.remove(profile) } catch { controller.errorMessage = error.localizedDescription } } }
-                        }
+        Button { controller.connectSaved(profile) } label: { connectionLabel }
+            .buttonStyle(.plain)
+            .accessibilityLabel(profile.name + ", " + profile.endpointSummary + ", " + status)
+            .help("\(profile.username)@\(profile.host):\(profile.port) · \(status)")
+            .contextMenu { connectionActions }
+    }
+    private var connectionLabel: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(profile.name)
+                Text(profile.endpointSummary).font(captionFont).foregroundStyle(palette?.secondaryText.color ?? Color.secondary)
+            }
+        } icon: { Image(systemName: "network") }
+            .frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
+    }
+    @ViewBuilder private var connectionActions: some View {
+        Button("Open in Current Pane") { controller.connectSaved(profile, destination: .current) }
+        Button("Open in Left Pane") { controller.connectSaved(profile, destination: .left) }
+        Button("Open in Right Pane") { controller.connectSaved(profile, destination: .right) }
+        Button("Edit Connection…") { controller.manageConnection(profile) }
+        Button("Disconnect") { disconnect() }
+        Button("Remove Connection") { remove() }
+    }
+    private func disconnect() {
+        Task { await controller.services.remote.disconnect(profile.id); await controller.refresh(.left); await controller.refresh(.right) }
+    }
+    private func remove() {
+        Task { do { try await controller.services.connections.remove(profile) } catch { controller.errorMessage = error.localizedDescription } }
     }
 }

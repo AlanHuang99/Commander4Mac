@@ -13,7 +13,7 @@ As of October 17, 2026. Release target: Commander4Mac 1.1/build 2, production id
 
 ## Executed checks
 
-- Full local `script/ci.sh`: 181 core tests, 20 opt-in skips, zero failures; each owned SMB/WebDAV/SFTP/cross-volume fixture passes; 23 Python publication/signature tests pass normally and with optimized Python; unsigned universal app build passes. Hosted architecture checks are recorded separately after publication.
+- Full local `script/ci.sh`: 181 core tests, 20 opt-in skips, zero failures; each owned SMB/WebDAV/SFTP/cross-volume fixture passes; 23 Python/native/publication/signature tests pass normally and with optimized Python; unsigned universal app build passes. The same gates subsequently passed on both hosted native architectures with pinned Xcode 26.3 in [PR CI](https://github.com/AlanHuang99/Commander4Mac/actions/runs/39062355987) and on the exact tag in [Release CI](https://github.com/AlanHuang99/Commander4Mac/actions/runs/39063665056).
 - Five real coordinator tests cover waiting/drain/save ordering, duplicate install callbacks, cancellation during a save, late activity, and failed-save retry.
 - Real official `sign_update` signatures cross-verify with CryptoKit. Tests reject altered archives and feeds, unsigned trailing XML, wrong/missing keys, bad version/build/minimum OS/length/URL, and verify restricted temporary-key creation/removal.
 - A separately identified disposable app was actually upgraded by pinned upstream `sparkle-cli`: invalid signed XML rejected with Sparkle error 1000; valid probe exit 0; install exit 0; version 1 became 2 and the installed executable printed the build 2 marker. Deep signature verification passed. User Applications were never a target. This fixture was not notarized; it exercises the actual updater path while production notarization is a separate gate.
@@ -39,8 +39,29 @@ The reviewer declined to certify complete installed-app visual acceptance, an ac
 
 ## Publication and installed-app verification
 
-The first hosted run for `7979389` passed tests and protocol fixtures, then failed the final app build under Xcode 26.3. The compiler could not type-check the large `PaneView` and `SavedConnectionRow` expressions in time. Splitting their existing content into smaller typed view properties preserves the controls, bindings and actions. The resulting unsigned universal build passes locally with Xcode 27. Hosted Xcode 26.3 checks remain required before a release tag.
+[Commander4Mac 1.1](https://github.com/AlanHuang99/Commander4Mac/releases/tag/v1.1) was published at 2026-10-17T20:12:35Z, from source `166c83eefd6da2a2d414877276584431d81e53e3`. Both required checks passed before [PR 1](https://github.com/AlanHuang99/Commander4Mac/pull/1) was squashed. Its complete tree equals hosted-tested PR head `37ff5d9b7b919cd5488f3c1819a325f78a722cf9`. Release CI repeated the full native gates on the exact immutable tag before accessing signing credentials.
 
-The development app built from `7979389` is installed and running at `/Applications/Commander4Mac Dev.app`, with version 1.1/build 2 and a valid deep signature. Its existing connection catalog and nonvisual session preferences were preserved, with an owner-only local backup. Onscreen acceptance remains qualified above.
+The first hosted builds exposed Xcode 26.3 type-checking limits in the large pane and saved-connection row expressions, despite local Xcode 27 success. Separating layout, styling, directory observation and row actions into smaller typed expressions resolved the actual compiler failures. The final source passes both compilers without changing the controls or bindings.
 
-Pending hosted CI/release and public artifact verification. Version 1.0 needs one manual 1.1 DMG installation to gain the updater. Clean-machine permissions/onboarding remain a separate manual acceptance check.
+The [release job](https://github.com/AlanHuang99/Commander4Mac/actions/runs/39063665056/job/117491297767) completed export, signing, notarization and public-key validation before publishing all five expected assets. Apple accepted app submission `88a3e465-8329-4e4a-be24-6d464a8078a7` and DMG submission `dbb83ffa-d654-47eb-9942-0c591f5eeab8`. Temporary signing credentials were removed before publication. Diagnostic status/log JSON is retained in that workflow's artifact.
+
+The actual public DMG was downloaded and independently checked:
+
+| Field | Verified value |
+| --- | --- |
+| Version/build | 1.1 / 2 |
+| DMG bytes | 15,932,629 |
+| DMG SHA-256 | `2d5dada4b913a09d60a32bc75dbb80afe969adc6e6168975ccb8f72e9871bf9f` |
+| Gatekeeper, app and image | Accepted, Notarized Developer ID |
+| Stapled tickets, app and image | Valid |
+| Mounted app distribution policy | Passed |
+| Universal signed Mach-O files | 9 |
+| Dependency records / hashed LGPL source files | 14 / 471 |
+
+All downloaded asset lengths and SHA-256 digests match GitHub metadata. The portable checksum matches the DMG. Downloaded notices/source-kit bytes equal the mounted app resources. The Applications shortcut and Finder layout are present. The public `releases/latest/download/appcast.xml` resolves to exactly the tagged feed bytes; CryptoKit verifies the XML and final DMG Ed25519 signatures against the checked-in public key.
+
+Pinned upstream Sparkle's actual CLI also fetched the public GitHub feed and reported an available update, exit 0, using a separately identified owned build-1 host with signed-feed enforcement. Its executable and Info.plist stayed unchanged. This was a public-feed probe; the earlier owned build-1-to-build-2 test is the separately executed install exercise. An installed production-to-production upgrade and permission retention remain unverified.
+
+The development app compiled from `37ff5d9b7b919cd5488f3c1819a325f78a722cf9` is installed and running at `/Applications/Commander4Mac Dev.app`, version 1.1/build 2, with a valid deep strict signature. Its complete source tree matches the released source before this documentation update. Session, preferences and connection-catalog bytes remain identical to the protected pre-refresh backup. No active operation was interrupted, real stored connection was edited, or permission database was reset. Onscreen acceptance remains qualified above.
+
+Version 1.0 needs one manual 1.1 DMG installation to gain the updater. Clean-machine permissions/onboarding remain a separate manual acceptance check. [Implementation decisions and deferred minor findings](appearance-updates-1.1-decisions.md) retain the execution rulings and their practical limits.

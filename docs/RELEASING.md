@@ -6,8 +6,8 @@ The [Release workflow](../.github/workflows/release.yml) builds and publishes on
 
 1. Update the single `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` entries in `project.yml`, and update `CHANGELOG.md` and README download examples. Use a new version and increasing build number.
 2. Resolve pinned dependencies, regenerate license resources and run CI checks. Review any dependency/license changes. Commit the generated project and source-kit changes with the release.
-3. Push `main` and wait for both hosted CI jobs to pass.
-4. Tag that reviewed commit with `v` plus its exact marketing version, then push the tag:
+3. Open a pull request and wait for both required hosted CI jobs to pass, then merge using the repository's allowed merge method. Do not use an administrator bypass. If the merge creates a new commit, verify its complete tree equals the tested PR head; otherwise wait for hosted CI on the changed tree.
+4. Tag that reviewed commit on `main` with `v` plus its exact marketing version, then push the tag. Release CI repeats all native checks on that exact tag before signing:
 
    ```sh
    git tag -a v1.0 -m 'Commander4Mac 1.0'

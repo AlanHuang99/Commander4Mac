@@ -1,6 +1,6 @@
 # Production distribution
 
-As of October 16, 2026. The release identity is `com.alanhuang.Commander4Mac`, version 1.0 build 1, signed by team `66LBY954DT`. The development app remains separate. Both arm64 and x86_64 slices are built; Intel hardware execution is not implied by archive validation.
+As of October 17, 2026. The release identity is `com.alanhuang.Commander4Mac`, version 1.1 build 2, signed by team `66LBY954DT`. The development app remains separate. Both arm64 and x86_64 slices are built; Intel hardware execution is not implied by archive validation.
 
 ## Build and validate
 
@@ -8,7 +8,7 @@ As of October 16, 2026. The release identity is `com.alanhuang.Commander4Mac`, v
 ./script/build_release.sh
 ```
 
-This generates the project, resolves the locked packages and submodules, prepares licenses and exact LGPL sources, archives Release into `.build/distribution/Commander4Mac.xcarchive`, and validates the actual app. Verification requires production identity/version, secure timestamps, every required architecture and UUID, Developer ID nested signatures, hardened runtime, no debug or library-validation exceptions, complete license/source resources and dynamic SMB linkage. Do not replace the development installation to produce a release.
+This generates the project, resolves the locked packages and submodules, prepares licenses and exact LGPL sources, archives Release into `.build/distribution/Commander4Mac.xcarchive`, exports with Developer ID into `.build/distribution/export/Commander4Mac.app`, and validates that exported app. Verification requires production identity/version, secure timestamps, every required architecture and UUID, Developer ID nested signatures, hardened runtime, no debug or library-validation exceptions, complete license/source resources and dynamic SMB linkage. Do not replace the development installation to produce a release.
 
 ## Apple credentials
 
@@ -33,7 +33,7 @@ The tool prompts for your developer Apple ID and app-specific password. An exist
 
 Run each finish action after Apple's processing completes; it safely refuses unfinished or rejected submissions. Accepted submissions still require a clean notary log. Rejected terminal submissions retain their downloaded log for diagnosis. Submission IDs, logs and upload hashes are saved under `.build/distribution/notarization`. A pending upload file represents an uncertain outcome and prevents blind resubmission. Inspect its ID/status before retrying.
 
-The app ZIP is submitted first. Its signing hash is checked before stapling. After the app has a valid ticket, the final DMG is built from that exact app, signed and submitted. The last step staples the image, checks the container signature and checksum, mounts read-only, verifies the inner app's ticket and signatures, and runs Gatekeeper and `syspolicy_check distribution` on the actual mounted app. The final output is `.build/distribution/Commander4Mac-1.0.dmg` with its `.sha256` file. Only the fully validated final image is a distribution candidate.
+The app ZIP is submitted first. Its signing hash is checked before stapling. After the app has a valid ticket, the final DMG is built from that exact app, signed and submitted. The last step staples the image, checks the container signature and checksum, mounts read-only, verifies the inner app's ticket and signatures, and runs Gatekeeper and `syspolicy_check distribution` on the actual mounted app. The final output is `.build/distribution/Commander4Mac-1.1.dmg` with its `.sha256` file. Only the fully validated final image is a distribution candidate. Generate the signed appcast from these final bytes using the [release instructions](../docs/RELEASING.md#automatic-update-feed).
 
 Do not rebuild the archive while a submission is in progress. Do not change the app or DMG after validation. Use new version/build metadata and a separate saved submission record for future releases; never reuse an old submission ID for changed bytes.
 

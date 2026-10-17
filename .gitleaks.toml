@@ -1,0 +1,7 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Commander4Mac's public Sparkle verification key; it cannot sign updates."
+regexTarget = "secret"
+regexes = ['''^HPADmzOe5rseBmB\+tpY/UNz0UrXKNLg0tnxBJIaSB7g=$''']

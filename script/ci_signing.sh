@@ -13,7 +13,7 @@ fi
 [[ "$ACTION" == setup ]] || { echo 'Unknown signing action' >&2; exit 2; }
 umask 077
 mkdir -p "$SIGNING_DIR"
-for variable in MACOS_CERT_P12_BASE64 MACOS_CERT_P12_PASSWORD MACOS_KEYCHAIN_PASSWORD MACOS_NOTARY_API_KEY_P8_BASE64 MACOS_NOTARY_API_KEY_ID MACOS_NOTARY_ISSUER_ID MACOS_TEAM_ID; do
+for variable in MACOS_CERT_P12_BASE64 MACOS_CERT_P12_PASSWORD MACOS_KEYCHAIN_PASSWORD MACOS_NOTARY_API_KEY_P8_BASE64 MACOS_NOTARY_API_KEY_ID MACOS_NOTARY_ISSUER_ID MACOS_TEAM_ID SPARKLE_ED_PRIVATE_KEY; do
   [[ -n "${!variable:-}" ]] || { echo "Missing encrypted secret: $variable" >&2; exit 1; }
 done
 [[ "$MACOS_TEAM_ID" == 66LBY954DT ]] || { echo 'Unexpected release team' >&2; exit 1; }
@@ -23,6 +23,10 @@ from pathlib import Path
 directory=Path(sys.argv[1])
 for variable,filename in [('MACOS_CERT_P12_BASE64','identity.p12'),('MACOS_NOTARY_API_KEY_P8_BASE64','AuthKey.p8')]:
     (directory/filename).write_bytes(base64.b64decode(os.environ[variable],validate=True))
+update_key=os.environ['SPARKLE_ED_PRIVATE_KEY'].strip()
+if len(base64.b64decode(update_key,validate=True)) not in (32,96):
+    raise SystemExit('Invalid encrypted Sparkle signing-key format')
+(directory/'sparkle.key').write_text(update_key+'\n')
 PY
 security create-keychain -p "$MACOS_KEYCHAIN_PASSWORD" "$KEYCHAIN"
 security set-keychain-settings -lut 7200 "$KEYCHAIN"

@@ -56,8 +56,11 @@ jobs:
           MACOS_NOTARY_API_KEY_ID: ${{ secrets.MACOS_NOTARY_API_KEY_ID }}
           MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
           MACOS_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
         run: ./script/ci_signing.sh setup
       - name: Build and validate notarized distribution
+        env:
+          COMMANDER_UPDATE_KEY_FILE: ${{ runner.temp }}/commander-signing/sparkle.key
         run: ./script/ci_release.sh
       - name: Remove signing credentials
         if: always()
@@ -67,6 +70,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="$(python3 script/release_metadata.py --field version)"
+          python3 script/update_feed.py verify --archive ".build/distribution/Commander4Mac-$VERSION.dmg" --feed .build/distribution/appcast.xml
           # Refuse an existing release rather than overwriting published bytes.
           gh release create "$GITHUB_REF_NAME" --verify-tag --latest \
             --title "Commander4Mac $VERSION" \
@@ -74,7 +78,8 @@ jobs:
             ".build/distribution/Commander4Mac-$VERSION.dmg" \
             ".build/distribution/Commander4Mac-$VERSION.dmg.sha256" \
             .build/distribution/LGPL-Sources.tar.gz \
-            .build/distribution/ThirdPartyNotices.txt
+            .build/distribution/ThirdPartyNotices.txt \
+            .build/distribution/appcast.xml
       - name: Release diagnostics
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

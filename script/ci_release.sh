@@ -9,6 +9,9 @@ OUT="${COMMANDER_DISTRIBUTION_DIR:-$TASK_ROOT/.build/distribution}"
 export COMMANDER_DISTRIBUTION_DIR="$OUT"
 if [[ -n "${RUNNER_TEMP:-}" ]]; then export COMMANDER_NOTARY_KEYCHAIN="$RUNNER_TEMP/commander-signing/release.keychain-db"; fi
 mkdir -p .build/logs
+UPDATE_KEY_FILE="${COMMANDER_UPDATE_KEY_FILE:?Restricted update-key file required}"
+./script/resolve_dependencies.sh
+python3 script/update_feed.py check-key --key-file "$UPDATE_KEY_FILE"
 python3 -m venv .build/packaging-venv
 .build/packaging-venv/bin/python -m pip install --disable-pip-version-check -r Packaging/requirements.txt >.build/logs/packaging-install.log 2>&1
 ./script/build_release.sh
@@ -23,11 +26,18 @@ cp Resources/OpenSource/LGPL-Sources.tar.gz "$OUT/LGPL-Sources.tar.gz"
 cp Resources/ThirdPartyNotices.txt "$OUT/ThirdPartyNotices.txt"
 python3 - "$OUT" "$VERSION" <<'PY'
 from pathlib import Path
-import sys
+import re,sys
 out,version=Path(sys.argv[1]),sys.argv[2]
+match=re.search(r'^## '+re.escape(version)+r'\n([\s\S]*?)(?=^## |\Z)',Path('CHANGELOG.md').read_text(),re.M)
+if match is None: raise SystemExit('Current version is missing from CHANGELOG.md')
+changes=match[1].strip()
 notes=f'''## Commander4Mac {version}
 
 A native two-pane file manager for macOS 15 or later, universal for Apple Silicon and Intel.
+
+### What changed
+
+{changes}
 
 ### Install
 
@@ -48,4 +58,8 @@ This product includes software developed by Niels Provos.
 '''
 (out/'release-notes.md').write_text(notes)
 PY
-echo "Validated release artifacts: Commander4Mac-$VERSION.dmg and checksum."
+python3 script/update_feed.py generate --app "$OUT/export/Commander4Mac.app" \
+  --archive "$OUT/Commander4Mac-$VERSION.dmg" --feed "$OUT/appcast.xml" \
+  --key-file "$UPDATE_KEY_FILE" --notes "$OUT/release-notes.md"
+python3 script/update_feed.py verify --archive "$OUT/Commander4Mac-$VERSION.dmg" --feed "$OUT/appcast.xml"
+echo "Validated release artifacts: Commander4Mac-$VERSION.dmg, checksum and signed appcast.xml."

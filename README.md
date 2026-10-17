@@ -30,9 +30,10 @@ Tabs, pinned folders, a shared shelf and direct server connections, with your fi
 - **Favorites and shelf:** open favorites in the current, left or right pane; collect references before transferring them.
 - **Local file operations:** queued copy and move, conflict choices, cancellation, new folders, rename and macOS Trash. Local copies preserve file metadata.
 - **Mac integration:** Quick Look, Open With, clipboard file actions and restored workspaces.
-- **Your preferred appearance:** System, Light or Dark, plus text and icon sizes.
-- **Direct server access:** SFTP, SMB and HTTPS WebDAV, with saved secrets in Keychain and explicit SSH host-key verification.
+- **Your preferred appearance:** System, Light or Dark, five color themes, font families, file/icon sizes and navigation sizing. Changes apply to all tabs and panes by default, with an option for individual tab styling.
+- **Direct server access:** SFTP, SMB and HTTPS WebDAV, with saved connections in the sidebar and Cmd-K, optional secrets in Keychain and explicit SSH host-key verification.
 - **Folder transfers:** copy files and directory trees between local and remote panes, with Skip, Keep Both or Cancel when a destination already exists.
+- **Automatic updates:** signed updates from GitHub Releases, with restarts deferred until file operations finish and the workspace is saved.
 
 Inspired by the efficiency of dual-pane file managers, with an original macOS interface.
 
@@ -40,7 +41,7 @@ Inspired by the efficiency of dual-pane file managers, with an original macOS in
 
 Requires **macOS 15 or later**. The DMG contains a universal app for Apple Silicon and Intel Macs.
 
-1. Download `Commander4Mac-1.0.dmg` from [Releases](https://github.com/AlanHuang99/Commander4Mac/releases/latest).
+1. Download `Commander4Mac-1.1.dmg` from [Releases](https://github.com/AlanHuang99/Commander4Mac/releases/latest).
 2. Open the DMG and drag **Commander4Mac** onto **Applications**.
 3. Eject the disk image, then open **Commander4Mac** from Applications.
 4. In **System Settings → Privacy & Security → Full Disk Access**, add `/Applications/Commander4Mac.app` and enable it. Restart the app if macOS requests it.
@@ -48,11 +49,11 @@ Requires **macOS 15 or later**. The DMG contains a universal app for Apple Silic
 
 Release automation signs with Developer ID, notarizes and staples both the app and DMG, then validates the packaged app before publishing. Each release includes a SHA-256 checksum. Full Disk Access is a macOS permission that you grant locally; it is separate from the app's setup acknowledgement.
 
-For later versions, download the latest DMG and replace the app in Applications after transfers finish.
+Version 1.0 needs one manual upgrade to 1.1 using the DMG. Starting with 1.1, automatic checks are enabled in the release app. Use **Commander4Mac → Check for Updates…** or **Settings → Updates** to manage checks and background downloads. Development builds have a separate identity and cannot install production updates.
 
 ## Connect to a server
 
-Press **⌘K**, choose a protocol, enter the endpoint and open it in either pane.
+Press **⌘K**, choose a protocol and enter the endpoint. **Save Connection** keeps it for later without connecting; **Save and Connect** also opens it in the chosen pane. Reopen connections from the **Saved Connections** sidebar or the **Saved** chooser in Cmd-K. Saved credentials are optional and use Keychain; servers never reconnect automatically on launch.
 
 | Protocol | Connection details |
 | --- | --- |
@@ -63,6 +64,12 @@ Press **⌘K**, choose a protocol, enter the endpoint and open it in either pane
 Remote copies preserve contents and directory structure. They currently do not preserve remote permissions, timestamps, ACLs, extended attributes or resource forks. Existing destination trees are not merged or replaced. Remote move/Trash, server-to-server transfers, symlinks and packages are not supported. See the [network acceptance record](docs/verification/network-folders-release.md) for tested coverage and limits.
 
 If a local server connection fails despite an enabled Local Network switch, confirm that the permission belongs to the installed app. Toggle that app's existing switch off and on, restart it and retry. See [troubleshooting](docs/DEVELOPMENT.md#local-network-troubleshooting).
+
+## Make the workspace yours
+
+Open **Settings → Appearance** for System, Ocean, Forest, Sand or Plum themes in light/dark/system mode. Choose a system font design or an installed font family, file text from 10–28 pt, list icons from 12–40 pt and grid icons from 32–160 pt. Navigation has its own font, 10–24 pt text, 12–28 pt icons and a 180–320 pt sidebar width.
+
+The view-options button beside each folder filter provides the same sizing controls. **Apply appearance changes to all tabs and panes** is on by default and updates existing/future tabs and windows. Turn it off to keep pane edits in the current tab, including while browsing subfolders and after relaunch. Settings then define defaults for new tabs; the sidebar uses app defaults. Sorting, filtering, view modes and pins stay independent.
 
 ## Keyboard shortcuts
 

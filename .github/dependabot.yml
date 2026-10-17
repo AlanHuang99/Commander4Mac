@@ -8,3 +8,13 @@ updates:
     groups:
       actions:
         patterns: ['*']
+  - package-ecosystem: pip
+    directory: /Tests/Support/Network
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+  - package-ecosystem: pip
+    directory: /Packaging
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3

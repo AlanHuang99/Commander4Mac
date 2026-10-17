@@ -4,7 +4,7 @@ Repository: https://github.com/AlanHuang99/Commander4Mac
 
 ## Setup
 
-Public repository with `main` as the publication branch, README with an actual app screenshot containing demonstration files only, download/install/Full Disk Access guidance, contributor/security/release docs, changelog, issue/PR templates and monthly Actions dependency updates. Original code is GPLv3 with the Citadel/CCitadelBcrypt permission in `LICENSE-EXCEPTION`; both texts are bundled and verified. Upstream licenses and acknowledgement are retained.
+Public repository with `main` as the publication branch, README with an actual app screenshot containing demonstration files only, download/install/Full Disk Access guidance, contributor/security/release docs, changelog, issue/PR templates and monthly Actions/Python dependency updates. Original code is GPLv3 with the Citadel/CCitadelBcrypt permission in `LICENSE-EXCEPTION`; both texts are bundled and verified. Upstream licenses and acknowledgement are retained.
 
 The `release` environment accepts `v*` tags only. Seven encrypted environment secrets configure the existing Developer ID identity and notarization API key. Secret values were sent through stdin, not logged or committed. Temporary certificate export/password were removed. The original private key and installed development app were preserved. Default workflow tokens are read-only; only the trusted release job requests write permission. Actions are restricted to official GitHub actions with pinned commits. Private vulnerability reporting and dependency alerts are enabled.
 
@@ -45,6 +45,10 @@ All four public assets were downloaded again after publication. The final staple
 The actual downloaded image passed strict code-signature verification, stapler validation, disk-image integrity verification and Gatekeeper assessment (`Notarized Developer ID`). It was mounted read-only in an owned temporary directory. The Applications shortcut and Finder layout were present. The actual mounted app passed production identity/version checks (`com.alanhuang.Commander4Mac`, version 1.0, build 1), universal arm64/x86_64 and every Mach-O slice's signing/runtime/UUID checks, license and LGPL source validation, app stapler validation, `syspolicy_check distribution` and Gatekeeper assessment. The separately downloaded LGPL archive and notices match their bundled app copies byte-for-byte. The owned image was then ejected and its temporary mount directory removed.
 
 Logs, notarization JSON, workflow metadata and the machine-readable public-download receipt are retained locally under `.build`; the hosted release diagnostics artifact is retained for 14 days. This publication check did not install the production app, grant permissions or establish clean-machine first-launch acceptance. Those manual checks remain separate from the successful artifact and hosted CI checks.
+
+## Post-publication test dependency maintenance
+
+GitHub subsequently surfaced Dependabot alert 1 for the test fixture's WsgiDAV 4.3.4 pin. [The upstream advisory](https://github.com/mar10/wsgidav/security/advisories/GHSA-p6gw-4frg-j7jw) concerns an optional MySQL sample provider that must be explicitly activated. Our loopback fixture maps an owned directory through the filesystem provider, does not activate MySQL and is not bundled in the app. The fixture pin was nevertheless updated to the patched 4.3.5 release, and all six real WebDAV integration tests passed locally against that installed version. Monthly Python dependency update checks cover both fixture and packaging requirements; automatic Dependabot security-fix pull requests are enabled. This maintenance changes no production app bytes, signing or release tag.
 
 ## Installed development app
 

@@ -39,4 +39,8 @@ The reviewer declined to certify complete installed-app visual acceptance, an ac
 
 ## Publication and installed-app verification
 
-Pending final independent review, hosted CI/release, public artifact verification and local development-app refresh. Version 1.0 needs one manual 1.1 DMG installation to gain the updater. Clean-machine permissions/onboarding remain a separate manual acceptance check.
+The first hosted run for `7979389` passed tests and protocol fixtures, then failed the final app build under Xcode 26.3. The compiler could not type-check the large `PaneView` and `SavedConnectionRow` expressions in time. Splitting their existing content into smaller typed view properties preserves the controls, bindings and actions. The resulting unsigned universal build passes locally with Xcode 27. Hosted Xcode 26.3 checks remain required before a release tag.
+
+The development app built from `7979389` is installed and running at `/Applications/Commander4Mac Dev.app`, with version 1.1/build 2 and a valid deep signature. Its existing connection catalog and nonvisual session preferences were preserved, with an owner-only local backup. Onscreen acceptance remains qualified above.
+
+Pending hosted CI/release and public artifact verification. Version 1.0 needs one manual 1.1 DMG installation to gain the updater. Clean-machine permissions/onboarding remain a separate manual acceptance check.

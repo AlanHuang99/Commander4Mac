@@ -17,8 +17,24 @@ final class AppServices {
         didSet {
             do { try preferencesStore.save(preferences) }
             catch { startupDiagnostic = "Could not save preferences: \(error.localizedDescription)" }
-            for controller in controllers.values.compactMap(\.value) { controller.workspace.defaultOptions = preferences.view.validated() }
+            for controller in controllers.values.compactMap(\.value) {
+                controller.workspace.defaultOptions = preferences.view.validated()
+                if preferences.shareAppearanceChanges { controller.workspace.applyAppearance(preferences.view.viewAppearance) }
+            }
+            saveSoon()
         }
+    }
+    func updateAppearance(_ appearance: ViewAppearance, for tab: TabSession? = nil) {
+        let updated = AppearanceSharing.update(appearance, selectedTab: tab, preferences: preferences,
+            workspaces: controllers.values.compactMap(\.value).map(\.workspace))
+        if updated != preferences { preferences = updated }
+        saveSoon()
+    }
+    func resetAppearance() {
+        var value = preferences
+        value.view.viewAppearance = .init(); value.appearance = .system; value.theme = .system
+        value.sidebarWidth = 220; value.shareAppearanceChanges = true
+        preferences = value
     }
     let remote = RemoteConnectionManager()
     let connections: ConnectionController
@@ -87,8 +103,7 @@ final class AppServices {
     private var saveRevision: UInt64 = 0
     private var restoredAdditionalWindows = false
     init() {
-        let directory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
-            .appendingPathComponent(Bundle.main.bundleIdentifier ?? "com.alanhuang.Commander4Mac.dev")
+        let directory = RuntimeIdentity.stateDirectory
         let settingsStore = PreferencesStore(directory: directory)
         preferencesStore = settingsStore
         let initialPreferences = settingsStore.load()
@@ -161,6 +176,7 @@ final class AppServices {
         restoredAdditionalWindows = true; return pendingWindows.count
     }
     func register(_ controller: WorkspaceController) {
+        if preferences.shareAppearanceChanges { controller.workspace.applyAppearance(preferences.view.viewAppearance) }
         controllers[controller.workspace.id] = WeakController(controller)
         conflictRouting.register(controller.workspace.id)
         activeController = controller

@@ -48,15 +48,23 @@ struct FileGridView: NSViewRepresentable {
         grid.onFocus = browser.onFocus; grid.onCommand = browser.onCommand; grid.previewController = browser.previewController
         let tab = browser.tab
         let changedTab = coordinator.tabID != tab.id
-        if changedTab { coordinator.needsRestore = true }
+        let changedStyle = coordinator.options.viewAppearance != tab.options.viewAppearance
+        let changedData = coordinator.entriesRevision != tab.entriesRevision || changedTab
+        let needsReload = changedData || coordinator.options != tab.options || coordinator.palette != browser.palette
+        if changedTab || changedStyle { coordinator.needsRestore = true }
         coordinator.synchronizing = true
-        if coordinator.entriesRevision != tab.entriesRevision || changedTab || coordinator.options != tab.options {
+        grid.backgroundColors = [browser.palette?.background.nsColor ?? .textBackgroundColor]
+        scroll.backgroundColor = browser.palette?.background.nsColor ?? .textBackgroundColor
+        if changedData {
             coordinator.entries = tab.visibleEntries
             coordinator.entriesRevision = tab.entriesRevision
             coordinator.indexByID = Dictionary(uniqueKeysWithValues: coordinator.entries.enumerated().map { ($0.element.id, $0.offset) })
-            coordinator.tabID = tab.id; coordinator.options = tab.options
+        }
+        coordinator.tabID = tab.id; coordinator.options = tab.options; coordinator.palette = browser.palette
+        if needsReload {
             if let layout = grid.collectionViewLayout as? NSCollectionViewFlowLayout {
-                layout.itemSize = NSSize(width: max(110, tab.options.gridIconSize + 36), height: tab.options.gridIconSize + tab.options.textSize * 2.6 + 18)
+                let font = AppearanceFont.resolve(tab.options.font, size: tab.options.textSize)
+                layout.itemSize = NSSize(width: max(110, tab.options.gridIconSize + 36, tab.options.textSize * 5.5), height: tab.options.gridIconSize + AppearanceFont.lineHeight(font) * 2 + 26)
             }
             grid.reloadData()
         }
@@ -89,6 +97,7 @@ struct FileGridView: NSViewRepresentable {
     var indexByID: [EntryID: Int] = [:]
     var tabID: UUID?
     var options = ViewOptions()
+    var palette: ThemePalette?
     var synchronizing = false
     var wasActive = false
     var renderedGeneration: UInt64?
@@ -110,7 +119,7 @@ struct FileGridView: NSViewRepresentable {
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int { entries.count }
     func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
         let item = collectionView.makeItem(withIdentifier: .init("file"), for: indexPath) as! GridItem
-        item.configure(entries[indexPath.item], options: options); return item
+        item.configure(entries[indexPath.item], options: options, palette: palette); return item
     }
     func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) { syncSelection() }
     func collectionView(_ collectionView: NSCollectionView, didDeselectItemsAt indexPaths: Set<IndexPath>) { syncSelection() }
@@ -165,6 +174,7 @@ struct FileGridView: NSViewRepresentable {
 
 @MainActor final class GridItem: NSCollectionViewItem {
     private var iconSize: [NSLayoutConstraint] = []
+    private var palette: ThemePalette?
     override func loadView() {
         view = NSView(); view.wantsLayer = true; view.layer?.cornerRadius = 6
         let image = NSImageView(); image.translatesAutoresizingMaskIntoConstraints = false; image.imageScaling = .scaleProportionallyUpOrDown
@@ -176,13 +186,19 @@ struct FileGridView: NSViewRepresentable {
             text.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 6), text.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 4),
             text.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -4), text.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor, constant: -5)])
     }
-    override var isSelected: Bool { didSet { view.layer?.backgroundColor = (isSelected ? NSColor.selectedContentBackgroundColor.withAlphaComponent(0.25) : .clear).cgColor } }
-    func configure(_ entry: FileEntry, options: ViewOptions) {
+    override var isSelected: Bool { didSet { updateAppearance() } }
+    private func updateAppearance() {
+        view.layer?.backgroundColor = (isSelected ? (palette?.selection.nsColor ?? NSColor.selectedContentBackgroundColor.withAlphaComponent(0.25)) : .clear).cgColor
+        textField?.textColor = isSelected ? (palette?.selectedText.nsColor ?? .labelColor) : (palette?.text.nsColor ?? .labelColor)
+    }
+    func configure(_ entry: FileEntry, options: ViewOptions, palette: ThemePalette?) {
         _ = view
+        self.palette = palette
         imageView?.image = FileIconCache.shared.icon(for: entry)
         iconSize.forEach { $0.constant = options.gridIconSize }
-        textField?.font = .systemFont(ofSize: options.textSize); textField?.stringValue = entry.name
+        textField?.font = AppearanceFont.resolve(options.font, size: options.textSize); textField?.stringValue = entry.name
         textField?.setAccessibilityLabel(entry.name); view.toolTip = entry.location.url.path
+        updateAppearance()
     }
 }
 

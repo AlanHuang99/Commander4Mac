@@ -14,6 +14,7 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
     var indexByID: [EntryID: Int] = [:]
     var tabID: UUID?
     var options = ViewOptions()
+    var palette: ThemePalette?
     var synchronizing = false
     var wasActive = false
     var renderedGeneration: UInt64?
@@ -35,6 +36,9 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
 
     init(owner: FileTableView) { self.owner = owner }
     func numberOfRows(in tableView: NSTableView) -> Int { entries.count }
+    func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+        let view = ThemedTableRow(); view.palette = palette; return view
+    }
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
         guard entries.indices.contains(row), let column else { return nil }
         let entry = entries[row]
@@ -56,8 +60,11 @@ final class FileTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewDe
             } else { text.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 3).isActive = true }
             NSLayoutConstraint.activate([text.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -5), text.centerYAnchor.constraint(equalTo: cell.centerYAnchor)])
         }
-        cell.textField?.font = .systemFont(ofSize: options.textSize)
-        cell.textField?.textColor = key == "name" ? .labelColor : .secondaryLabelColor
+        cell.textField?.font = AppearanceFont.resolve(options.font, size: options.textSize)
+        if let palette {
+            cell.textField?.textColor = tableView.selectedRowIndexes.contains(row) ? palette.selectedText.nsColor :
+                (key == "name" ? palette.text.nsColor : palette.secondaryText.nsColor)
+        } else { cell.textField?.textColor = key == "name" ? .labelColor : .secondaryLabelColor }
         cell.textField?.alignment = key == "size" ? .right : .left
         switch key {
         case "name":

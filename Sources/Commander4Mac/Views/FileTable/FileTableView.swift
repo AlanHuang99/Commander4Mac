@@ -22,10 +22,11 @@ struct FileTableView: NSViewRepresentable {
     var onDrop: (TransferRequest) -> Void
     var previewController: QuickLookController
     var focusRequest: UUID?
+    var palette: ThemePalette? = nil
     func makeCoordinator() -> FileTableCoordinator { FileTableCoordinator(owner: self) }
     func makeNSView(context: Context) -> NSScrollView {
         let scroll = CommanderScrollView()
-        scroll.hasVerticalScroller = true; scroll.hasHorizontalScroller = false; scroll.autohidesScrollers = true
+        scroll.hasVerticalScroller = true; scroll.hasHorizontalScroller = true; scroll.autohidesScrollers = true
         let table = CommanderTableView()
         table.setAccessibilityIdentifier(paneID.rawValue + ".fileTable")
         table.setAccessibilityLabel((paneID == .left ? "Left" : "Right") + " file list")
@@ -64,17 +65,35 @@ struct FileTableView: NSViewRepresentable {
         guard let table = coordinator.table else { return }
         table.previewController = previewController
         table.onFocus = onFocus; table.onCommand = onCommand
-        for column in table.tableColumns { column.isHidden = !tab.options.visibleColumns.contains(column.identifier.rawValue) }
-        table.rowHeight = max(tab.options.textSize + 9, tab.options.listIconSize + 6)
-        if coordinator.tabID != tab.id { coordinator.needsRestore = true }
         let savedAnchor = tab.scrollAnchor
         coordinator.synchronizing = true
-        if coordinator.entriesRevision != tab.entriesRevision || coordinator.tabID != tab.id || coordinator.options != tab.options {
+        let changedTab = coordinator.tabID != tab.id
+        let changedStyle = coordinator.options.viewAppearance != tab.options.viewAppearance
+        let changedData = coordinator.entriesRevision != tab.entriesRevision || changedTab
+        let needsReload = changedData || coordinator.options != tab.options || coordinator.palette != palette
+        if changedTab || changedStyle { coordinator.needsRestore = true }
+        let font = AppearanceFont.resolve(tab.options.font, size: tab.options.textSize)
+        let navigationFont = AppearanceFont.resolve(tab.options.navigationFont, size: tab.options.navigationTextSize)
+        for column in table.tableColumns {
+            column.isHidden = !tab.options.visibleColumns.contains(column.identifier.rawValue)
+            column.headerCell.font = navigationFont
+        }
+        if let header = table.headerView {
+            header.setFrameSize(.init(width: header.frame.width, height: max(24, AppearanceFont.lineHeight(navigationFont) + 8)))
+        }
+        table.rowHeight = max(AppearanceFont.lineHeight(font) + 9, tab.options.listIconSize + 6)
+        if let scroll = scroll as? CommanderScrollView { scroll.fileTextSize = tab.options.textSize; scroll.listIconSize = tab.options.listIconSize }
+        table.backgroundColor = palette?.background.nsColor ?? .textBackgroundColor
+        scroll.backgroundColor = table.backgroundColor
+        if changedData {
             coordinator.entries = tab.visibleEntries
             coordinator.entriesRevision = tab.entriesRevision
             coordinator.indexByID = Dictionary(uniqueKeysWithValues: coordinator.entries.enumerated().map { ($0.element.id, $0.offset) })
-            coordinator.tabID = tab.id; coordinator.options = tab.options
+        }
+        coordinator.tabID = tab.id; coordinator.options = tab.options; coordinator.palette = palette
+        if needsReload {
             table.reloadData()
+            table.enumerateAvailableRowViews { row, _ in (row as? ThemedTableRow)?.palette = palette }
         }
         let indexes = IndexSet(tab.selection.compactMap { coordinator.indexByID[$0] })
         if table.selectedRowIndexes != indexes { table.selectRowIndexes(indexes, byExtendingSelection: false) }
@@ -127,18 +146,23 @@ final class CommanderTableView: NSTableView {
 }
 
 @MainActor final class CommanderScrollView: NSScrollView {
+    var fileTextSize: Double = 13
+    var listIconSize: Double = 20
     override func layout() {
         super.layout()
         guard let table = documentView as? NSTableView, table.tableColumns.count == 3 else { return }
-        let width = max(280, contentSize.width)
-        let sizeWidth: CGFloat = 67
-        let dateWidth: CGFloat = width > 430 ? 145 : 112
+        let viewport = max(280, contentSize.width)
+        let scale = max(1, fileTextSize / 13)
+        let sizeWidth: CGFloat = 67 * scale
+        let dateWidth: CGFloat = (viewport > 430 ? 145 : 112) * scale
         let usedSize: CGFloat = table.tableColumns[1].isHidden ? 0 : sizeWidth
         let usedDate: CGFloat = table.tableColumns[2].isHidden ? 0 : dateWidth
-        let widths = [max(100, width - usedSize - usedDate), sizeWidth, dateWidth]
+        let minimumName = max(100, listIconSize + fileTextSize * 5 + 20)
+        let width = max(viewport, minimumName + usedSize + usedDate)
+        let widths = [max(minimumName, width - usedSize - usedDate), sizeWidth, dateWidth]
         for (column, target) in zip(table.tableColumns, widths) where abs(column.width - target) > 0.5 { column.width = target }
         if abs(table.frame.width - width) > 0.5 { table.setFrameSize(NSSize(width: width, height: table.frame.height)) }
-        if contentView.bounds.origin.x != 0 { contentView.scroll(to: NSPoint(x: 0, y: contentView.bounds.origin.y)) }
+        if width <= contentSize.width, contentView.bounds.origin.x != 0 { contentView.scroll(to: NSPoint(x: 0, y: contentView.bounds.origin.y)) }
     }
 }
 

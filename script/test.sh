@@ -27,6 +27,7 @@ ERRORS
 BUILD_COMMAND=(/usr/bin/xcodebuild)
 if [[ "$BUNDLE" == "Commander4MacUITests" ]]; then BUILD_COMMAND=(python3 "$ROOT_DIR/script/run_ui_tests.py"); fi
 BUILD_COMMAND+=(-project Commander4Mac.xcodeproj -scheme "$SCHEME" -configuration "$CONFIGURATION" -destination 'platform=macOS' -derivedDataPath .build/xcode -onlyUsePackageVersionsFromResolvedFile -only-testing:"$FILTER")
+if [[ "$BUNDLE" == "Commander4MacUITests" ]]; then BUILD_COMMAND+=(ENABLE_TESTABILITY=YES); fi
 if [[ "${COMMANDER_CI:-0}" == 1 ]]; then BUILD_COMMAND+=(CODE_SIGNING_ALLOWED=NO); fi
 BUILD_COMMAND+=("$ACTION")
 if ! "${BUILD_COMMAND[@]}" >"$LOG" 2>&1; then

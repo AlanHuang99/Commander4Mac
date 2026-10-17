@@ -52,7 +52,15 @@ final class WorkspaceController {
     @ObservationIgnored weak var undoManager: UndoManager?
     init(services: AppServices = .shared) {
         self.services = services
-        let initial = WorkspaceSession()
+        let initial: WorkspaceSession
+        #if COMMANDER_UI_TEST_HOST
+        if let path = ProcessInfo.processInfo.environment["COMMANDER_TEST_STATE_DIRECTORY"], path.hasPrefix("/") {
+            let folder = FileLocation.local(URL(fileURLWithPath: path).deletingLastPathComponent())
+            initial = WorkspaceSession(left: folder, right: folder)
+        } else { initial = WorkspaceSession() }
+        #else
+        initial = WorkspaceSession()
+        #endif
         workspace = initial
         loader = DirectoryLoader(workspace: initial, provider: ProviderRouter(remote: services.remote))
     }

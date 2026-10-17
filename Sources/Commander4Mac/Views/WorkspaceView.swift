@@ -10,11 +10,12 @@ struct WorkspaceView: View {
     @State private var controller = WorkspaceController()
     @AppStorage("accessSetupAcknowledged") private var acknowledged = false
     @State private var showAccessSetup = false
+    @Environment(\.colorScheme) private var scheme
     var body: some View {
         VStack(spacing: 0) {
         HStack(spacing: 0) {
             if controller.sidebarVisible {
-                SidebarView(controller: controller).frame(width: 190)
+                SidebarView(controller: controller).frame(width: controller.services.preferences.sidebarWidth)
                 Divider()
             }
             GeometryReader { geometry in
@@ -37,6 +38,7 @@ struct WorkspaceView: View {
         .background(WindowRegistration(controller: controller).frame(width: 0, height: 0))
         .frame(minWidth: 980, minHeight: 620)
         .preferredColorScheme(controller.services.preferences.appearance.colorScheme)
+        .tint(controller.services.preferences.theme.palette(isDark: scheme == .dark)?.accent.color ?? .accentColor)
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button { controller.sidebarVisible.toggle() } label: { Image(systemName: "sidebar.left") }.help("Toggle Sidebar")

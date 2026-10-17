@@ -9,6 +9,7 @@ struct TabStripView: View {
     var paneID: PaneID
     var body: some View {
         let pane = controller.workspace.pane(paneID)
+        let options = pane.activeTab.options
         HStack(spacing: 2) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 3) {
@@ -17,7 +18,7 @@ struct TabStripView: View {
                             Button { controller.selectTab(tab, pane: paneID) } label: {
                                 HStack(spacing: 5) {
                                     Image(systemName: tab.pin.isLocked ? "lock.fill" : (tab.pin.isPinned ? "pin.fill" : "folder"))
-                                        .font(.system(size: 10)).foregroundStyle(tab.pin.isPinned ? Color.accentColor : .secondary)
+                                        .font(.system(size: max(10, options.navigationIconSize - 4))).foregroundStyle(tab.pin.isPinned ? Color.accentColor : .secondary)
                                     Text(tab.title).lineLimit(1)
                                     if let home = tab.pin.home, home != tab.location { Image(systemName: "arrow.uturn.backward").font(.caption2) }
                                 }.padding(.leading, 9).padding(.vertical, 8)
@@ -25,7 +26,7 @@ struct TabStripView: View {
                                 .accessibilityLabel(tab.title + (tab.pin.isLocked ? ", locked pin" : (tab.pin.isPinned ? ", navigable pin" : ", tab")))
                                 .help(tab.location.url.path)
                             if !tab.pin.isPinned && pane.tabs.count > 1 {
-                                Button { _ = pane.close(tabID: tab.id); Task { await controller.refresh(paneID) } } label: { Image(systemName: "xmark").font(.system(size: 9)) }.buttonStyle(.plain).padding(.trailing, 7)
+                                Button { _ = pane.close(tabID: tab.id); Task { await controller.refresh(paneID) } } label: { Image(systemName: "xmark").font(.system(size: max(9, options.navigationIconSize - 6))) }.buttonStyle(.plain).padding(.trailing, 7)
                             }
                         }
                         .padding(.trailing, tab.pin.isPinned || pane.tabs.count == 1 ? 9 : 0)
@@ -43,7 +44,8 @@ struct TabStripView: View {
                     }
                 }
             }
-            Button { controller.open(pane.activeTab.location, in: paneID, newTab: true) } label: { Image(systemName: "plus") }.buttonStyle(.borderless).help("New Tab")
-        }.font(.system(size: 12)).padding(.horizontal, 7).padding(.vertical, 5)
+            Button { controller.open(pane.activeTab.location, in: paneID, newTab: true) } label: { Image(systemName: "plus").font(.system(size: options.navigationIconSize)) }.buttonStyle(.borderless).help("New Tab")
+        }.font(Font(AppearanceFont.resolve(options.navigationFont, size: options.navigationTextSize)))
+            .padding(.horizontal, 7).padding(.vertical, 5)
     }
 }

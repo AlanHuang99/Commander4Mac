@@ -6,6 +6,7 @@ import CommanderCore
 
 struct SidebarView: View {
     var controller: WorkspaceController
+    @Environment(\.colorScheme) private var scheme
     private let locations: [(String, String, URL)] = [
         ("Home", "house", FileManager.default.homeDirectoryForCurrentUser),
         ("Desktop", "desktopcomputer", FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Desktop")),
@@ -19,6 +20,8 @@ struct SidebarView: View {
         }
     }
     var body: some View {
+        let options = controller.services.preferences.view
+        let palette = controller.services.preferences.theme.palette(isDark: scheme == .dark)
         List {
             Section("Favorites") {
                 ForEach(controller.services.favorites.items) { favorite in
@@ -86,5 +89,20 @@ struct SidebarView: View {
                 }
             }
         }.listStyle(.sidebar)
+            .font(Font(AppearanceFont.resolve(options.navigationFont, size: options.navigationTextSize)))
+            .labelStyle(SidebarNavigationLabelStyle(iconSize: options.navigationIconSize))
+            .scrollContentBackground(palette == nil ? .automatic : .hidden)
+            .background(palette?.chrome.color ?? .clear)
+            .foregroundStyle(palette?.text.color ?? .primary)
+    }
+}
+
+private struct SidebarNavigationLabelStyle: LabelStyle {
+    let iconSize: Double
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 9) {
+            configuration.icon.font(.system(size: iconSize)).frame(width: iconSize + 3)
+            configuration.title.lineLimit(1)
+        }
     }
 }

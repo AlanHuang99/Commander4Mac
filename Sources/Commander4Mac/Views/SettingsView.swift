@@ -21,21 +21,7 @@ struct SettingsView: View {
                 }
                 Button("Full Disk Access Setup…") { showAccess = true }
             }.padding(24).tabItem { Label("General", systemImage: "gearshape") }
-            Form {
-                Picker("Appearance", selection: $services.preferences.appearance) {
-                    Text("System").tag(AppearanceMode.system); Text("Light").tag(AppearanceMode.light); Text("Dark").tag(AppearanceMode.dark)
-                }.pickerStyle(.segmented)
-                Slider(value: $services.preferences.view.textSize, in: 11...20, step: 1) {
-                    Text("Text size: \(Int(services.preferences.view.textSize)) pt")
-                }.accessibilityLabel("Default text size").accessibilityValue("\(Int(services.preferences.view.textSize)) points")
-                Slider(value: $services.preferences.view.listIconSize, in: 16...32, step: 1) {
-                    Text("List icons: \(Int(services.preferences.view.listIconSize)) pt")
-                }.accessibilityLabel("Default list icon size").accessibilityValue("\(Int(services.preferences.view.listIconSize)) points")
-                Slider(value: $services.preferences.view.gridIconSize, in: 32...128, step: 8) {
-                    Text("Grid icons: \(Int(services.preferences.view.gridIconSize)) pt")
-                }.accessibilityLabel("Default grid icon size").accessibilityValue("\(Int(services.preferences.view.gridIconSize)) points")
-                Text("Defaults apply to new tabs. Use a pane’s View Options to change an existing tab.").font(.callout).foregroundStyle(.secondary)
-            }.padding(24).tabItem { Label("Appearance", systemImage: "circle.lefthalf.filled") }
+            AppearanceSettingsView().tabItem { Label("Appearance", systemImage: "circle.lefthalf.filled") }
             Form {
                 ForEach([("Open", "⌘O"), ("Rename", "Return"), ("Quick Look", "Space"), ("Switch Pane", "Tab"),
                          ("Copy to Other Pane", "F5"), ("Move to Other Pane", "F6"), ("New Folder", "F7"),
@@ -43,7 +29,7 @@ struct SettingsView: View {
                     LabeledContent(name) { Text(shortcut).foregroundStyle(.secondary) }
                 }
             }.padding(24).tabItem { Label("Shortcuts", systemImage: "keyboard") }
-        }.frame(width: 540, height: 390)
+        }.frame(width: 660, height: 620)
         .preferredColorScheme(services.preferences.appearance.colorScheme)
         .sheet(isPresented: $showAccess) { AccessSetupView { showAccess = false } }
     }

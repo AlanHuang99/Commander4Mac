@@ -145,26 +145,6 @@ final class CommanderTableView: NSTableView {
     }
 }
 
-@MainActor final class CommanderScrollView: NSScrollView {
-    var fileTextSize: Double = 13
-    var listIconSize: Double = 20
-    override func layout() {
-        super.layout()
-        guard let table = documentView as? NSTableView, table.tableColumns.count == 3 else { return }
-        let viewport = max(280, contentSize.width)
-        let scale = max(1, fileTextSize / 13)
-        let sizeWidth: CGFloat = 67 * scale
-        let dateWidth: CGFloat = (viewport > 430 ? 145 : 112) * scale
-        let usedSize: CGFloat = table.tableColumns[1].isHidden ? 0 : sizeWidth
-        let usedDate: CGFloat = table.tableColumns[2].isHidden ? 0 : dateWidth
-        let minimumName = max(100, listIconSize + fileTextSize * 5 + 20)
-        let width = max(viewport, minimumName + usedSize + usedDate)
-        let widths = [max(minimumName, width - usedSize - usedDate), sizeWidth, dateWidth]
-        for (column, target) in zip(table.tableColumns, widths) where abs(column.width - target) > 0.5 { column.width = target }
-        if abs(table.frame.width - width) > 0.5 { table.setFrameSize(NSSize(width: width, height: table.frame.height)) }
-        if width <= contentSize.width, contentView.bounds.origin.x != 0 { contentView.scroll(to: NSPoint(x: 0, y: contentView.bounds.origin.y)) }
-    }
-}
 
 extension TableCommand {
     @MainActor func isSupported(in browser: FileTableView) -> Bool {

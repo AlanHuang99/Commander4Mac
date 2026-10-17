@@ -36,6 +36,7 @@
 		1E8C9BD522A31F18AAF88BC8 /* OperationCancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E44A7A7437A069F6220F435 /* OperationCancellation.swift */; };
 		216DC1A376CC56059AA13B9D /* InstallationLocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413AD2678A23577B998CB207 /* InstallationLocationTests.swift */; };
 		21C2DFF65741F3E823154FA8 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4692A579CAE6CC7633842217 /* SidebarView.swift */; };
+		2243A2BA884F8F1D2B5D527E /* CommanderScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EB1BC6A21934A996C7E746 /* CommanderScrollView.swift */; };
 		2272A2E89A0832D3DD6B0AB2 /* SystemFileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E449BF5A1E13EAE8FC3C29 /* SystemFileActions.swift */; };
 		2326669A73BE96B682A47967 /* KeyboardAndAccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B1FCFB9E853975226DC8B5 /* KeyboardAndAccessibilityTests.swift */; };
 		2478A17E5B901A5E2D7734EC /* OperationGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DA5CEFEB9AEA3C38FCECCA /* OperationGate.swift */; };
@@ -381,6 +382,7 @@
 		D4466212710556ED4CF5A731 /* LocationReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationReference.swift; sourceTree = "<group>"; };
 		D5202F20FF6B0EC046F89174 /* AppearanceUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceUITests.swift; sourceTree = "<group>"; };
 		D577A7A61D119822121457AF /* WorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceView.swift; sourceTree = "<group>"; };
+		D5EB1BC6A21934A996C7E746 /* CommanderScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommanderScrollView.swift; sourceTree = "<group>"; };
 		D655885F9AC419AB3578D778 /* FileLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLocation.swift; sourceTree = "<group>"; };
 		D83959891FD967D37EE6BF54 /* FileTableCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTableCoordinator.swift; sourceTree = "<group>"; };
 		D89B82894663940920DADBED /* HostKeyVerificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostKeyVerificationTests.swift; sourceTree = "<group>"; };
@@ -460,6 +462,7 @@
 		15CAB319D5F5458D693E4DDD /* FileTable */ = {
 			isa = PBXGroup;
 			children = (
+				D5EB1BC6A21934A996C7E746 /* CommanderScrollView.swift */,
 				83DE360CE5F00928FABD22BD /* FileTableCommandHandler.swift */,
 				D83959891FD967D37EE6BF54 /* FileTableCoordinator.swift */,
 				DD7FC9F29F3EB2F7EF2969C5 /* FileTableView.swift */,
@@ -1115,6 +1118,7 @@
 				CD1AC73900201682243BDCAC /* AppearanceRendering.swift in Sources */,
 				E0208DA406BF78A479A99C79 /* AppearanceSettingsView.swift in Sources */,
 				3B986664226E2626075A95A5 /* Commander4MacApp.swift in Sources */,
+				2243A2BA884F8F1D2B5D527E /* CommanderScrollView.swift in Sources */,
 				B3D8E76A489BA8A75D1F4345 /* ConflictSheet.swift in Sources */,
 				5FC442D7FBAB11C45A861C75 /* ConnectionController.swift in Sources */,
 				753581A21C12218322F6BFAB /* ConnectionEditor.swift in Sources */,
